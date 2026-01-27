@@ -5,12 +5,11 @@ services:
   nginx:
     container_name: txy_nginx
     image: nginx:alpine
-    network_mode: "host"
+    # network_mode: "host" # Use bridge for cross-platform compatibility
     restart: always
-    # Ports are managed by host mode (listening on host directly)
-    # ports:
-    #   - "80:80"
-    #   - "443:443"
+    ports:
+      - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/certs:/etc/nginx/certs

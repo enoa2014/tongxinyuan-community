@@ -24,10 +24,17 @@ export default function LoginPage() {
         setIsLoading(true)
 
         // Simulate API call
+        // Simulate API call and redirect based on role
         setTimeout(() => {
             setIsLoading(false)
-            router.push("/")
-        }, 2000)
+            if (activeTab === 'family') {
+                router.push("/dashboard/family")
+            } else if (activeTab === 'volunteer') {
+                router.push("/dashboard/volunteer")
+            } else {
+                router.push("/dashboard/worker")
+            }
+        }, 1000)
     }
 
     return (

@@ -31,3 +31,8 @@ data/
 # IDEs
 .vscode/
 .idea/
+
+# Logs
+nginx/logs/
+*.log
+
