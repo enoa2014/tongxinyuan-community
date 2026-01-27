@@ -1,0 +1,23 @@
+FROM node:20-slim AS builder
+WORKDIR /app
+
+# Standard sources (Best for VPN)
+# RUN echo ... (Removed Aliyun mirrors to avoid conflict with VPN)
+
+# Install build dependencies for native modules
+RUN apt-get update && apt-get install -y --fix-missing python3 make g++ python-is-python3 && rm -rf /var/lib/apt/lists/*
+
+COPY package.json ./
+# Verify if package-lock exists, if not just install
+COPY package-lock.json* ./
+
+# Install ALL dependencies (including dev) for build
+RUN npm config set registry https://registry.npmmirror.com
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Build
+ENV NEXT_TELEMETRY_DISABLED 1
+RUN npm run build

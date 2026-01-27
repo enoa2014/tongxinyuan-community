@@ -1,7 +1,7 @@
 export function SiteFooter() {
     return (
         <footer className="bg-slate-50 border-t border-slate-100 py-12 font-sans">
-            <div className="container text-center md:text-left">
+            <div className="container mx-auto px-4 md:px-6 text-center md:text-left">
                 <div className="grid md:grid-cols-4 gap-8">
                     <div className="space-y-4">
                         <h3 className="font-heading font-bold text-lg text-slate-900">同心源社区</h3>

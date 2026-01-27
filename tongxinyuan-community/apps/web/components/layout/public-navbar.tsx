@@ -26,20 +26,24 @@ export function PublicNavbar() {
     return (
         <header
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled || !isHome
-                    ? "bg-white/90 backdrop-blur-md shadow-sm py-3"
-                    : "bg-transparent py-5"
+                ? "bg-white/90 backdrop-blur-md shadow-sm py-3"
+                : "bg-transparent py-5"
                 }`}
         >
-            <div className="container flex items-center justify-between">
+            <div className="container mx-auto px-6 md:px-12 flex items-center justify-between">
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-2 group">
-                    <div className={`p-2 rounded-xl transition-all duration-300 ${isScrolled || !isHome ? "bg-medical-primary/10 text-medical-primary" : "bg-white/20 text-white"
-                        }`}>
-                        <Heart className="h-6 w-6 fill-current" />
+                <Link href="/" className="flex items-center gap-3 group">
+                    <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-white/10 backdrop-blur-sm p-1">
+                        {/* Fallback to text/icon if image fails, but here we use the image */}
+                        <img
+                            src="/logo.png"
+                            alt="同心源 Logo"
+                            className="h-full w-full object-contain"
+                        />
                     </div>
                     <span className={`text-xl font-heading font-bold tracking-tight transition-colors duration-300 ${isScrolled || !isHome ? "text-slate-900" : "text-white text-shadow-sm"
                         }`}>
-                        Tongxinyuan
+                        同心源
                     </span>
                 </Link>
 
