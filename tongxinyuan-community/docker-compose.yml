@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  # Nginx Gateway (SSL Termination & Reverse Proxy)
+  nginx:
+    container_name: txy_nginx
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/certs:/etc/nginx/certs
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - app
+      - api
+
+  # Next.js Web Application (Admin + Mobile H5)
+  app:
+    container_name: txy_web
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    restart: always
+    # Ports exposed only to internal network (accessed via Nginx), 
+    # but mapped locally for dev convenience.
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/tongxinyuan
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+
+  # Python AI Agent (FastAPI)
+  api:
+    container_name: txy_api
+    build:
+      context: .
+      dockerfile: ./apps/ai-agent/Dockerfile
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/tongxinyuan
+      - REDIS_URL=redis://redis:6379/0
+      - ALIYUN_API_KEY=${ALIYUN_API_KEY}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./apps/ai-agent:/app
+
+  # PostgreSQL Database with pgvector
+  db:
+    container_name: txy_db
+    image: pgvector/pgvector:pg16
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=tongxinyuan
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    shm_size: 256mb # Optimization for ECS 2G RAM
+
+  # Redis Cache
+  redis:
+    container_name: txy_redis
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+
+volumes:
+  postgres_data:
+  redis_data:
