@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+:root {
+  /* Warm & Trustworthy Palette */
+  --primary: #0891B2;
+  --secondary: #22D3EE;
+  --cta: #F97316;
+  --background: #ECFEFF;
+  --text: #164E63;
+  
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-cta: var(--cta);
+  --color-background: var(--background);
+  --color-text: var(--text);
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-cta: var(--cta);
+  --color-background: var(--background);
+  --color-text: var(--text);
+  
+  --font-sans: var(--font-noto-sans), sans-serif;
+  --font-display: var(--font-figtree), sans-serif;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text);
+}
