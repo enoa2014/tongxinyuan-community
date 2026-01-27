@@ -32,16 +32,16 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/tongxinyuan
       - NEXT_PUBLIC_API_URL=http://localhost:8000
     depends_on:
       - db
       - redis
+    # command: npm run dev
     # volumes:
     #   - ./apps/web:/app
     #   - /app/node_modules
-
     # Python AI Agent (FastAPI)
   api:
     container_name: txy_api
@@ -88,6 +88,12 @@ services:
       - "6379:6379"
     volumes:
       - ./data/redis:/data
+
+    # Add a common network or DNS configuration if needed
+    # For now, injecting DNS into services directly
+    dns:
+      - 8.8.8.8
+      - 114.114.114.114
 
 volumes:
   postgres_data:
