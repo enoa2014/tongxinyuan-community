@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
-import { Figtree, Noto_Sans_SC } from "next/font/google";
+// import { Figtree, Noto_Sans_SC } from "next/font/google";
 import "./globals.css";
 
-const figtree = Figtree({
-  variable: "--font-figtree",
-  subsets: ["latin"],
-  display: "swap",
-});
+// const figtree = Figtree({
+//   variable: "--font-figtree",
+//   subsets: ["latin"],
+//   display: "swap",
+// });
 
-const notoSans = Noto_Sans_SC({
-  variable: "--font-noto-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
+// const notoSans = Noto_Sans_SC({
+//   variable: "--font-noto-sans",
+//   subsets: ["latin"],
+//   display: "swap",
+// });
 
 export const metadata: Metadata = {
   title: "同心源 (Tongxinyuan) Community Support",
@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body
-        className={`${figtree.variable} ${notoSans.variable} antialiased bg-background text-text font-sans`}
+        className={`antialiased bg-background text-text font-sans`}
       >
         {children}
       </body>

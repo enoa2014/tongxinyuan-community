@@ -21,8 +21,11 @@ services:
   app:
     container_name: txy_web
     build:
-      context: .
-      dockerfile: ./apps/web/Dockerfile
+      context: ./apps/web
+      dockerfile: Dockerfile
+      args:
+        - HTTP_PROXY
+        - HTTPS_PROXY
     restart: always
     # Ports exposed only to internal network (accessed via Nginx), 
     # but mapped locally for dev convenience.
@@ -35,16 +38,19 @@ services:
     depends_on:
       - db
       - redis
-    volumes:
-      - ./apps/web:/app
-      - /app/node_modules
+    # volumes:
+    #   - ./apps/web:/app
+    #   - /app/node_modules
 
-  # Python AI Agent (FastAPI)
+    # Python AI Agent (FastAPI)
   api:
     container_name: txy_api
     build:
-      context: .
-      dockerfile: ./apps/ai-agent/Dockerfile
+      context: ./apps/ai-agent
+      dockerfile: Dockerfile
+      args:
+        - HTTP_PROXY
+        - HTTPS_PROXY
     restart: always
     ports:
       - "8000:8000"
