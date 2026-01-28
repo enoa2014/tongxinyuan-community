@@ -1,30 +1,36 @@
-# Session Progress Log
+# 项目进展日志 (Session Progress Log)
 
-## Session: Analysis of Tongxinyuan 2025/2026 Docs
-**Date**: 2026-01-27
+## 阶段: 2025/2026 同心源文档分析与规划
+**日期**: 2026-01-27
 
-### Completed Actions
-- [x] Identified resource files: `2025同心源工作汇报及2026展望.pptx` and `同心源关爱异地求医大病儿童家庭社区支持中心.pdf`.
-- [x] Wrote and executed Python script `extract_pptx_full.py` to extract raw text from PPTX.
-- [x] Used `baoyu-danger-gemini-web` skill to analyze the extracted content.
-- [x] Established structural understanding of the project's strategic shift (Platform Reliance -> Self-Growth).
-- [x] Initialized Planning-with-Files structure (`task_plan.md`, `findings.md`).
-- [x] **Product Brief**: Used BMAD method to collaboratively define the 2026 platform vision.
-    - Defined "Community Support Center" model (vs. just "Little Home").
-    - Defined MVP scope: Ops Console, Volunteer App, Family App.
-    - Added user-requested features: **Policy Assistant** and **Open Kitchen**.
-- [x] **Implementation Plan**:
-    - Drafted initial Next.js + Supabase plan.
-    - Optimized for China ("China Special Version"): Replaced Supabase with **MemFire Cloud**, Vercel with **Tencent/Aliyun**.
-    - Translated plan to Chinese.
+### 已完成事项 (Completed Actions)
+- [x] 识别资源文件: `2025同心源工作汇报及2026展望.pptx` 和 `同心源关爱异地求医大病儿童家庭社区支持中心.pdf`。
+- [x] 编写并执行 Python 脚本 `extract_pptx_full.py` 提取 PPTX 文本。
+- [x] 使用 `baoyu-danger-gemini-web` 技能分析提取的内容。
+- [x] 确立对项目战略转型的结构化理解（从“平台依赖”转向“自主生长”）。
+- [x] 初始化 Planning-with-Files 结构 (`task_plan.md`, `findings.md`)。
+- [x] **产品简报 (Product Brief)**: 使用 BMAD 方法协作定义 2026 平台愿景。
+    - 定义“社区支持中心”模式（对比原来的“小家”模式）。
+    - 定义 MVP 范围：运营控制台、志愿者端、家庭端。
+    - 增加用户请求的功能：**政策助手** 和 **共享厨房**。
+- [x] **实施计划 (Implementation Plan)**:
+    -以此草拟 Next.js + Supabase 初始计划。
+    - 针对中国环境优化（“中国特供版”）：将 Supabase 替换为 **MemFire Cloud**，Vercel 替换为 **腾讯云/阿里云**。
+    - 将计划翻译为中文。
+- [x] **设计与架构重构 (Design & Architecture REFACTOR, 2026-01-28)**:
+    - **统一产品设计**: 创建 `product-design.md`，将分散的需求合并为一个文档。增加了“社工”和“管理者”角色。
+    - **战略路线图**: 创建 `roadmap.md`，确立“先做对外门户 (Phase 1)，后做内部系统 (Phase 2)”的策略，以降低初始复杂度。
+    - **原型设计**: 创建 `wireframes.md` 和 `review-packet-phase1.md` 供利益相关者评审。
+    - **开发 (Phase 1)**: 使用 Next.js 实现了 首页、服务页 和 参与页。
 
-### Key Discoveries
-- The PDF/PPT content is highly overlapping; the PPT contains the full narrative of the strategic shift.
-- The 2026 plan is very specific about the "Community Support Center" model, which is a significant upgrade from their previous "Love Home" (Little Hopes) model.
-- Compliance with the new Charity Law is a major driver for these changes.
-- **Constraints**: Domestic accessibility (No VPN) is a hard requirement, necessitating domestic cloud vendors.
+### 关键发现 (Key Discoveries)
+- PDF/PPT 内容高度重叠；PPT 包含了战略转型的完整叙述。
+- 2026 计划非常具体地指出了“社区支持中心”模式，这是对之前“小家”模式的重大升级。
+- 新《慈善法》的合规要求是这些变化的主要驱动力。
+- **约束条件**: 国内访问（无 VPN）是硬性要求，必须使用国内云厂商。
+- **UX 洞察**: “登录墙”阻碍了品牌传播和筹款的初始目标。Phase 1 必须是开放访问的。
 
-### Next Steps
-- Validate specific implementation details for the 4 core modules.
-- Plan how these findings translate into execution (e.g., website updates, grant writing).
-- **Execution**: Initialize `tongxy-platform` codebase with Next.js template.
+### 下一步 (Next Steps)
+- **立即执行**: 与利益相关者评审 `review-packet-phase1.md`。
+- **随后**: 根据批准的线框图制作高保真视觉稿。
+- **稍后**: 在对外门户发布后，恢复 Phase 2（登录/后台）的开发。

@@ -1,101 +1,94 @@
-# Task Plan: Analyze Tongxinyuan Documents & Prepare for 2026 Planning
+# 任务计划: 同心源文档分析与 2026 规划准备
 <!-- 
-  WHAT: This is your roadmap for the entire task. Think of it as your "working memory on disk."
-  WHY: After 50+ tool calls, your original goals can get forgotten. This file keeps them fresh.
-  WHEN: Create this FIRST, before starting any work. Update after each phase completes.
+  WHAT: 这是整个任务的路线图。可以看作是“磁盘上的工作记忆”。
+  WHY: 经过多次工具调用后，最初的目标容易被遗忘。此文件保持目标的清晰。
+  WHEN: 首先创建此文件，然后在开始任何工作之前。每个阶段完成后更新。
 -->
 
-## Goal
+## 目标 (Goal)
 <!-- 
-  WHAT: One clear sentence describing what you're trying to achieve.
-  WHY: This is your north star. Re-reading this keeps you focused on the end state.
+  WHAT: 用一句话清晰描述你要实现的目标。
+  WHY: 这是你的北极星。重读它让你专注于最终状态。
 -->
-Analyze 2025/2026 documents for "Tongxinyuan", extract key insights about the new "Community Support Center" model, and prepare structured knowledge for project implementation.
+分析“同心源”2025/2026 文档，提取关于新“社区支持中心”模式的关键见解，并为项目实施准备结构化知识。
 
-## Current Phase
+## 当前阶段 (Current Phase)
 <!-- 
-  WHAT: Which phase you're currently working on (e.g., "Phase 1", "Phase 3").
-  WHY: Quick reference for where you are in the task. Update this as you progress.
+  WHAT: 你当前正在进行的阶段（例如，“Phase 1”，“Phase 3”）。
+  WHY: 快速参考你在任务中的位置。随着进度更新此项。
 -->
-Phase 3: Website Planning & Design
+Phase 3: 网站规划与设计 (Website Planning & Design)
 
-## Phases
+## 阶段 (Phases)
 <!-- 
-  WHAT: Break your task into 3-7 logical phases. Each phase should be completable.
-  WHY: Breaking work into phases prevents overwhelm and makes progress visible.
-  WHEN: Update status after completing each phase: pending → in_progress → complete
+  WHAT: 将任务分解为 3-7 个逻辑阶段。每个阶段都应该是可完成的。
+  WHY: 将工作分解为阶段可以防止不知所措，并使进度可见。
+  WHEN: 完成每个阶段后更新状态：pending → in_progress → complete
 -->
 
-### Phase 1: Content Extraction & Initial Analysis
+### Phase 1: 内容提取与初步分析
 <!-- 
-  WHAT: Extract text from PPTX/PDF and summarize key points.
-  WHY: Foundation for all subsequent work. Need to understand the project shift from "Platform Reliance" to "Self-Growth".
+  WHAT: 从 PPTX/PDF 中提取文本并总结关键点。
+  WHY: 后续所有工作的基础。需要理解项目从“平台依赖”到“自主生长”的转变。
 -->
-- [x] Extract text from PPTX and PDF (done via scripts)
-- [x] Analyze content using Gemini (done)
-- [x] Document key findings in `findings.md`
-- **Status:** complete
+- [x] 从 PPTX 和 PDF 中提取文本 (已通过脚本完成)
+- [x] 使用 Gemini 分析内容 (已完成)
+- [x] 在 `findings.md` 中记录关键发现
+- **状态:** complete
 
-### Phase 2: Structured Knowledge Organization
+### Phase 2: 结构化知识组织
 <!-- 
-  WHAT: Organize findings into actionable categories (Services, Volunteer System, Goals).
-  WHY: To easily reference specific details when building the website or writing copy later.
+  WHAT: 将发现组织成可执行的类别（服务、志愿者体系、目标）。
+  WHY: 以便在构建网站或编写文案时轻松引用具体细节。
 -->
-- [x] Refine `findings.md` with structured sections for:
-    - Context (The "Why" - Compliance issues)
-    - New Model (Community Support Center)
-    - Volunteer System (Levels 1-3)
-- [x] Verify if any details are missing or unclear
-- **Status:** complete
+- [x] 完善 `findings.md`，包含以下结构化章节：
+    - 背景 (Why - 合规问题)
+    - 新模式 (社区支持中心)
+    - 志愿者体系 (Level 1-3)
+- [x] 验证是否有任何细节缺失或不清楚
+- **状态:** complete
 
-### Phase 3: Website Planning & Design
+### Phase 3: 网站规划与设计
 <!-- 
-  WHAT: Define the website structure, tech stack, and content strategy.
-  WHY: Ensure the website directly supports the 2026 strategic goals (Fundraising, Volunteers).
+  WHAT: 定义网站结构、技术栈和内容策略。
+  WHY: 确保网站直接支持 2026 战略目标（筹款、志愿者）。
 -->
-- [x] Create `implementation_plan.md` (Architecture, Tech Stack)
-- [x] Incorporate "Policy Assistant" and "Open Kitchen" requirements into plans
-- [x] **[Ongoing]** Discuss and refine detailed requirements with user
-- [x] Define "Design System" using UI/UX Pro Max skill (Colors: Warm/Healing, Fonts)
-- [ ] Outline content map based on `findings.md` (4 Modules, Impact Data)
+- [x] 创建 `implementation_plan.md` (架构、技术栈)
+- [x] 将“政策助手”和“开放厨房”需求纳入计划
+- [x] **[进行中]** 与用户讨论并细化详细需求
+- [x] 定义“设计系统” (使用 UI/UX Pro Max 技能，颜色：温暖/治愈，字体)
+- [x] 创建每一产品设计文档 `product-design.md` (网站地图, UX 策略, 社工/管理者工作流)
+- [x] **[新增]** 创建 `roadmap.md` 以阐明“先对外，后登录”的策略。
+- [x] **[新增]** 创建低保真 `wireframes.md` 和 `review-packet-phase1.md`。
+- **状态:** complete
+
+### Phase 4: 网站开发 (路线图: 公众门户优先)
+<!-- 
+  WHAT: 构建核心的面向公众的页面 (Phase 1)。
+  WHY: 立即建立品牌形象和筹款渠道。
+-->
+- [x] 初始化 Next.js 项目
+- [x] 实施设计系统 (Tailwind)
+- [x] 构建主页 (Hero, 影响力, 捐赠引导)
+- [x] 构建“社区中心”服务页面
+- [x] 构建“参与” (志愿者/捐赠) 页面
+- [x] **[检查点]** 创建 Phase 1 设计评审包
+- [ ] 根据评审意见修改 (待定)
 - **Status:** in_progress
 
-### Phase 4: Website Development (MVP)
-<!-- 
-  WHAT: Build the core pages.
-  WHY: Get a functional site ready for 2026 operations.
--->
-- [x] Initialize Next.js project
-- [ ] Implement Design System (Tailwind)
-- [ ] Build Home Page (Hero, Impact, Donation CTA)
-- [ ] Build "Community Center" Service Pages
-- [ ] Build "Get Involved" (Volunteer/Donate) Pages
-- **Status:** in_progress
+## 关键问题 (Key Questions)
+1. “穿透式管理”部分提到的具体合规要求是什么？（在 findings 中部分回答）
+2. 2026 社区支持中心启动的时间表是什么？（需要检查文档细节）
 
-## Key Questions
-<!-- 
-  WHAT: Important questions you need to answer during the task.
-  WHY: These guide your research and decision-making. Answer them as you go.
--->
-1. What are the specific compliance requirements mentioned in the "penetrating management" section? (Partially answered in findings)
-2. What is the timeline for the 2026 Community Support Center launch? (Need to check doc details)
+## 已做决策 (Decisions Made)
+| 决策 | 理由 |
+|---|---|
+| 使用 Gemini Web Skill | 文档复杂 (PPTX/PDF)，需要高层次的理解和总结 |
+| 基于脚本的提取 | 直接文本提取确保没有内容因 OCR 问题而丢失 |
+| 分阶段实施 (Phase 1 First) | 优先解决品牌传播和筹款痛点，降低初始技术复杂度 |
 
-## Decisions Made
-<!-- 
-  WHAT: Technical and design decisions you've made, with the reasoning behind them.
-  WHY: You'll forget why you made choices. This table helps you remember and justify decisions.
--->
-| Decision | Rationale |
-|----------|-----------|
-| Use Gemini Web Skill | Docs are complex (PPTX/PDF), need high-level understanding & summary |
-| Script-based Extraction | Direct text extraction ensures no content is missed by OCR issues |
-
-## Errors Encountered
-<!-- 
-  WHAT: Every error you encounter, what attempt number it was, and how you resolved it.
-  WHY: Logging errors prevents repeating the same mistakes. This is critical for learning.
--->
-| Error | Attempt | Resolution |
-|-------|---------|------------|
-| PDF search failed | 1 | User confirmed PDF IS relevant; switched to extracting content via python script |
-| Encoding error in PS | 1 | Fixed by ensuring UTF-8 encoding for passing prompts |
+## 遇到的错误 (Errors Encountered)
+| 错误 | 尝试次数 | 解决方案 |
+|---|---|---|
+| PDF 搜索失败 | 1 | 用户确认 PDF 相关；切换到通过 python 脚本提取内容 |
+| PS 编码错误 | 1 | 确保传递提示时使用 UTF-8 编码 |
