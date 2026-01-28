@@ -1,41 +1,41 @@
-# Sprint Status Report
+# 冲刺状态报告 (Sprint Status Report)
 
-**Date**: 2026-01-28
-**Sprint Goal**: 完成核心基础设施搭建、登录页重构及生产环境部署 (MVP Foundation)。
+**日期**: 2026-01-28
+**冲刺目标**: 完成核心基础设施搭建、登录页重构及生产环境部署 (MVP 基础)。
 
-## 📊 Sprint Overview
-*   **Status**: 🟢 ON TRACK (Sprint Completed)
-*   **Focus**: Infrastructure, Auth UI, Deployment
-*   **Completeness**: 100% of planned tasks.
+## 📊 冲刺概览
+*   **状态**: 🟢 正常 (冲刺已完成)
+*   **重点**: 基础设施, 认证界面, 部署
+*   **完成度**: 100% 计划任务。
 
-## ✅ Completed Items
-1.  **Infrastructure**:
-    *   Docker Compose Environment (Local & Prod).
-    *   Aliyun ECS Setup (Swap, Docker, Security Group).
-    *   **Host Mode Networking** implementation.
-    *   **SSL/HTTPS** via Let's Encrypt/Aliyun Free Cert.
+## ✅ 已完成事项
+1.  **基础设施**:
+    *   Docker Compose 环境 (本地 & 生产)。
+    *   阿里云 ECS 设置 (Swap, Docker, 安全组)。
+    *   **Host 网络模式** 实现。
+    *   **SSL/HTTPS** 通过 Let's Encrypt/阿里云免费证书。
 
-2.  **Frontend (Web)**:
-    *   **Login Page Redesign**: Medical Trust System (Shadcn + Tailwind).
-    *   **Architecture**: Dual-Mode Layout (Public vs Dashboard).
-    *   **Landing Page**: Basic UI structure implementation.
+2.  **前端 (Web)**:
+    *   **登录页重构**: 医疗信任系统 (Shadcn + Tailwind)。
+    *   **架构**: 双模布局 (公众端 vs 管理后台)。
+    *   **落地页**: 基础 UI 结构实现。
 
 3.  **DevOps**:
-    *   **External Build Strategy**: Solved Windows->Linux cross-compilation.
-    *   **CI/CD Scripts**: `package_linux_artifacts.ps1`.
+    *   **外部构建策略**: 解决了 Windows->Linux 交叉编译问题。
+    *   **CI/CD 脚本**: `package_linux_artifacts.ps1`。
 
-## 🚧 In Progress / Next Up
-1.  **Backend Logic (Auth)**:
-    *   Connecting Login UI to NextAuth.js actual logic.
-    *   Database persistence for Users.
+## 🚧 进行中 / 下一步
+1.  **后端逻辑 (Auth)**:
+    *   连接登录界面与 NextAuth.js 实际逻辑。
+    *   用户数据的数据库持久化。
 
-2.  **Dashboard Features**:
-    *   Implementing the actual "Social Worker Workbench".
+2.  **仪表盘功能**:
+    *   实现实际的“社工工作台”。
 
-## ⚠️ Risks & Issues
-*   **ECS Memory**: 2GB is tight. `node_modules` installation on server is strictly forbidden. Must stick to "External Build".
-*   **Port 80**: OS-level blocking requires persistent `iptables` rules.
+## ⚠️ 风险与问题
+*   **ECS 内存**: 2GB 非常紧张。严禁在服务器上安装 `node_modules`。必须坚持“外部构建”。
+*   **80 端口**: 操作系统级别的封锁需要持久化的 `iptables` 规则。
 
-## 📝 Decision Log
-*   **2026-01-28**: Switch to Docker **Host Network Mode** to resolve inter-container communication issues on Alibaba Cloud ECS.
-*   **2026-01-28**: Use **iptables NAT** to forward port 80 to 8080.
+## 📝 决策日志
+*   **2026-01-28**: 切换到 Docker **Host 网络模式** 以解决阿里云 ECS 上容器间通信问题。
+*   **2026-01-28**: 使用 **iptables NAT** 将 80 端口转发到 8080。

@@ -1,16 +1,16 @@
-# 系统架构设计文档 (System Architecture) - Tongxinyuan 2026
+# 系统架构设计文档 - 同心源 2026
 
 **严重架构变更 (2026-01-28)**:
-*   **部署策略**: 迁移至 **External Build Strategy** (本地交叉编译)，解决 ECS 内存/网络瓶颈。
-*   **网络模式**: 采用 **Docker Host Mode** + `iptables` (80->8080) 解决 ECS 端口封禁与 Bridge 网络不通问题。
-*   **路由架构**: 实施 **Dual-Mode Layout** (Public/Dashboard 物理隔离)。
+*   **部署策略**: 迁移至 **外部构建策略** (本地交叉编译)，解决 ECS 内存/网络瓶颈。
+*   **网络模式**: 采用 **Docker Host 模式** + `iptables` (80->8080) 解决 ECS 端口封禁与 Bridge 网络不通问题。
+*   **路由架构**: 实施 **双模布局** (公众端/管理端物理隔离)。
 
-## 1. 架构概览 (Architecture Overview)
+## 1. 架构概览
 
 本项目采用 **双后端微服务架构**，通过 **Docker Compose** 编排。
-针对 **2核 2G 内存** 的 ECS 实例，我们将采用**资源紧凑型 (Resource-Efficient)** 配置策略。
+针对 **2核 2G 内存** 的 ECS 实例，我们将采用**资源紧凑型** 配置策略。
 
-### 系统上下文图 (System Context)
+### 系统上下文图
 ```mermaid
 graph TD
     User_Mobile[手机用户 (家庭/社工)] --微信小程序/H5--> Nginx
@@ -40,7 +40,7 @@ graph TD
     end
     
     subgraph "客户端应用"
-        TaroApp[Taro 小程序\n(Phase 2 Reserved)]
+        TaroApp[Taro 小程序\n(Phase 2 预留)]
     end
     
     TaroApp -.-> Nginx
@@ -50,16 +50,16 @@ graph TD
 
 ---
 
-## 2. 技术栈详细选型 (Tech Stack)
+## 2. 技术栈详细选型
 
-### 2.1 客户端 (Client Side)
+### 2.1 客户端
 *   **Web 端/后台**: **Next.js 14+ (App Router)**
-    *   *理由*: MVP 核心。同时适配 Desktop 和 Mobile 浏览器 (Responsive Design)。
+    *   *理由*: MVP 核心。同时适配 Desktop 和 Mobile 浏览器 (响应式设计)。
 *   **UI 框架**: **Shadcn/ui (Web)**
 *   **[Phase 2] 微信小程序**: **Taro (React)**
     *   *理由*: 预留技术栈，二期开发。
 
-### 2.2 服务端 (Server Side)
+### 2.2 服务端
 *   **主应用**: **Next.js API Routes**
     *   处理用户认证、业务 CRUD。
 *   **AI 增强**: **Python (FastAPI)**
@@ -68,7 +68,7 @@ graph TD
     *   *理由*: 免费，功能强大。开启 `pgvector` 插件支持 AI 向量检索。
 *   **缓存**: **Redis** (轻量级配置)
 
-### 2.3 基础设施 (Infrastructure)
+### 2.3 基础设施
 *   **服务器**: 阿里云 ECS (2核 2G 40G)
 *   **容器化**: **Docker Compose**
 *   **文件存储**: **ECS 本地磁盘 (Docker Volume)**
@@ -76,11 +76,11 @@ graph TD
 
 ---
 
-## 3.  2G 内存环境优化策略 (Critical)
+## 3.  2G 内存环境优化策略 (关键)
 
 **鉴于 ECS 只有 2GB 内存，必须进行严格的资源限制：**
 
-1.  **构建策略 (Build Strategy)**:
+1.  **构建策略**:
     *   🚫 **禁止在 ECS 上执行 `npm run build`**: 这会导致 OOM (内存溢出) 崩溃。
     *   ✅ **本地构建 / CI 构建**: 在本地电脑 Build 成 Docker 镜像，推送到阿里云容器镜像服务 (ACR 个人版免费)，ECS 只负责 `docker pull` 和 `run`。
 2.  **Swap 交换分区**:
@@ -92,7 +92,7 @@ graph TD
 
 ---
 
-## 4. 数据库模型设计 (Data Model Design)
+## 4. 数据库模型设计
 
 ### 4.1 核心 E-R 关系
 ```mermaid
@@ -131,7 +131,7 @@ erDiagram
 
 ---
 
-## 5. 部署架构 (Deployment)
+## 5. 部署架构
 
 ### 5.1 目录结构 (Monorepo)
 ```text

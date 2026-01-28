@@ -1,9 +1,9 @@
-# 技术实施计划：同心源社区支持中心 (Technical Implementation Plan)
+# 技术实施计划：同心源社区支持中心
 
 > **状态**: 此文档为最新的技术执行标准，取代旧版 `implementation_plan.md`。
 > **核心约束**: 中国大陆部署 (Webify/OSS) + MemFire Cloud 后端 + 严格的慈善法合规。
 
-## 1. 架构概览 (Architecture)
+## 1. 架构概览
 
 ### 1.1 技术栈 (The "China-Stack")
 | 组件 | 选型 | 理由 |
@@ -16,7 +16,7 @@
 | **移动端** | **PWA + Taro (小程序)** | Phase 1 使用 PWA 覆盖移动端；Phase 2 开发 Taro 小程序以调用摄像头/LBS能力。 |
 | **响应式** | **Mobile-First RWD** | 必须覆盖: Mobile (<640px), Tablet (768px+), Laptop (1024px+), Desktop (1280px+). |
 
-### 1.2 关键合规设计 (Compliance by Design)
+### 1.2 关键合规设计
 *   **资金流**: 系统 **绝不** 触碰资金流。
     *   ❌ 禁止：集成微信支付/支付宝 SDK 进行自建收款。
     *   ❌ 禁止：在数据库存储用户银行卡号。
@@ -24,7 +24,7 @@
 *   **数据隐私**:
     *   所有受助家庭的敏感数据 (身份证、病历) 必须存储在 RLS (Row Level Security) 保护的表中，仅授权社工可读。
 
-### 1.3 身份路由策略 (Identity Routing)
+### 1.3 身份路由策略
 > **One Login, Many Worlds**
 *   **Middleware (中间件)**: 在 `Next.js Middleware` 层拦截 `/login` 请求。
 *   **Logic**:

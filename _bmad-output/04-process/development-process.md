@@ -42,7 +42,7 @@
 ---
 
 ## 2. 文档维护规范
-*   **单一来源 (Single Source of Truth)**: `documentation_index.md` 是所有文档的入口。
+*   **文档中心 (Documentation Hub)**: `_bmad-output` 目录包含了所有的项目文档。
 *   **及时更新**: 代码变更引发的需求变更，必须同步回 `product-design.md`。
 *   **双语要求**: 所有交付给用户的文档必须使用 **中文**。
 

@@ -1,62 +1,62 @@
-# Tongxinyuan (同心源) Project Context
+# 同心源 (Tongxinyuan) 项目上下文
 
-> **Last Updated**: 2026-01-27
-> **Status**: Legacy Site Deployed (ECS), New Site Planning Completed
-> **Tech Stack**: 
-> - **Legacy**: PHP 7.4 + MySQL (Dockerized on ECS)
-> - **New**: Next.js + MemFire Cloud (China)
+> **最后更新**: 2026-01-27
+> **状态**: 旧版网站已部署 (ECS), 新版网站规划完成
+> **技术栈**: 
+> - **旧版**: PHP 7.4 + MySQL (Dockerized on ECS)
+> - **新版**: Next.js + MemFire Cloud (国内)
 
-## 4. Project Map & Deployment Reference (2026 Update)
+## 4. 项目地图与部署参考 (2026 更新)
 
-### 4.1 Locations (Code & Server)
+### 4.1 位置 (代码与服务器)
 
-| Component | Local Path (Windows) | Remote Path (ECS) | Description |
+| 组件 | 本地路径 (Windows) | 远程路径 (ECS) | 说明 |
 |---|---|---|---|
-| **Legacy Site** | `res\txy2020` | `/opt/txy2020` | Old PHP Grace website (Archive/Reference) |
-| **New Site** | `tongxinyuan-community` | `/opt/tongxinyuan` | New Next.js Community Platform |
-| **Deployment Scripts** | Root (`ws\2026\tongxy`) | `/tmp/` (during execution) | Automation scripts (`.ps1`, `.sh`) |
+| **旧版网站** | `res\txy2020` | `/opt/txy2020` | 旧版 PHP Grace 网站 (归档/参考) |
+| **新版网站** | `tongxinyuan-community` | `/opt/tongxinyuan` | 新版 Next.js 社区平台 |
+| **部署脚本** | Root (`ws\2026\tongxy`) | `/tmp/` (执行期间) | 自动化脚本 (`.ps1`, `.sh`) |
 
-### 4.2 Port Mappings
+### 4.2 端口映射
 
-| Environment | Legacy Site (PHP) | New Site (Next.js) | Notes |
+| 环境 | 旧版网站 (PHP) | 新版网站 (Next.js) | 备注 |
 |---|---|---|---|
-| **Local Dev** | `http://localhost:8000` | `http://localhost:3000` | Modified legacy to 8000 to avoid conflict |
-| **ECS Prod** | `https://tongxy.xyz` (443) | `https://tongxy.xyz:3000` | Nginx handles SSL for both (Legacy on 443, Proxy 3000->3001) |
+| **本地开发** | `http://localhost:8000` | `http://localhost:3000` | 修改旧版为 8000 以避免冲突 |
+| **ECS 生产** | `https://tongxy.xyz` (443) | `https://tongxy.xyz:3000` | Nginx 处理两者的 SSL (旧版在 443, 代理 3000->3001) |
 
-### 4.3 Deployment Cheat Sheet
+### 4.3 部署速查表
 
-*   **Deploying Updates (New or Legacy)**
+*   **部署更新 (新版或旧版)**
     *   **PowerShell**: `.\deploy_dual.ps1 -ServerIP ecs`
-    *   **Effect**: Updates configs, restarts containers, ensures both sites are running.
+    *   **效果**: 更新配置，重启容器，确保两个站点都运行。
 
-*   **Local Development**
-    *   **Legacy**: `cd res/txy2020; docker-compose up -d`
-    *   **New**: `cd tongxinyuan-community; npm run dev`
+*   **本地开发**
+    *   **旧版**: `cd res/txy2020; docker-compose up -d`
+    *   **新版**: `cd tongxinyuan-community; npm run dev`
 
-## 1. Core Strategic Shift (2025 -> 2026)
-- **From**: "Platform Reliance" (Dependent on Public Foundations, high risk).
-- **To**: "Self-Growth" (Independent fundraising, Community Support Center model).
-- **Key Driver**: Compliance with new Charity Law ("Penetrating Management") and need for sustainable funding.
+## 1. 核心战略转型 (2025 -> 2026)
+- **从**: "平台依赖" (依赖公募基金会，高风险)。
+- **到**: "自我成长" (独立筹款，社区支持中心模式)。
+- **关键驱动力**: 符合新慈善法 ("穿透式管理") 和可持续资金需求。
 
-## 2. Product Vision: Community Support Center
-A digital + physical platform serving:
-1.  **Families**: Accommodation, Respite Services, Life Education, Policy Aid.
-2.  **Volunteers**: Structured growth (Level 1-3), standardized ops.
-3.  **Public/Donors**: Transparent impact data, easy access to public events.
+## 2. 产品愿景: 社区支持中心
+服务于以下的数字化 + 物理平台:
+1.  **家庭**: 住宿，喘息服务，生命教育，政策援助。
+2.  **志愿者**: 结构化成长 (Level 1-3)，标准化运营。
+3.  **公众/捐赠者**: 透明的影响力数据，便捷参与公开活动。
 
-## 3. Critical Requirements (The "Must Haves")
-- **China Accessible**: NO VPN required. Must use domestic cloud (MemFire, Tencent/Aliyun).
-- **Multi-Platform Sync**: Web (PC/Mobile) + WeChat Mini Program must share ONE database.
-- **Operations First**: Focus on solving "Social Worker Efficiency" (no more manual Excel).
-- **Data Sovereignty**: Ops data (Service Logs, Resources) must be digital and auditable.
+## 3. 关键需求 ("必须有")
+- **国内访问**: 无需 VPN。必须使用国内云 (MemFire, 腾讯/阿里云)。
+- **多端同步**: Web (PC/手机) + 微信小程序必须共享同一个数据库。
+- **运营优先**: 专注于解决 "社工效率" (不再使用手动 Excel)。
+- **数据主权**: 运营数据 (服务日志，资源) 必须数字化且可审计。
 
-## 4. Feature Roadmap (MVP)
-- **Ops Console**: Family Mgmt, Event Scheduling, Data Dashboard.
-- **Volunteer App**: Sign-up, QR Check-in, Service Logs.
-- **Family App**: Service Requests, **Policy Assistant**, **Kitchen Booking**.
-- **Public Gateway**: SEO-friendly Official Site, Simplified Event Registration (Guest Mode).
+## 4. 功能路线图 (MVP)
+- **运营控制台**: 家庭管理，活动排期，数据仪表盘。
+- **志愿者 App**: 注册，扫码签到，服务日志。
+- **家庭 App**: 服务申请，**政策助手**，**共享厨房预订**。
+- **公众门户**: SEO 友好的官网，简化的活动报名 (访客模式)。
 
-## 5. Key Documentation
-- **Product Brief**: `_bmad-output/planning-artifacts/product-brief-tongxy-2026-01-27.md` (Detailed specs)
-- **Tech Plan**: `_bmad-output/planning-artifacts/implementation-plan-tongxy-2026-01-27.md` (Architecture)
-- **Research**: `findings.md` (Analysis of original PPT/PDF)
+## 5. 关键文档
+- **产品简报**: `_bmad-output/01-strategy/product-brief.md` (原始需求事实来源)
+- **技术计划**: `_bmad-output/01-strategy/technical-implementation-plan.md` (架构)
+- **调研**: `_bmad-output/02-analysis/findings.md` (原始 PPT/PDF 分析)
