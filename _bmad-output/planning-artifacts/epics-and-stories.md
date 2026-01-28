@@ -4,14 +4,14 @@
 
 ## Epic 1: 基础设施与地基 (Foundation & Ops)
 **目标**: 搭建 Docker 环境，跑通 Next.js + Python 双后端，确保 CI/CD 流程就绪。
-*   **Story 1.1**: 搭建 Docker Compose 本地开发环境 (Next.js + FastAPI + Postgres + Redis)。
-*   **Story 1.2**: 配置 ECS 生产环境（Swap 分区、Docker 安装）、域名解析及 SSL 证书配置 (Nginx)。
-*   **Story 1.3**: 初始化 Monorepo 结构（包含 `apps/web`，预留 `apps/miniprogram` 目录）。
+*   **Story 1.1**: [Done] 搭建 Docker Compose 本地开发环境 (Next.js + FastAPI + Postgres + Redis)。
+*   **Story 1.2**: [Done] 配置 ECS 生产环境（Swap 分区、Docker External Build Strategy）、域名解析及 SSL 证书配置 (Nginx Host Mode + IPTables)。
+*   **Story 1.3**: [Done] 初始化 Monorepo 结构（包含 `apps/web`，预留 `apps/miniprogram` 目录）。
 
 ## Epic 2: 用户中心与权限 (Identity & Access)
 **目标**: 实现安全的身份验证系统，优先支持 Web 端。
-*   **Story 2.1**: 数据库建模 (User, Profile) 及 pgvector 初始化。
-*   **Story 2.2**: [Web] 实现 NextAuth 登录（手机号/密码）。
+*   **Story 2.1**: [In Progress] 数据库建模 (User, Profile) 及 pgvector 初始化。
+*   **Story 2.2**: [In Progress] [Web] 实现 NextAuth 登录 UI 与路由架构 (Login Page & Dual-Mode Layout Completed)。
 *   **Story 2.3**: [Phase 2] 实现微信小程序登录接口 (code2session) 并颁发 JWT。
 *   **Story 2.4**: [Phase 2] 实现小程序端的“微信一键登录”及 Token 存储。
 
@@ -32,7 +32,7 @@
 ## Epic 5: 移动驾驶舱与内容 (Mobile Ops & Content)
 **目标**: 即使在手机上，社工也能干活（通过手机浏览器）。
 *   **Story 5.1**: [Web-Mobile] 社工端：活动现场拍照上传（Web版上传组件）。
-*   **Story 5.2**: [Web] 官网主页与动态展示（读取上传的内容）。
+*   **Story 5.2**: [In Progress] [Web] 官网主页与动态展示 (Landing Page UI Implemented)。
 *   **Story 5.3**: [Web] 捐赠落地页（静态收款码/外链）。
 
 ---

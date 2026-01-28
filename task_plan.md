@@ -56,7 +56,7 @@ Phase 3: Website Planning & Design
 - [x] Create `implementation_plan.md` (Architecture, Tech Stack)
 - [x] Incorporate "Policy Assistant" and "Open Kitchen" requirements into plans
 - [x] **[Ongoing]** Discuss and refine detailed requirements with user
-- [ ] Define "Design System" using UI/UX Pro Max skill (Colors: Warm/Healing, Fonts)
+- [x] Define "Design System" using UI/UX Pro Max skill (Colors: Warm/Healing, Fonts)
 - [ ] Outline content map based on `findings.md` (4 Modules, Impact Data)
 - **Status:** in_progress
 
@@ -65,12 +65,12 @@ Phase 3: Website Planning & Design
   WHAT: Build the core pages.
   WHY: Get a functional site ready for 2026 operations.
 -->
-- [ ] Initialize Next.js project
+- [x] Initialize Next.js project
 - [ ] Implement Design System (Tailwind)
 - [ ] Build Home Page (Hero, Impact, Donation CTA)
 - [ ] Build "Community Center" Service Pages
 - [ ] Build "Get Involved" (Volunteer/Donate) Pages
-- **Status:** pending
+- **Status:** in_progress
 
 ## Key Questions
 <!-- 

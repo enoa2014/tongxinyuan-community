@@ -1,5 +1,10 @@
 # 系统架构设计文档 (System Architecture) - Tongxinyuan 2026
 
+**严重架构变更 (2026-01-28)**:
+*   **部署策略**: 迁移至 **External Build Strategy** (本地交叉编译)，解决 ECS 内存/网络瓶颈。
+*   **网络模式**: 采用 **Docker Host Mode** + `iptables` (80->8080) 解决 ECS 端口封禁与 Bridge 网络不通问题。
+*   **路由架构**: 实施 **Dual-Mode Layout** (Public/Dashboard 物理隔离)。
+
 ## 1. 架构概览 (Architecture Overview)
 
 本项目采用 **双后端微服务架构**，通过 **Docker Compose** 编排。
