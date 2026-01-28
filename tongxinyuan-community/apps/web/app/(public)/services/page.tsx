@@ -3,6 +3,9 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Utensils, HeartHandshake, BookOpen, Sun } from "lucide-react";
 import Image from "next/image";
 
+import { InnerPageWrapper } from "@/components/layout/inner-page-wrapper";
+import { ServiceInquiryDialog } from "@/components/services/service-inquiry-dialog";
+
 export default function ServicesPage() {
   const modules = [
     {
@@ -32,18 +35,11 @@ export default function ServicesPage() {
   ];
 
   return (
-    <div className="container py-12 mx-auto">
-      {/* Header Section */}
-      <div className="text-center mb-16 space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-          社区支持中心
-        </h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          不仅仅是住宿，更是“异乡的家”。
-          <br />
-          从单一住宿点升级为复合功能的社区中心，全方位守护大病患儿家庭。
-        </p>
-      </div>
+    <InnerPageWrapper
+      title="社区支持中心"
+      subtitle="不仅仅是住宿，更是“异乡的家”。从单一住宿点升级为复合功能的社区中心，全方位守护大病患儿家庭。"
+      imageUrl="/images/banner-services.png"
+    >
 
       {/* Vision Transition */}
       <div className="mb-16 bg-white rounded-2xl p-8 shadow-sm border text-center">
@@ -71,9 +67,10 @@ export default function ServicesPage() {
               <CardTitle className="text-xl">{module.title}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-slate-600 leading-relaxed">
+              <p className="text-slate-600 leading-relaxed mb-4">
                 {module.description}
               </p>
+              <ServiceInquiryDialog serviceTitle={module.title} />
             </CardContent>
           </Card>
         ))}
@@ -97,6 +94,6 @@ export default function ServicesPage() {
           </div>
         </div>
       </div>
-    </div>
+    </InnerPageWrapper>
   );
 }

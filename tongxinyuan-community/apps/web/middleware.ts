@@ -1,28 +1,46 @@
+
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
-    // TODO: Integrate with real Auth (NextAuth/Clerk)
-    // For now, if user visits /dashboard, we redirect them to /login
-    // because we can't guess their role without a session.
+    const path = request.nextUrl.pathname;
 
-    if (request.nextUrl.pathname === '/dashboard') {
-        return NextResponse.redirect(new URL('/login', request.url))
+    // 1. Protect Admin Routes
+    if (path.startsWith('/admin')) {
+        // Allow public access to login page
+        if (path === '/admin/login') {
+            return NextResponse.next();
+        }
+
+        // Check for PocketBase Auth Cookie
+        // The cookie name 'pb_auth' is consistent with what we set in login page
+        const authCookie = request.cookies.get('pb_auth');
+
+        if (!authCookie) {
+            // Redirect to login if no auth cookie found
+            const loginUrl = new URL('/admin/login', request.url);
+            // Optional: Add ?next= param to redirect back after login
+            loginUrl.searchParams.set('next', path);
+            return NextResponse.redirect(loginUrl);
+        }
+
+        // Note: Strict validation of the cookie token usually happens on server/API side
+        // Here we just do a quick "has cookie" check to redirect unauthenticated users.
     }
-
-    // Basic protection mock
-    // if (request.nextUrl.pathname.startsWith('/dashboard')) {
-    //   const token = request.cookies.get('token')
-    //   if (!token) {
-    //     return NextResponse.redirect(new URL('/login', request.url))
-    //   }
-    // }
 
     return NextResponse.next()
 }
 
 export const config = {
     matcher: [
-        '/dashboard/:path*',
+        /*
+         * Match all request paths except for the ones starting with:
+         * - api (API routes)
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         * - public folder content (if specific patterns needed)
+         */
+        '/admin/:path*',
     ],
 }

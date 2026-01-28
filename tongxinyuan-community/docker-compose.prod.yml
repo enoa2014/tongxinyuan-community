@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  # Nginx Gateway (SSL Termination & Reverse Proxy)
+  nginx:
+    container_name: txy_nginx
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "3000:443" # SSL: Map Host 3000 -> Container 443
+      # - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/certs:/etc/nginx/certs
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - app
+      - api
+
+  # Next.js Web Application
+  app:
+    container_name: txy_web
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile # This corresponds to Dockerfile.prod in deployment package
+    restart: always
+    # ports:
+    #   - "3000:3000" # Removed to avoid host conflict. Accessed via Nginx on 3000.
+    environment:
+      - NODE_ENV=production
+      - HOSTNAME=0.0.0.0
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/tongxinyuan
+      - NEXT_PUBLIC_API_URL=http://localhost:8000 # Should be updated if API has domain
+    depends_on:
+      - db
+      - redis
+    # No volumes for code - strictly immutable container
+
+    # Python AI Agent
+  api:
+    container_name: txy_api
+    build:
+      context: ./apps/ai-agent
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/tongxinyuan
+      - REDIS_URL=redis://redis:6379/0
+      # ALIYUN_API_KEY injected via .env on server
+    depends_on:
+      - db
+      - redis
+
+  # PostgreSQL Database
+  db:
+    container_name: txy_db
+    image: pgvector/pgvector:pg16
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=tongxinyuan
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    shm_size: 256mb
+
+  # Redis Cache
+  redis:
+    container_name: txy_redis
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data

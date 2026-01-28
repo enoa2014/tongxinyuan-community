@@ -13,10 +13,12 @@
 *   [旧版网站地图 (Site Map)](../02-analysis/legacy-site-map.md): 旧版网站的完整页面层级。
 *   [功能迁移差异分析 (Gap Analysis)](../02-analysis/feature-migration-gap.md): 新旧版功能对比与迁移建议 (含合规性调整)。
 *   [早期调研发现 (Findings)](../02-analysis/findings.md): 基于原始 PPT/PDF 的早期分析。
+*   [技术经验总结 (Tech Lessons)](../02-analysis/tech-lessons-20260129.md): Nginx端口策略、设计规范实施与Docker构建经验。
 
 ## 3. 新版产品设计 (New Site Design) - `03-design/`
 *   [用户体验与交互设计 (UX & Sitemap)](../03-design/new-site-ux-sitemap.md): **(Core UX)** 详细的网站地图、用户交互流程图与线框图规划。
 *   [线框图 (Wireframes)](../03-design/wireframes.md): 关键页面 (首页、捐赠、网点) 的低保真原型。
+*   [工程设计规范 (Engineering Design System)](../03-design/design-system.md): **(Execution)** 包含视觉基础、布局逻辑(Padding/Container)与组件详细规范。
 
 ## 4. 开发流程 (Process) - `04-process/`
 *   [开发流程规范 (Process)](../04-process/development-process.md): **(Standard)** 标准化的开发与协作流程。

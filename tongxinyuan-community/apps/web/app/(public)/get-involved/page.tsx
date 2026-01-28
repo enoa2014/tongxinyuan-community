@@ -1,7 +1,9 @@
-
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, Users2, Star, ShieldCheck, Gem } from "lucide-react";
+import { InnerPageWrapper } from "@/components/layout/inner-page-wrapper";
+import { VolunteerForm } from "@/components/volunteer/volunteer-form";
 
 export default function GetInvolvedPage() {
     const volunteerLevels = [
@@ -32,22 +34,26 @@ export default function GetInvolvedPage() {
     ];
 
     return (
-        <div className="container py-12 mx-auto">
-            {/* Hero */}
-            <div className="text-center mb-16 space-y-4">
-                <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-                    成为同心源的一员
-                </h1>
-                <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                    无论是贡献时间还是爱心，您的每一次参与，
-                    <br />
-                    都在为异地求医的大病患儿家庭点亮一盏灯。
-                </p>
+        <InnerPageWrapper
+            title="成为同心源的一员"
+            subtitle="无论是贡献时间还是爱心，您的每一次参与，都在为异地求医的大病患儿家庭点亮一盏灯。"
+            imageUrl="/images/banner-volunteer.png"
+        >
+
+            {/* Hero Visualization */}
+            <div className="mb-16 rounded-3xl overflow-hidden shadow-2xl border border-slate-100">
+                <Image
+                    src="/volunteer-hero.png"
+                    alt="同心源志愿者服务"
+                    width={1200}
+                    height={400}
+                    className="w-full object-cover"
+                />
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-12">
+            <div className="max-w-4xl mx-auto">
                 {/* Volunteer Section */}
-                <section>
+                <section className="bg-white p-8 md:p-12 rounded-2xl border border-slate-100 shadow-sm">
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-3 bg-brand-yellow/20 rounded-full">
                             <Users2 className="h-8 w-8 text-brand-yellow" />
@@ -55,82 +61,41 @@ export default function GetInvolvedPage() {
                         <h2 className="text-3xl font-bold">加入志愿者</h2>
                     </div>
 
-                    <div className="space-y-6">
-                        <p className="text-slate-600 mb-6">
+                    <div className="space-y-8">
+                        <p className="text-slate-600 text-lg leading-relaxed">
                             我们需要多元化的力量。同心源建立了分级志愿者培养体系，无论您是学生、职场人士还是专业专家，都能找到适合的位置。
                         </p>
 
                         <div className="space-y-4">
                             {volunteerLevels.map((level, index) => (
-                                <Card key={index} className={`border-l-4 ${level.color}`}>
-                                    <CardContent className="p-4 flex items-start gap-4">
-                                        <div className="mt-1">{level.icon}</div>
-                                        <div>
-                                            <h3 className="font-bold text-lg flex items-center gap-2">
-                                                {level.level} <span className="text-sm font-normal text-slate-500">({level.role})</span>
+                                <Card key={index} className={`border-l-4 ${level.color} transition-all hover:shadow-md hover:-translate-y-1`}>
+                                    <CardContent className="p-6 flex flex-col md:flex-row md:items-center gap-6">
+                                        <div className="p-3 bg-slate-50 rounded-full w-fit">{level.icon}</div>
+                                        <div className="flex-1">
+                                            <h3 className="font-bold text-lg flex items-center gap-2 mb-2">
+                                                {level.level} <span className="text-sm font-normal text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">({level.role})</span>
                                             </h3>
-                                            <p className="text-sm font-medium mt-1">职责: {level.duties}</p>
-                                            <p className="text-xs text-slate-500 mt-1">要求: {level.requirements}</p>
+                                            <div className="grid md:grid-cols-2 gap-4 text-sm">
+                                                <div>
+                                                    <span className="font-semibold text-slate-700">职责:</span> {level.duties}
+                                                </div>
+                                                <div>
+                                                    <span className="font-semibold text-slate-700">要求:</span> {level.requirements}
+                                                </div>
+                                            </div>
                                         </div>
                                     </CardContent>
                                 </Card>
                             ))}
                         </div>
 
-                        <div className="mt-6">
-                            <Button size="lg" className="w-full bg-brand-yellow text-slate-900 hover:bg-brand-yellow/90">
-                                申请成为志愿者
-                            </Button>
+                        <div className="mt-10 pt-10 border-t border-slate-100">
+                            <h3 className="text-xl font-bold mb-6 text-center">立即填写报名表</h3>
+                            <VolunteerForm />
                         </div>
-                    </div>
-                </section>
-
-                {/* Donation Section */}
-                <section>
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="p-3 bg-brand-green/20 rounded-full">
-                            <Heart className="h-8 w-8 text-brand-green" />
-                        </div>
-                        <h2 className="text-3xl font-bold">支持我们</h2>
-                    </div>
-
-                    <div className="bg-slate-50 p-8 rounded-2xl border border-slate-100 h-fit">
-                        <div className="mb-6">
-                            <h3 className="text-xl font-bold flex items-center gap-2 mb-2">
-                                <Gem className="h-5 w-5 text-brand-green" /> 成为月捐人
-                            </h3>
-                            <p className="text-slate-600 text-sm">
-                                月捐是同心源实现“自主生长”的关键。持续稳定的支持，让我们能更从容地规划长期的患儿家庭服务。
-                            </p>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 mb-6">
-                            <Button variant="outline" className="h-20 text-lg hover:border-brand-green hover:text-brand-green">
-                                ¥ 30 / 月
-                                <span className="block text-xs font-normal text-slate-400 w-full">一顿午餐</span>
-                            </Button>
-                            <Button variant="outline" className="h-20 text-lg hover:border-brand-green hover:text-brand-green">
-                                ¥ 100 / 月
-                                <span className="block text-xs font-normal text-slate-400 w-full">一晚住宿</span>
-                            </Button>
-                            <Button variant="outline" className="h-20 text-lg hover:border-brand-green hover:text-brand-green">
-                                ¥ 500 / 月
-                                <span className="block text-xs font-normal text-slate-400 w-full">一次艺术疗愈</span>
-                            </Button>
-                            <Button variant="outline" className="h-20 text-lg hover:border-brand-green hover:text-brand-green">
-                                自定义金额
-                            </Button>
-                        </div>
-
-                        <Button size="lg" className="w-full bg-brand-green text-white hover:bg-brand-green/90">
-                            立即捐赠
-                        </Button>
-                        <p className="text-xs text-center text-slate-400 mt-4">
-                            您的每一笔捐赠都将进入同心源公募账户，并定期公开财务报告。
-                        </p>
                     </div>
                 </section>
             </div>
-        </div>
+        </InnerPageWrapper>
     );
 }

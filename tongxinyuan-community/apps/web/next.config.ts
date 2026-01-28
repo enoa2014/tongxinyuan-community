@@ -1,14 +1,15 @@
+
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // output: "standalone",
+  reactStrictMode: false,
   typescript: {
     ignoreBuildErrors: true,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  }
 };
-
 
 export default nextConfig;

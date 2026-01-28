@@ -1,3 +1,9 @@
 res/
 .DS_Store
 Thumbs.db
+
+# Large Deployment Artifacts
+*.tar
+*.tar.gz
+*.zip
+deploy_pkg_linux/

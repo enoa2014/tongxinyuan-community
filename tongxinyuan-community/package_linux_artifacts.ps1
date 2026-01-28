@@ -55,9 +55,14 @@ Copy-Item "$WorkDir\apps\ai-agent" "$DistDir\apps\" -Recurse -Container
 # Nginx
 Copy-Item "$WorkDir\nginx" "$DistDir\" -Recurse -Container
 # Docker Compose
-Copy-Item "$WorkDir\docker-compose.yml" "$DistDir\"
+# Docker Compose (Rename prod to default)
+Copy-Item "$WorkDir\docker-compose.prod.yml" "$DistDir\docker-compose.yml"
 
-# 5. Compress
+# 5. Offline Images
+Write-Host "📦 Including Offline Docker Images..."
+Copy-Item "$WorkDir\images_*.tar" "$DistDir\"
+
+# 6. Compress
 Write-Host "🗜️ Compressing to $ZipFile..."
 # Tar command (available in Win 10+)
 # Note: tar on windows might need correct execution path or relative paths

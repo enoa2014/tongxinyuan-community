@@ -55,7 +55,7 @@ export function HeroSection() {
                             </Link>
                         </Button>
                         <Button asChild variant="outline" size="lg" className="h-14 px-8 text-base border-white/20 bg-white/5 hover:bg-white/10 text-white backdrop-blur-sm rounded-full transition-all hover:scale-105 active:scale-95">
-                            <Link href="/login">
+                            <Link href="/get-involved">
                                 我想成为志愿者
                             </Link>
                         </Button>

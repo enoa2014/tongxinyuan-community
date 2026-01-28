@@ -64,11 +64,25 @@ export function PublicNavbar() {
                         关于我们
                     </Link>
                     <Link
-                        href="/stories"
+                        href="/services"
                         className={`text-sm font-medium transition-colors hover:opacity-80 ${isScrolled || !isHome ? "text-slate-700" : "text-white/90"
                             }`}
                     >
-                        我们的故事
+                        服务中心
+                    </Link>
+                    <Link
+                        href="/news"
+                        className={`text-sm font-medium transition-colors hover:opacity-80 ${isScrolled || !isHome ? "text-slate-700" : "text-white/90"
+                            }`}
+                    >
+                        新闻动态
+                    </Link>
+                    <Link
+                        href="/donate"
+                        className={`text-sm font-medium transition-colors hover:opacity-80 ${isScrolled || !isHome ? "text-slate-700" : "text-white/90"
+                            }`}
+                    >
+                        支持我们
                     </Link>
                 </nav>
 
@@ -88,7 +102,7 @@ export function PublicNavbar() {
                         className="rounded-full px-6 font-bold shadow-lg shadow-medical-cta/20 bg-medical-cta hover:bg-green-600 text-white border-0"
                         asChild
                     >
-                        <Link href="/support">
+                        <Link href="/get-involved">
                             加入我们
                         </Link>
                     </Button>
@@ -105,10 +119,12 @@ export function PublicNavbar() {
                         <div className="flex flex-col gap-6 mt-10">
                             <Link href="/" className="text-lg font-medium">首页</Link>
                             <Link href="/about" className="text-lg font-medium">关于我们</Link>
-                            <Link href="/stories" className="text-lg font-medium">我们的故事</Link>
+                            <Link href="/services" className="text-lg font-medium">服务中心</Link>
+                            <Link href="/news" className="text-lg font-medium">新闻动态</Link>
+                            <Link href="/donate" className="text-lg font-medium">支持我们</Link>
                             <div className="h-px bg-slate-100 my-2" />
                             <Link href="/login" className="text-lg font-medium text-slate-600">登录</Link>
-                            <Link href="/support" className="text-lg font-medium text-medical-cta font-bold">加入我们</Link>
+                            <Link href="/get-involved" className="text-lg font-medium text-medical-cta font-bold">加入我们</Link>
                         </div>
                     </SheetContent>
                 </Sheet>

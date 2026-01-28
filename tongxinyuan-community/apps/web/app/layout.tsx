@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Toaster } from "@/components/ui/toaster";
 // import { Figtree, Noto_Sans_SC } from "next/font/google";
 import "./globals.css";
 
@@ -30,6 +31,7 @@ export default function RootLayout({
         className={`antialiased bg-background text-text font-sans`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );

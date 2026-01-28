@@ -4,3 +4,12 @@ node_modules
 npm-debug.log
 README.md
 .git
+.next
+
+
+.vscode
+dist
+out
+coverage
+junit.xml
+test-results

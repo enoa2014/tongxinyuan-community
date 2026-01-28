@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PWD=root
+      - DB_NAME=a1
+    depends_on:
+      - db
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - txy_net
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: a1
+    volumes:
+      - ./db_dump.sql:/docker-entrypoint-initdb.d/init.sql
+      - db_data:/var/lib/mysql
+    # ports:
+    #   - "3000:3000"
+    ports:
+      - "3000" # Expose internally only
+    networks:
+      - txy_net
+    # Force utf8mb4 for server and handshake
+    command: >
+      --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --skip-character-set-client-handshake
+
+volumes:
+  db_data:
+
+
+networks:
+  txy_net:

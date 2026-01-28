@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: txy2020-nginx-1
+    ports:
+      - "80:80"
+      - "443:443"
+      # - "3000:3000" # DISABLED to allow new app on 3000
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - web
+    networks:
+      - txy_net
+
+  web:
+    image: txy2020:latest
+    container_name: txy2020-web-1
+    # Ports removed, only accessible via Nginx
+    expose:
+      - "80"
+    environment:
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PWD=root
+      - DB_NAME=a1
+    depends_on:
+      - db
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - txy_net
+
+  db:
+    image: mysql:5.7
+    container_name: txy2020-db-1
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: a1
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --skip-character-set-client-handshake
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db_dump.sql:/docker-entrypoint-initdb.d/init.sql
+      - db_data:/var/lib/mysql
+    networks:
+      - txy_net
+
+networks:
+  txy_net:
+
+
+volumes:
+  db_data:

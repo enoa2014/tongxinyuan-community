@@ -34,5 +34,13 @@ data/
 
 # Logs
 nginx/logs/
-*.log
+
+# PocketBase
+pocketbase.exe
+pb_data/
+pb_migrations/
+*.db
+*.db-wal
+*.db-shm
+
 

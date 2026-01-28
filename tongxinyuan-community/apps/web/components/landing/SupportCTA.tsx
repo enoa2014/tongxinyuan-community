@@ -26,13 +26,13 @@ export function SupportCTA() {
 
                         <div className="flex flex-col sm:flex-row gap-4 pt-4">
                             <Button asChild size="lg" className="h-14 bg-white text-teal-900 hover:bg-teal-50 rounded-full font-bold shadow-lg">
-                                <Link href="/support/donate">
+                                <Link href="/donate">
                                     <Gift className="mr-2 h-5 w-5" />
-                                    捐赠物资
+                                    我要捐赠
                                 </Link>
                             </Button>
                             <Button asChild variant="outline" size="lg" className="h-14 border-teal-400 text-teal-300 hover:bg-teal-900/50 hover:text-white rounded-full">
-                                <Link href="/login?tab=volunteer">
+                                <Link href="/get-involved">
                                     <ArrowRight className="mr-2 h-5 w-5" />
                                     注册志愿者
                                 </Link>

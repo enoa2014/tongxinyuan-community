@@ -4,7 +4,7 @@
 > **状态**: 旧版网站已部署 (ECS), 新版网站规划完成
 > **技术栈**: 
 > - **旧版**: PHP 7.4 + MySQL (Dockerized on ECS)
-> - **新版**: Next.js + MemFire Cloud (国内)
+> - **新版**: Next.js + PocketBase (Self-hosted Go+SQLite)
 
 ## 4. 项目地图与部署参考 (2026 更新)
 
@@ -60,3 +60,61 @@
 - **产品简报**: `_bmad-output/01-strategy/product-brief.md` (原始需求事实来源)
 - **技术计划**: `_bmad-output/01-strategy/technical-implementation-plan.md` (架构)
 - **调研**: `_bmad-output/02-analysis/findings.md` (原始 PPT/PDF 分析)
+
+## 6. 关键工程规则 (Critical Engineering Rules)
+> **必须严格遵守的本地环境约束**
+> **🔴 最高优先级 (HIGHEST PRIORITY): 阶段门禁 (Phase Gate Control)**
+> *   **禁止自动推进**: 严禁在未获得用户**明确打字确认**的情况下，自动进入下一个主要阶段 (Phase) 或子阶段。
+> *   **Explicit Confirmation**: DO NOT proceed to the next stage without typed user confirmation.
+
+1.  **PowerShell 兼容性**:
+    *   **禁止使用 `&&`**: PowerShell 不支持 `&&` 运算符（除非在 PowerShell 7+ 且配置正确，但默认环境不可靠）。
+    *   **替代方案**: 使用 `;` 分隔命令，或将多个命令拆分为独立的 `run_command` 调用。
+2.  **图片资源**:
+    *   **路径**: 所有静态图片必须存放在 `apps/web/public/images/`。
+    *   **引用**: 代码中引用时，路径始终以 `/images/` 开头（例如 `/images/banner.png`）。
+3.  **Docker 缓存**:
+    *   如果修改了代码但 Docker 容器未更新，**必须**执行 `docker exec ... rm -rf .next` 并重启容器。单纯重启往往无效。
+
+## 7. 疑难排查与经验沉淀 (Troubleshooting & Lessons Learned)
+
+### 2026-01-29: Admin 400 错误与 Schema 丢失事件
+
+#### 问题描述
+后台管理列表 `/admin/volunteers` 在按时间排序 (`sort=-created`) 时报错 `400 Bad Request`。同时，数据库中部分记录显示为 "Invalid Date" 且无字段内容。
+
+#### 根本原因 (Root Causes)
+1.  **PocketBase Schema 语法变动 (v0.20+ -> v0.26+)**:
+    *   在旧版脚本中习惯使用 `schema: [...]` 定义字段。
+    *   **现状**: 新版 SDK 废弃了 `schema` 属性，改为 `fields`。导致表被创建为空壳 (Empty Shell)，只有 ID，没有 `name`/`created` 等字段。这也是 400 错误的直接原因 (字段不存在)。
+2.  **Next.js 15 Route Handler 破坏性更新**:
+    *   **现状**: `params` 参数变成了 **Promise**。直接访问 `params.path` 会导致 Proxy 崩溃 (500 Error)。
+    *   **修复**: 必须使用 `const { path } = await params`。
+
+#### 解决方案与规范
+1.  **Schema 修复**: 使用 `pb.collections.import()` 配合正确的新版 `fields` 语法进行覆盖更新。**禁止**简单的“删除重造” (Delete & Recreate)，因为可能因外键约束失败。
+2.  **Proxy 规范**: 手动代理 (`route.ts`) 必须处理好 Headers 清洗和 Params awaiting。
+3.  **数据清洗**: 编写脚本 (`scripts/cleanup-bad-data.ts`) 清理因 Schema 错误产生的幽灵数据。
+
+### 2026-01-29: 业务流闭环与审计日志
+
+#### 8.1 业务状态机
+为了解决误操作问题，放弃了单向状态流（如只能 Pending -> Approved），改为**全联通状态机**：
+*   **允许悔棋**: 任意状态均可重置为 `Pending` (待审核/待处理)。
+*   **安全门禁**: 凡是**逆向操作**（如 Approved -> Rejected, Resolved -> Pending），前端必须弹出 `<AlertDialog>` 二次确认。
+
+#### 8.2 审计日志 (Audit Log) 标准
+所有关键业务表（志愿者、咨询、捐赠）均应包含 `history` (JSON) 字段，存储不可变的操作记录。
+**数据结构**:
+```json
+[
+  {
+    "action": "通过申请",      // 动作描述
+    "date": "ISO8601 Sting",   // 2026-01-29T12:00:00.000Z
+    "operator": "Admin",       // 操作人标识
+    "prevStatus": "pending"    // 修改前状态
+  }
+]
+```
+**展示要求**: 在详情页 Dialog 底部以时间轴形式渲染。
+

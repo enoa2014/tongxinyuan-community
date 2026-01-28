@@ -12,25 +12,25 @@ export function SiteFooter() {
                     <div>
                         <h4 className="font-semibold text-slate-900 mb-4">关于</h4>
                         <ul className="space-y-2 text-sm text-slate-500">
-                            <li>我们的使命</li>
-                            <li>团队介绍</li>
-                            <li>透明度报告</li>
+                            <li><a href="/services" className="hover:text-teal-600">服务介绍</a></li>
+                            <li><a href="/about" className="hover:text-teal-600">团队介绍</a></li>
+                            <li><a href="/about" className="hover:text-teal-600">透明度报告</a></li>
                         </ul>
                     </div>
                     <div>
                         <h4 className="font-semibold text-slate-900 mb-4">参与</h4>
                         <ul className="space-y-2 text-sm text-slate-500">
-                            <li>成为志愿者</li>
-                            <li>合作伙伴</li>
-                            <li>物资捐赠</li>
+                            <li><a href="/get-involved" className="hover:text-teal-600">成为志愿者</a></li>
+                            <li><a href="/get-involved" className="hover:text-teal-600">合作伙伴</a></li>
+                            <li><a href="/get-involved" className="hover:text-teal-600">物资捐赠</a></li>
                         </ul>
                     </div>
                     <div>
                         <h4 className="font-semibold text-slate-900 mb-4">联系</h4>
                         <ul className="space-y-2 text-sm text-slate-500">
-                            <li>support@tongxinyuan.org</li>
-                            <li>+86 123-4567-8900</li>
-                            <li>北京市...</li>
+                            <li>qinfayuan@nntxy.com</li>
+                            <li>0771-6758590</li>
+                            <li>南宁市西乡塘区万秀村二队九栋</li>
                         </ul>
                     </div>
                 </div>
