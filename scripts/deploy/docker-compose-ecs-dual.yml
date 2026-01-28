@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # Next.js Web Application (Port 3000)
+  app:
+    container_name: txy_new_web
+    image: tongxinyuan-app:latest
+    restart: always
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - HOSTNAME=0.0.0.0
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/tongxinyuan
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - db
+      - redis
+
+  # Python AI Agent (FastAPI) (Port 8000)
+  api:
+    container_name: txy_new_api
+    build:
+      context: ./apps/ai-agent
+      dockerfile: Dockerfile
+      args:
+        - HTTP_PROXY
+        - HTTPS_PROXY
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/tongxinyuan
+      - REDIS_URL=redis://redis:6379/0
+      - ALIYUN_API_KEY=${ALIYUN_API_KEY}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./apps/ai-agent:/app
+
+  # PostgreSQL
+  db:
+    container_name: txy_new_db
+    image: pgvector/pgvector:pg16
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=tongxinyuan
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    shm_size: 256mb
+
+  # Redis
+  redis:
+    container_name: txy_new_redis
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+
+    dns:
+      - 8.8.8.8
+      - 114.114.114.114
+
+volumes:
+  postgres_data:
+  redis_data:

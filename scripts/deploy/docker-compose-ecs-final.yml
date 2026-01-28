@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  # Nginx Gateway (SSL Termination & Reverse Proxy)
+  nginx:
+    container_name: txy_nginx
+    image: nginx:alpine
+    # Use host mode for performance and simplicity in avoiding port mapping issues
+    network_mode: "host"
+    restart: always
+    volumes:
+      # Use the Nginx config with port 3000 proxy enabled (uploaded to txy2020 dir)
+      - /opt/txy2020/nginx_new.conf:/etc/nginx/nginx.conf:ro
+      # Use EXISTING CERTIFICATES from txy2020 (No migration needed)
+      - /opt/txy2020/certs:/etc/nginx/certs:ro
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - app
+
+  # Next.js Web Application
+  app:
+    container_name: txy_web
+    # USE PRE-EXISTING IMAGE found on ECS
+    image: tongxinyuan-app:latest
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - HOSTNAME=0.0.0.0
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/tongxinyuan
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - db
+      - redis
+
+  # Python AI Agent (FastAPI)
+  api:
+    container_name: txy_api
+    build:
+      context: ./apps/ai-agent
+      dockerfile: Dockerfile
+      args:
+        - HTTP_PROXY
+        - HTTPS_PROXY
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/tongxinyuan
+      - REDIS_URL=redis://redis:6379/0
+      - ALIYUN_API_KEY=${ALIYUN_API_KEY}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./apps/ai-agent:/app
+
+  # PostgreSQL
+  db:
+    container_name: txy_db
+    image: pgvector/pgvector:pg16
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=tongxinyuan
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    shm_size: 256mb
+
+  # Redis
+  redis:
+    container_name: txy_redis
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+
+    dns:
+      - 8.8.8.8
+      - 114.114.114.114
+
+volumes:
+  postgres_data:
+  redis_data:

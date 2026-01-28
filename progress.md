@@ -3,6 +3,42 @@
 ## 阶段: 2025/2026 同心源文档分析与规划
 **日期**: 2026-01-27
 
+## Session Update: Legacy Site Dockerization Completed
+**Date:** 2026-01-28
+**Status:** ✅ Completed
+
+### 1. Achievements
+- **Containerization**: Successfully containerized the legacy PHP 7.4 / MySQL 5.7 website (`txy2020`).
+- **Data Recovery**: Restored full database from SQL dump and synchronized missing image assets (`statics/images`) from provided archive.
+- **Artifacts**: Created `Dockerfile`, `docker-compose.yml` (production-ready), and `deploy_guide_ecs.md`.
+- **Packaging**: Delivered `txy2020_deploy.zip` for one-click deployment.
+
+### 2. Technical Troubleshooting (Lessons Learned)
+- **Double Encoding (Mojibake)**:
+    - *Issue*: Chinese characters appeared as `èŠ±...`.
+    - *Cause*: PHP connected with UTF-8, but MySQL 5.7 handshake defaulted to Latin1, causing double-encoding on insert (simulated during import).
+    - *Fix*: Forced MySQL server & handshake to `utf8mb4` via `docker-compose` command (`--skip-character-set-client-handshake`).
+- **WeChat Anti-Hotlinking**:
+    - *Issue*: Images from WeChat Official Account returned 403 Forbidden.
+    - *Fix*: Added `<meta name="referrer" content="no-referrer" />` to `header.php`.
+- **Missing Assets**:
+    - *Issue*: Local `statics/images` directory was empty.
+    - *Fix*: Extracted `images.tar.gz` provided by user and mounted volume (`./:/var/www/html`) for hot-reload.
+
+### 3. Deployment Success (v2: with SSL)
+- **Challenge**: User requested HTTPS on port 443 with existing certificates.
+- **Solution**:
+    - Added **Nginx Reverse Proxy** (`nginx:alpine`) to handle SSL termination.
+    - Configured automatic HTTP -> HTTPS redirection.
+    - Updated deployment pipeline to include `nginx.tar` and certificate files.
+- **Result**: Site running on `https://tongxy.xyz` (via ECS IP). Verified Nginx proxying correctly.
+
+### 4. Next Steps
+- **New Site Phase 1**: Resume development of the new Next.js portal.
+- **Cleanup**: Monitor ECS disk usage.
+
+---
+
 ### 已完成事项 (Completed Actions)
 - [x] 识别资源文件: `2025同心源工作汇报及2026展望.pptx` 和 `同心源关爱异地求医大病儿童家庭社区支持中心.pdf`。
 - [x] 编写并执行 Python 脚本 `extract_pptx_full.py` 提取 PPTX 文本。
