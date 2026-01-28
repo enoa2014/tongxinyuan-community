@@ -24,6 +24,9 @@
 - **Missing Assets**:
     - *Issue*: Local `statics/images` directory was empty.
     - *Fix*: Extracted `images.tar.gz` provided by user and mounted volume (`./:/var/www/html`) for hot-reload.
+- **PowerShell Syntax (CRITICAL)**:
+    - *Issue*: Repeatedly used `&&` to chain commands (e.g., `cmd1 && cmd2`), which fails in PowerShell.
+    - *Rule*: **NEVER** use `&&`. Use `;` for chaining, or preferably, use separate `run_command` tool calls for each step to ensure atomic execution and better error handling.
 
 ### 3. Deployment Success (v2: with SSL)
 - **Challenge**: User requested HTTPS on port 443 with existing certificates.
