@@ -1,86 +1,149 @@
 
-import { notFound } from "next/navigation"
-import { Calendar, ArrowLeft, Tag } from "lucide-react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { pb } from "@/lib/pocketbase"
 import { InnerPageWrapper } from "@/components/layout/inner-page-wrapper"
-import { NEWS_ITEMS } from "@/lib/data/news"
+import { format } from "date-fns"
+import { zhCN } from "date-fns/locale"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { ArrowLeft, User, Calendar, Share2, Printer } from "lucide-react"
+import Link from "next/link"
+import { notFound } from "next/navigation"
 
-interface NewsDetailPageProps {
-    params: {
-        id: string
+export const revalidate = 60
+
+// Dynamic Metadata
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
+    try {
+        const item = await pb.collection('news').getOne(id)
+        return {
+            title: `${item.title} - 同心源`,
+            description: item.description || item.title,
+        }
+    } catch {
+        return {
+            title: "文章不存在 - 同心源"
+        }
     }
 }
 
-// Generate static params for SSG
-export function generateStaticParams() {
-    return NEWS_ITEMS.map((news) => ({
-        id: news.id,
-    }))
-}
+export default async function NewsDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params
+    let item
 
-export default function NewsDetailPage({ params }: NewsDetailPageProps) {
-    const news = NEWS_ITEMS.find(n => n.id === params.id)
-
-    if (!news) {
+    try {
+        item = await pb.collection('news').getOne(id)
+    } catch {
         notFound()
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 pt-32 pb-20">
-            <div className="container mx-auto px-4 max-w-4xl">
-                <Link href="/news">
-                    <Button variant="ghost" className="mb-6 hover:bg-slate-200 text-slate-500">
-                        <ArrowLeft className="mr-2 h-4 w-4" /> 返回资讯列表
-                    </Button>
-                </Link>
+        <article className="min-h-screen bg-white">
+            {/* Header / Hero Section for the Article */}
+            <div className="relative bg-slate-900 text-white py-24">
+                <div className="absolute inset-0 overflow-hidden">
+                    {/* Dark overlay */}
+                    <div className="absolute inset-0 bg-slate-900/80 z-10" />
+                    {item.cover && (
+                        <img
+                            src={pb.files.getUrl(item, item.cover)}
+                            alt={item.title}
+                            className="w-full h-full object-cover blur-sm"
+                        />
+                    )}
+                </div>
 
-                <article className="bg-white rounded-xl shadow-sm p-8 md:p-12 overflow-hidden">
-                    <header className="mb-10 text-center border-b border-slate-100 pb-10">
-                        <div className="flex justify-center gap-2 mb-6">
-                            <Badge variant="secondary" className="bg-brand-green/10 text-brand-green hover:bg-brand-green/20">
-                                {news.category === 'agency' ? '机构动态' : news.category === 'media' ? '媒体报道' : '政策解读'}
+                <div className="container relative z-20 mx-auto px-4 max-w-4xl">
+                    <div className="mb-8">
+                        <Button asChild variant="outline" className="text-white border-white/20 hover:bg-white/10 hover:text-white backdrop-blur-sm group">
+                            <Link href="/news">
+                                <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+                                返回列表
+                            </Link>
+                        </Button>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="flex gap-2">
+                            <Badge className="bg-brand-green hover:bg-brand-green/90 border-0">
+                                {{
+                                    news: "新闻",
+                                    story: "故事",
+                                    notice: "公告",
+                                    activity: "活动"
+                                }[item.category] || item.category}
                             </Badge>
-                        </div>
-                        <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 leading-tight">
-                            {news.title}
-                        </h1>
-                        <div className="flex flex-wrap items-center justify-center text-slate-500 text-sm gap-6">
-                            <span className="flex items-center">
-                                <Calendar className="h-4 w-4 mr-2" />
-                                {news.publishedAt}
-                            </span>
-                            {news.author && (
-                                <span>
-                                    作者/来源: <span className="font-medium text-slate-700">{news.author}</span>
-                                </span>
+                            {item.updated !== item.created && (
+                                <Badge variant="outline" className="text-slate-300 border-white/20">已更新</Badge>
                             )}
                         </div>
-                    </header>
 
-                    <div
-                        className="prose prose-slate max-w-none prose-lg
-                    prose-headings:font-bold prose-headings:text-slate-800
-                    prose-a:text-brand-green prose-a:no-underline hover:prose-a:underline
-                    prose-img:rounded-xl prose-img:shadow-md"
-                        dangerouslySetInnerHTML={{ __html: news.content }}
-                    />
+                        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+                            {item.title}
+                        </h1>
 
-                    <footer className="mt-12 pt-8 border-t border-slate-100">
-                        <div className="flex items-center gap-2">
-                            <Tag className="h-4 w-4 text-slate-400" />
-                            <div className="flex gap-2">
-                                {news.tags?.map(tag => (
-                                    <Badge key={tag} variant="outline" className="text-slate-500 font-normal">
-                                        {tag}
-                                    </Badge>
-                                ))}
+                        <div className="flex flex-wrap items-center gap-6 text-slate-300 text-sm md:text-base">
+                            <div className="flex items-center gap-2">
+                                <div className="w-10 h-10 rounded-full bg-brand-green/20 flex items-center justify-center border border-white/10">
+                                    <User className="h-5 w-5 text-brand-green" />
+                                </div>
+                                <span>{item.author}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Calendar className="h-5 w-5 opacity-70" />
+                                <span>{format(new Date(item.created), "yyyy年MM月dd日", { locale: zhCN })}</span>
                             </div>
                         </div>
-                    </footer>
-                </article>
+                    </div>
+                </div>
             </div>
-        </div>
+
+            {/* Content Body */}
+            <div className="container mx-auto px-4 max-w-4xl -mt-10 relative z-30">
+                <div className="bg-white rounded-xl shadow-xl border p-8 md:p-12">
+
+                    {/* Lead / Description */}
+                    {item.description && (
+                        <div className="text-xl md:text-2xl text-slate-600 font-light leading-relaxed border-l-4 border-brand-green pl-6 mb-12 italic">
+                            {item.description}
+                        </div>
+                    )}
+
+                    {/* Main Content */}
+                    <div className="prose prose-lg prose-slate max-w-none 
+                        prose-headings:font-bold prose-headings:text-slate-900 
+                        prose-p:text-slate-700 prose-p:leading-loose
+                        prose-a:text-brand-green prose-a:no-underline hover:prose-a:underline
+                        prose-img:rounded-xl prose-img:shadow-md">
+
+                        {/* 
+                           SAFEGUARD: In a real app, use a sanitizer like dompurify 
+                           before rendering HTML from DB. For now, assuming trusted admin input.
+                        */}
+                        <div dangerouslySetInnerHTML={{ __html: item.content }} />
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="mt-16 pt-8 border-t flex items-center justify-between text-slate-500">
+                        <div className="text-sm">
+                            &copy; {new Date().getFullYear()} 同心源社区支持中心
+                        </div>
+                        <div className="flex gap-2">
+                            <Button variant="ghost" size="sm">
+                                <Share2 className="mr-2 h-4 w-4" />
+                                分享
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => { }}>
+                                <Printer className="mr-2 h-4 w-4" />
+                                打印
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Spacer */}
+            <div className="h-24" />
+        </article>
     )
 }
