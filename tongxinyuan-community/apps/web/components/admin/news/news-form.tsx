@@ -28,7 +28,12 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2 } from "lucide-react"
-import { RichTextEditor } from "./rich-text-editor"
+import dynamic from "next/dynamic"
+
+const RichTextEditor = dynamic(
+    () => import("./rich-text-editor").then((mod) => mod.RichTextEditor),
+    { ssr: false, loading: () => <p>Loading Editor...</p> }
+)
 
 const newsFormSchema = z.object({
     title: z.string().min(2, "标题至少需要2个字符"),

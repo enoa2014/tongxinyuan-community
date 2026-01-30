@@ -1,5 +1,7 @@
 
+import React from 'react'
 import { useEditor, EditorContent, Editor } from '@tiptap/react'
+import { pb } from "@/lib/pocketbase"
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
@@ -96,8 +98,42 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         editor.chain().focus().insertContent(content).run()
     }
 
+    const fileInputRef = React.useRef<HTMLInputElement>(null)
+
+    const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0]
+        if (!file) return
+
+        try {
+            const formData = new FormData()
+            formData.append('file', file)
+            // 'media' collection must be created in PocketBase
+            const record = await pb.collection('media').create(formData)
+            const url = pb.files.getURL(record, record.file)
+            editor.chain().focus().setImage({ src: url }).run()
+        } catch (error: any) {
+            console.error('Image upload failed (Full details):', JSON.stringify(error.data || error, null, 2))
+            alert(`图片上传失败: ${error?.data?.message || error.message || '未知错误'}`)
+        } finally {
+            if (fileInputRef.current) {
+                fileInputRef.current.value = ''
+            }
+        }
+    }
+
+    const triggerImageUpload = () => {
+        fileInputRef.current?.click()
+    }
+
     return (
         <div className="border-b bg-slate-50 p-2 flex flex-wrap gap-1 sticky top-0 z-10">
+            <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleImageUpload}
+            />
             {/* History */}
             <Button variant="ghost" size="sm" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()}>
                 <Undo className="h-4 w-4" />
@@ -215,7 +251,8 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
             <Button
                 variant="ghost"
                 size="sm"
-                onClick={addImage}
+                onClick={triggerImageUpload}
+                title="上传图片"
             >
                 <ImageIcon className="h-4 w-4" />
             </Button>

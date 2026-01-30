@@ -22,6 +22,7 @@ async function proxy(request: NextRequest, props: { params: Promise<{ path: stri
         // Important: Host header must match the target (or be omitted so fetch sets it)
         headers.delete("host");
         headers.delete("connection");
+        headers.delete("content-length"); // Let fetch calculate length from body
 
         // Log headers for debugging
         headers.forEach((v, k) => console.log(`[Proxy Header] ${k}: ${v}`));
