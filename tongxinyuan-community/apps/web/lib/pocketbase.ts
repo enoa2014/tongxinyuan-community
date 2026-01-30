@@ -6,7 +6,9 @@ import PocketBase from 'pocketbase';
 // For Client-side, we use relative URL to leverage Next.js Proxy (avoids CORS)
 // Server-side (SSR) still needs full URL if logic runs there (but pages router might need conditional)
 // Since we mainly use this in Client Components (useEffect), relative path is safest for Dev.
-const PB_URL = typeof window !== 'undefined' ? '/api/pb' : 'http://127.0.0.1:8090';
+const PB_URL = typeof window !== 'undefined'
+    ? (process.env.NEXT_PUBLIC_API_URL || '/api/pb') // Client side
+    : (process.env.PB_URL || 'http://127.0.0.1:8090'); // Server side (Docker internal)
 
 // Create a singleton instance
 export const pb = new PocketBase(PB_URL);

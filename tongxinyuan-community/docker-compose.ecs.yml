@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # PocketBase (New Database)
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    container_name: txy_pocketbase
+    restart: unless-stopped
+    ports:
+      - "8090:8090" # Exposed for Admin UI
+    volumes:
+      - ./backend/pb_data:/pb_data
+      - ./backend/pb_migrations:/pb_migrations
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8090/api/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Next.js Web App
+  web:
+    container_name: txy_web
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=/api/pb # Relative path works because we access via port 3000 directly
+      - PB_URL=http://pocketbase:8090
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+    volumes:
+      # Mount legacy images for /statics compatibility from Host
+      - /opt/txy2020/statics:/app/public/statics

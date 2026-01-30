@@ -1,83 +1,83 @@
-# 技术实施计划：同心源社区支持中心
+# 技术实施计划 v2: PocketBase 架构
 
-> **状态**: 此文档为最新的技术执行标准，取代旧版 `implementation_plan.md`。
-> **核心约束**: 中国大陆部署 (Webify/OSS) + MemFire Cloud 后端 + 严格的慈善法合规。
+> **状态**: 此文档为最新的技术执行标准，取代旧版 MemFire 方案。
+> **核心约束**: 中国大陆部署 + 数据完全私有化 + 轻量级服务器资源 (2GB RAM)。
 
 ## 1. 架构概览
 
-### 1.1 技术栈 (The "China-Stack")
+### 1.1 技术栈 (The "Indie Stack")
 | 组件 | 选型 | 理由 |
 | :--- | :--- | :--- |
 | **前端框架** | **Next.js 14+ (App Router)** | SEO 友好，利于公益传播；React 生态丰富。 |
 | **样式库** | **Tailwind CSS** + `shadcn/ui` | 快速开发，移动端适配能力强。 |
-| **后端/DB** | **MemFire Cloud** | Supabase 的国内替代品 (PostgreSQL + Auth + Storage)，无墙，速度快。 |
-| **部署托管** | **腾讯云 Webify** / 阿里云 OSS | 静态资源托管，配合 CDN 加速。 |
-| **认证** | MemFire Auth (微信登录) | 符合国内用户习惯 (Phase 2 实现)。 |
-| **移动端** | **PWA + Taro (小程序)** | Phase 1 使用 PWA 覆盖移动端；Phase 2 开发 Taro 小程序以调用摄像头/LBS能力。 |
-| **响应式** | **Mobile-First RWD** | 必须覆盖: Mobile (<640px), Tablet (768px+), Laptop (1024px+), Desktop (1280px+). |
+| **后端/DB** | **PocketBase** | 基于 Go + SQLite 的超轻量级后端。单一二进制文件，含 Auth, DB, Realtime, Dashboard。 |
+| **部署托管** | **ECS 自托管** | 前后端均部署在同一台 ECS 上，数据不离境，不依懒第三方云服务。 |
+| **认证** | PocketBase Auth | 内置 Email/Password 认证，支持 OAuth2。 |
+| **对象存储** | 本地文件系统 | PocketBase 自动管理 `pb_data/storage`，支持图片缩放。 |
 
-### 1.2 关键合规设计
-*   **资金流**: 系统 **绝不** 触碰资金流。
-    *   ❌ 禁止：集成微信支付/支付宝 SDK 进行自建收款。
-    *   ❌ 禁止：在数据库存储用户银行卡号。
-    *   ✅ 允许：仅存储“跳转事件”日志 (点击了哪个公益项目的捐赠按钮)。
+### 1.2 关键合规与隐私设计
+*   **资金流**: 系统 **绝不** 触碰资金流 (与 Phase 1 保持一致)。
 *   **数据隐私**:
-    *   所有受助家庭的敏感数据 (身份证、病历) 必须存储在 RLS (Row Level Security) 保护的表中，仅授权社工可读。
+    *   所有数据存储在 ECS 本地磁盘 (`pb_data/data.db`)。
+    *   使用 PocketBase 的 **API Rules** 实现行级安全控制 (RLS)。
+    *   受助家庭敏感数据 (身份证、病历) 设置 `View Rule: @request.auth.role = 'admin'`。
 
-### 1.3 身份路由策略
-> **One Login, Many Worlds**
-*   **Middleware (中间件)**: 在 `Next.js Middleware` 层拦截 `/login` 请求。
+### 1.3 身份路由策略 (使用中间件)
+*   **Middleware (中间件)**: 拦截 `/login` 请求，校验 PB Cookie。
 *   **Logic**:
-    *   Role == `admin/worker` -> Redirect to `/admin` (Workstation).
-    *   Role == `volunteer` -> Redirect to `/volunteer` (Tasks).
-    *   Role == `family` -> Redirect to `/family` (Services).
-    *   No Role -> Redirect to `/onboarding`.
+    *   Role == `admin` -> Redirect to `/admin` (PB Dashboard 或 自建后台).
+    *   Role == `volunteer` -> Redirect to `/volunteer`.
+    *   Role == `family` -> Redirect to `/family`.
 
-## 2. 数据库设计 (Schema - MemFire/PostgreSQL)
+## 2. 数据库设计 (PocketBase Collections)
 
-### 2.1 核心表结构
-*   **`profiles`**: 用户档案 (One user, one profile)。
-    *   `role`: 'admin' | 'volunteer' | 'family' | 'donor'
-*   **`service_locations` (服务网点)**: Phase 1 核心。
-    *   `name`: 网点名称 (万秀小家)
-    *   `address`: 详细地址
-    *   `geo_location`: 经纬度
-    *   `contact_phone`: 公开联系电话
-    *   `features`: 标签 (['厨房', '住宿'])
+### 2.1 核心集合 (Collections)
+*   **`users`** (系统预置):
+    *   `name`, `avatar`, `email`
+    *   `role`: 'admin' | 'volunteer' | 'family' | 'donor' (Select 字段)
+    *   `phone`: 联系电话
+*   **`service_locations` (服务网点)**:
+    *   `name` (Text)
+    *   `address` (Text)
+    *   `geo_location` (Text/JSON)
     *   `status`: 'active' | 'closed'
 *   **`articles` (内容管理)**:
-    *   `title`, `content`, `cover_image`
-    *   `category`: 'news' | 'story' | 'report' | 'policy'
-    *   `published_at`: 发布时间 (用于迁移旧版数据)
-
-### 2.2 迁移策略 (Legacy Data)
-*   **表 `txy_articles` -> `articles`**:
-    *   编写 SQL 脚本，清洗 HTML 内容 (去除旧的各种 style 标签)。
-    *   提取旧文章中的图片链接，下载并上传到 MemFire Storage，替换 URL。
+    *   `title` (Text)
+    *   `content` (Editor/HTML)
+    *   `cover_image` (File)
+    *   `category`: 'news' | 'story' (Select)
+*   **`volunteer_applications` (志愿者申请)**:
+    *   `applicant` (Relation -> users)
+    *   `skills` (JSON/Tags)
+    *   `status`: 'pending' | 'approved' | 'rejected'
 
 ## 3. 分阶段实施细节
 
-### Phase 1: 公众门户 (Web Only)
-> **重点**: 静态化为主，CMS 为辅。
-1.  **初始化**: `npx create-next-app`。
-2.  **组件开发**: 
-    *   `DonationGuideCard` (包含跳转逻辑)。
-    *   `LocationMap` (使用百度/高德地图 SDK)。
-    *   `VolunteerLevelCards` (展示 L1-L3)。
-3.  **API 对接**:
-    *   读取 `service_locations` 表渲染网点页。
-    *   读取 `articles` 表渲染故事墙。
+### Phase 2a: 后端基础 (Current Focus)
+1.  **环境准备**:
+    *   Windows: 下载 `pocketbase_0.22.x_windows_amd64.zip`。
+    *   启动: `./pocketbase serve` (默认端口 8090)。
+2.  **Schema 初始化**:
+    *   手动在 `http://127.0.0.1:8090/_/` 创建 Collections。
+    *   或者编写 `pb_migrations` 脚本 (推荐手动 MVP)。
+3.  **前端集成**:
+    *   `npm install pocketbase`。
+    *   封装 `lib/pocketbase.ts` 单例客户端。
 
-### Phase 2: 用户系统 (Web + Mobile)
-> **重点**: 权限控制。
-1.  **Auth 集成**: 配置 MemFire 微信登录回调。
-2.  **家庭端**: `ApplicationForm` (建档表单)，文件上传组件。
-3.  **后台**: 基于 Ant Design Pro 或 shadcn/ui 的管理面板。
+### Phase 2b: 业务功能对接
+1.  **Web 注册/登录**:
+    *   实现 `/login` 和 `/register` 页面，调用 `pb.collection('users').authWithPassword()`.
+2.  **志愿者报名**:
+    *   对接 `/get-involved` 表单 -> `pb.collection('volunteer_applications').create()`.
+3.  **服务咨询**:
+    *   对接 Dialog 表单 -> 存入数据库。
 
-## 4. 部署流水线 (CI/CD)
-*   **本地**: `npm run build` -> 生成 `.next/out` (Static Export)。
-*   **发布**: 使用 `cloudbase` CLI 将静态文件推送到腾讯云 Webify。
+## 4. 部署方案
+*   **Artifact**: 一个 Next.js standalone 文件夹 + 一个 PocketBase.exe。
+*   **进程管理**: 使用 Docker Compose 编排两个容器，或者在 ECS 上使用 PM2/Systemd 管理。
+    *   **推荐**: 纯 Docker Compose (App + PocketBase)。
+    *   **Volume**: 挂载 `./pb_data` 到宿主机，确保持久化。
 
 ## 5. 风险控制
-*   **图片审核**: 用户上传的图片 (头像/证明材料) 需对接阿里云/腾讯云的内容安全检测 API。
-*   **备份**: 开启 MemFire 的每日自动备份 (PITR)。
+*   **备份**: 定期 Rsync 备份 `pb_data` 目录到异地/OSS。
+*   **性能**: SQLite 在高并发写入时可能锁表 (对于公益项目 <1000 QPS 几乎不可能触发)。

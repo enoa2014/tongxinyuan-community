@@ -5,9 +5,10 @@ import { format } from "date-fns"
 import { zhCN } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, User, Calendar, Share2, Printer } from "lucide-react"
+import { ArrowLeft, User, Calendar } from "lucide-react"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { NewsActions } from "@/components/news/news-actions"
 
 export const revalidate = 60
 
@@ -33,6 +34,9 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ id:
 
     try {
         item = await pb.collection('news').getOne(id)
+        if (!item.published) {
+            notFound()
+        }
     } catch {
         notFound()
     }
@@ -46,7 +50,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ id:
                     <div className="absolute inset-0 bg-slate-900/80 z-10" />
                     {item.cover && (
                         <img
-                            src={pb.files.getUrl(item, item.cover)}
+                            src={`/api/pb/api/files/${item.collectionId}/${item.id}/${item.cover}`}
                             alt={item.title}
                             className="w-full h-full object-cover blur-sm"
                         />
@@ -55,7 +59,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ id:
 
                 <div className="container relative z-20 mx-auto px-4 max-w-4xl">
                     <div className="mb-8">
-                        <Button asChild variant="outline" className="text-white border-white/20 hover:bg-white/10 hover:text-white backdrop-blur-sm group">
+                        <Button asChild variant="outline" className="bg-transparent text-white border-white/20 hover:bg-white/10 hover:text-white backdrop-blur-sm group">
                             <Link href="/news">
                                 <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
                                 返回列表
@@ -66,12 +70,12 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ id:
                     <div className="space-y-6">
                         <div className="flex gap-2">
                             <Badge className="bg-brand-green hover:bg-brand-green/90 border-0">
-                                {{
+                                {({
                                     news: "新闻",
                                     story: "故事",
                                     notice: "公告",
                                     activity: "活动"
-                                }[item.category] || item.category}
+                                } as Record<string, string>)[item.category] || item.category}
                             </Badge>
                             {item.updated !== item.created && (
                                 <Badge variant="outline" className="text-slate-300 border-white/20">已更新</Badge>
@@ -128,16 +132,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ id:
                         <div className="text-sm">
                             &copy; {new Date().getFullYear()} 同心源社区支持中心
                         </div>
-                        <div className="flex gap-2">
-                            <Button variant="ghost" size="sm">
-                                <Share2 className="mr-2 h-4 w-4" />
-                                分享
-                            </Button>
-                            <Button variant="ghost" size="sm" onClick={() => { }}>
-                                <Printer className="mr-2 h-4 w-4" />
-                                打印
-                            </Button>
-                        </div>
+                        <NewsActions title={item.title} />
                     </div>
                 </div>
             </div>

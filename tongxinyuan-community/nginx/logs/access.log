@@ -1891,3 +1891,5 @@
 172.19.0.1 - - [28/Jan/2026:18:21:19 +0000] "GET /_next/webpack-hmr?id=oPaUP-NGwtS5Fhcgn2axT HTTP/1.1" 404 3788 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" "-"
 172.19.0.1 - - [28/Jan/2026:18:21:22 +0000] "GET /_next/webpack-hmr?id=sbUgwLIgEc2XIPpDebBCP HTTP/1.1" 404 3788 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" "-"
 172.19.0.1 - - [28/Jan/2026:18:21:24 +0000] "GET /_next/webpack-hmr?id=oPaUP-NGwtS5Fhcgn2axT HTTP/1.1" 404 3788 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" "-"
+172.19.0.1 - - [29/Jan/2026:19:22:57 +0000] "GET / HTTP/1.1" 404 555 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" "-"
+172.19.0.1 - - [29/Jan/2026:19:22:57 +0000] "GET /favicon.ico HTTP/1.1" 404 555 "http://localhost:8080/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36" "-"

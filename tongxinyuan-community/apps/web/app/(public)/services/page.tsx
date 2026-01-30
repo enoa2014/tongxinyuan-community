@@ -1,38 +1,56 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Utensils, HeartHandshake, BookOpen, Sun } from "lucide-react";
+import { Utensils, HeartHandshake, BookOpen, Sun, HelpCircle, Home, Smile, Users, Star, Gift } from "lucide-react";
 import Image from "next/image";
 
 import { InnerPageWrapper } from "@/components/layout/inner-page-wrapper";
 import { ServiceInquiryDialog } from "@/components/services/service-inquiry-dialog";
+import { pb } from "@/lib/pocketbase";
 
-export default function ServicesPage() {
-  const modules = [
-    {
-      title: "生活支持 (Life Support)",
-      icon: <Utensils className="h-8 w-8 text-brand-green" />,
-      description: "不仅是住宿，更是生活。我们提供爱心物资站和共享厨房，让患儿家庭能吃上热腾腾的家乡菜，降低生活成本，并在烟火气中重建社交链接。",
-      color: "bg-green-50 border-green-200"
-    },
-    {
-      title: "喘息服务 (Respite Services)",
-      icon: <HeartHandshake className="h-8 w-8 text-brand-yellow" />,
-      description: "为长期照护的家长提供心理疏导与互助网络。通过社工专业陪伴和艺术疗愈，让疲惫的心灵得到片刻的休息与充电。",
-      color: "bg-yellow-50 border-yellow-200"
-    },
-    {
-      title: "儿童康乐 (Child Recreation)",
-      icon: <BookOpen className="h-8 w-8 text-blue-500" />,
-      description: "防止长期就医导致的心理发展脱轨。我们提供绘本阅读和游戏治疗，守护孩子童年的快乐与色彩。",
-      color: "bg-blue-50 border-blue-200"
-    },
-    {
-      title: "生命教育 (Life Education)",
-      icon: <Sun className="h-8 w-8 text-orange-500" />,
-      description: "社区化安宁疗护。与临床医疗互补，提升家庭面对生死议题的韧性，让每一个生命都得到尊严与温暖。",
-      color: "bg-orange-50 border-orange-200"
-    }
-  ];
+// Map db icon strings to React components
+const ICON_MAP: Record<string, any> = {
+  utensils: Utensils,
+  heart_handshake: HeartHandshake,
+  book_open: BookOpen,
+  sun: Sun,
+  home: Home,
+  smile: Smile,
+  users: Users,
+  star: Star,
+  gift: Gift
+};
+
+const COLOR_MAP: Record<string, string> = {
+  green: "bg-green-50 border-green-200",
+  yellow: "bg-yellow-50 border-yellow-200",
+  blue: "bg-blue-50 border-blue-200",
+  orange: "bg-orange-50 border-orange-200",
+  red: "bg-red-50 border-red-200",
+  purple: "bg-purple-50 border-purple-200",
+  teal: "bg-teal-50 border-teal-200",
+  slate: "bg-slate-50 border-slate-200"
+};
+
+export const revalidate = 60; // ISR: Revalidate every 60 seconds
+
+async function getServices() {
+  try {
+    const records = await pb.collection('services').getList(1, 100);
+    // Sort logic: Order desc, then Created desc
+    const sortedItems = records.items.sort((a, b) => {
+      const orderDiff = (b.order || 0) - (a.order || 0);
+      if (orderDiff !== 0) return orderDiff;
+      return new Date(b.created).getTime() - new Date(a.created).getTime();
+    });
+    return sortedItems;
+  } catch (e) {
+    console.error("Failed to fetch services:", e);
+    return [];
+  }
+}
+
+export default async function ServicesPage() {
+  const services = await getServices();
 
   return (
     <InnerPageWrapper
@@ -58,22 +76,37 @@ export default function ServicesPage() {
 
       {/* Modules Grid */}
       <div className="grid md:grid-cols-2 gap-6">
-        {modules.map((module, index) => (
-          <Card key={index} className={`border-2 ${module.color} transition-all hover:shadow-md`}>
-            <CardHeader className="flex flex-row items-center gap-4 space-y-0">
-              <div className="p-2 bg-white rounded-full shadow-sm">
-                {module.icon}
-              </div>
-              <CardTitle className="text-xl">{module.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-slate-600 leading-relaxed mb-4">
-                {module.description}
-              </p>
-              <ServiceInquiryDialog serviceTitle={module.title} />
-            </CardContent>
-          </Card>
-        ))}
+        {services.length > 0 ? (
+          services.map((module) => {
+            const IconComponent = ICON_MAP[module.icon] || HelpCircle;
+            const colorClass = COLOR_MAP[module.color_theme] || "bg-slate-50 border-slate-200";
+
+            return (
+              <Card key={module.id} className={`border-2 ${colorClass} transition-all hover:shadow-md`}>
+                <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+                  <div className="p-2 bg-white rounded-full shadow-sm">
+                    <IconComponent className={`h-8 w-8 ${module.color_theme === 'green' ? 'text-brand-green' :
+                      module.color_theme === 'yellow' ? 'text-brand-yellow' :
+                        `text-${module.color_theme}-500`
+                      }`} />
+                  </div>
+                  <CardTitle className="text-xl">{module.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-slate-600 leading-relaxed mb-4">
+                    {module.description}
+                  </p>
+                  <ServiceInquiryDialog serviceTitle={module.title} />
+                </CardContent>
+              </Card>
+            );
+          })
+        ) : (
+          // Fallback if DB is empty or fails
+          <div className="col-span-2 text-center py-12 text-slate-400 bg-slate-50 rounded-xl border border-dashed">
+            <p>暂无服务数据，请检查后台连接</p>
+          </div>
+        )}
       </div>
 
       {/* Operational Mechanism */}

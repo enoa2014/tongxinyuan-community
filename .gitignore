@@ -7,3 +7,11 @@ Thumbs.db
 *.tar.gz
 *.zip
 deploy_pkg_linux/
+
+*.tar.gz
+*.zip
+*.tar
+
+*.tar.gz
+*.zip
+*.tar

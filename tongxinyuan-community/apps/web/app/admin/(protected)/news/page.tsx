@@ -16,7 +16,8 @@ export default function NewsListPage() {
     const fetchData = async () => {
         try {
             setLoading(true)
-            const records = await pb.collection('news').getList(1, 50, {
+            // Fetch up to 500 items for client-side pagination
+            const records = await pb.collection('news').getList(1, 500, {
                 sort: '-created',
             });
             setData(records.items as unknown as NewsArticle[])

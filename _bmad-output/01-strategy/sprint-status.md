@@ -1,41 +1,43 @@
 # 冲刺状态报告 (Sprint Status Report)
 
-**日期**: 2026-01-28
-**冲刺目标**: 完成核心基础设施搭建、登录页重构及生产环境部署 (MVP 基础)。
+**日期**: 2026-01-30
+**冲刺目标**: 公众门户(Phase 1)动态化上线 ＆ 后台管理系统(Phase 2)基础功能开发。
 
 ## 📊 冲刺概览
-*   **状态**: 🟢 正常 (冲刺已完成)
-*   **重点**: 基础设施, 认证界面, 部署
-*   **完成度**: 100% 计划任务。
+*   **状态**: 🟢 正常 (On Track)
+*   **重点**: 从静态页面转向动态数据 (PocketBase Integration)
+*   **进度**: 
+    *   **Public Portal**: 95% (等待内容填充)
+    *   **Admin System**: 40% (列表已阅, 增删改待办)
 
-## ✅ 已完成事项
-1.  **基础设施**:
-    *   Docker Compose 环境 (本地 & 生产)。
-    *   阿里云 ECS 设置 (Swap, Docker, 安全组)。
-    *   **Host 网络模式** 实现。
-    *   **SSL/HTTPS** 通过 Let's Encrypt/阿里云免费证书。
+## ✅ 已完成事项 (Achievements)
+1.  **公众门户 (Dynamic Web)**:
+    *   **服务中心**: 对接 PocketBase `services` 集合，展示动态数据。
+    *   **新闻中心**: 对接 PocketBase `articles` 集合。
+    *   **访客优化**: 解决了 Guest 访问 API 的 400/403 权限问题。
 
-2.  **前端 (Web)**:
-    *   **登录页重构**: 医疗信任系统 (Shadcn + Tailwind)。
-    *   **架构**: 双模布局 (公众端 vs 管理后台)。
-    *   **落地页**: 基础 UI 结构实现。
+2.  **后台基础 (Admin V1)**:
+    *   **布局**: 响应式侧边栏 + 顶部导航 (Logout).
+    *   **鉴权**: 基于 Cookie 的客户端路由保护。
+    *   **列表视图**: 实现了服务、新闻、志愿者申请的 DataTable 展示。
 
-3.  **DevOps**:
-    *   **外部构建策略**: 解决了 Windows->Linux 交叉编译问题。
-    *   **CI/CD 脚本**: `package_linux_artifacts.ps1`。
+3.  **DevOps & Data**:
+    *   **PocketBase**: 解决了 v0.23+ 版本 Schema 定义不兼容问题 (`fields` vs `schema`)。
+    *   **脚本**: 编写了 `inspect-db-content.ts` 和 `init-services.ts` 用于数据维护。
+    *   **环境修复**: 解决了 Browser Tool 因 Windows 代理配置冲突导致的 502 错误。
+    *   **服务排序**: 通过 Docker 后门脚本成功绕过问题，完成了数据库 Schema 更新。
 
-## 🚧 进行中 / 下一步
-1.  **后端逻辑 (Auth)**:
-    *   连接登录界面与 NextAuth.js 实际逻辑。
-    *   用户数据的数据库持久化。
+## 🚧 进行中 / 下一步 (In Progress)
+1.  **管理端交互 (CRUD)**:
+    *   **Service**: 列表/编辑/删除/排序 (✅ Done).
+    *   **News**: 列表/编辑/发布 (✅ Done - Basic).
+    *   **Volunteer**: 列表 (✅), 审批流 (🚧 Pending).
+    *   **Rich Text**: 待集成 Tiptap/Quill.
 
-2.  **仪表盘功能**:
-    *   实现实际的“社工工作台”。
-
-## ⚠️ 风险与问题
-*   **ECS 内存**: 2GB 非常紧张。严禁在服务器上安装 `node_modules`。必须坚持“外部构建”。
-*   **80 端口**: 操作系统级别的封锁需要持久化的 `iptables` 规则。
+## ⚠️ 风险与问题 (Risks)
+*   **PocketBase v0.23+**: API 变动较大 (如 Select 字段扁平化)，需小心使用旧教程代码。
+*   **Next.js 15 Route Handlers**: `params` 变为 Promise，需 `await` 访问，否则导致 500 错误。
 
 ## 📝 决策日志
-*   **2026-01-28**: 切换到 Docker **Host 网络模式** 以解决阿里云 ECS 上容器间通信问题。
-*   **2026-01-28**: 使用 **iptables NAT** 将 80 端口转发到 8080。
+*   **2026-01-30**: **Unfreeze Phase 2**. 决定并行开发后台管理系统，以便运营团队能尽早录入真实数据填补官网内容。
+*   **2026-01-30**: 在 Public API 暂时移除 `sort` 参数以规避 Guest 访问限制。

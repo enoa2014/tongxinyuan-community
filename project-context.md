@@ -12,8 +12,8 @@
 
 | 组件 | 本地路径 (Windows) | 远程路径 (ECS) | 说明 |
 |---|---|---|---|
-| **旧版网站** | `res\txy2020` | `/opt/txy2020` | 旧版 PHP Grace 网站 (归档/参考) |
-| **新版网站** | `tongxinyuan-community` | `/opt/tongxinyuan` | 新版 Next.js 社区平台 |
+| **旧版网站** | `res\txy2020` | `/opt/txy2020` | 运行在 80/443 端口 (主站) |
+| **新版网站** | `tongxinyuan-community` | `/opt/tongxinyuan` | 运行在 3000/8090 端口 (测试/并行) |
 | **部署脚本** | Root (`ws\2026\tongxy`) | `/tmp/` (执行期间) | 自动化脚本 (`.ps1`, `.sh`) |
 
 ### 4.2 端口映射
@@ -118,3 +118,73 @@
 ```
 **展示要求**: 在详情页 Dialog 底部以时间轴形式渲染。
 
+
+### 2026-01-29: News CMS 与 PocketBase v0.23+ 升级踩坑
+
+#### 问题描述
+1.  **Admin 新闻列表 400 错误**: 复现了类似之前的 Schema 错误，但这次是因为 `select` 字段。
+2.  **构建失败**: `Cannot find module 'code-block-writer'`.
+
+#### 根本原因与修复
+1.  **Schema 结构扁平化 (Flattening)**:
+    *   **旧版**: Select 字段 `options: { maxSelect: 1, values: [...] }`。
+    *   **新版 (v0.23+)**: 结构被扁平化。`maxSelect` 和 `values` 必须直接位于字段对象的顶层，**不再嵌套在 `options` 中**。
+    *   **后果**: 如果使用嵌套结构，PocketBase 返回 `validation_required` 错误，因为找不到 `values`。
+2.  **Shadcn CLI 废弃**:
+    *   **旧命令**: `npx shadcn-ui@latest add ...` 已不再维护，会导致依赖解析错误。
+    *   **新命令**: 必须使用 `npx shadcn@latest add ...`。
+3.  **TSX/Node 缓存问题**:
+### 2026-01-29: News CMS 与 PocketBase v0.23+ 升级踩坑
+... (上文省略) ...
+
+### 2026-01-29: ECS 服务器分析与部署策略 (Infrastructure & Deployment)
+
+#### 10.1 ECS 目录结构分析 (基于 `ls -R`)
+服务器 (`8.148.186.60`) 运行着两套独立系统：
+
+1.  **旧版 PHP 系统 (`/opt/txy2020`)**
+    *   **状态**: 完整归档，包含 PHP 代码与历史附件。
+    *   **核心资产**: `/opt/txy2020/statics/images`。
+    *   **价值**: 包含 2020-2025 年间上传的所有新闻/活动图片。新版系统部署时，**必须**将此目录内容迁移或挂载到新版 `public/images` 下，否则历史文章配图会裂开。
+
+2.  **新版 Docker 系统 (`/opt/tongxinyuan`)**
+    *   **架构**: Docker Compose (Postgres + Redis + Nginx)。
+    *   **关键数据**:
+        *   `data/postgres`: 数据库持久化 (注意：这是旧的 Postgres 数据，与我们最新的 PocketBase 架构不兼容，可能需要因地制宜清理或迁移)。
+        *   `nginx/certs`: HTTPS 证书 (`tongxy.xyz.pem`)，**绝对不能删除**。
+
+#### 10.2 部署备份与清理策略 (Deployment Lifecycle)
+> **目的**: 防止坏包导致服务不可用，同时避免磁盘爆满。
+
+每次更新 ECS 上的 Docker 镜像时，**必须**执行以下标准流程：
+
+1.  **备份 (Backup)**:
+    *   在 `docker pull` 拉取新镜像**之前**，将当前正在运行的镜像打标签备份。
+    *   **命令示例**: `docker tag tongxinyuan-web:latest tongxinyuan-web:backup-YYYYMMDD`
+    *   **原因**: 如果新版镜像启动失败 (CrashLoopBackOff)，可立即回滚到 `backup-YYYYMMDD`。
+
+2.  **更新 (Update)**:
+    *   执行标准的 `docker-compose up -d --build` (或拉取新镜像重启)。
+
+3.  **清理 (Cleanup)**:
+    *   **保留策略**: 仅保留**当前运行版本** (`latest`) 和**最近一个备份** (`backup-YYYYMMDD`)。
+    *   **删除动作**: 删除所有更早的历史备份。
+    *   **命令示例**: `docker rmi tongxinyuan-web:backup-20251201` (删除旧的)。
+    *   **原因**: ECS 磁盘空间有限，Docker overlay2 文件系统容易膨胀。
+
+#### 10.3 关键避坑 (Gotchas)
+*   **图片 404**: 即使代码更新了，如果 Docker 容器内的图片路径没配置 Proxy 或没挂载旧版 `/opt/txy2020/statics`，历史图片依然会裂。解决方案见代码中的 Proxy 修复。
+*   **URL 连通性**: Docker 内部访问 API **必须**使用容器间网络 (如 `http://pocketbase:8090`)，严禁使用 `localhost`。
+
+### 2026-01-30: 服务排序与 Windows 环境配置 (Service Reordering & Env)
+
+#### 1. 拖拽排序 (Drag-and-Drop) 实现
+*   **技术栈**: `@dnd-kit` (Core, Sortable, Utilities).
+*   **Schema 要求**: PocketBase `services` 集合必须包含 `order` (Number) 字段。
+*   **坑点**: 如果 `order` 字段不存在，SDK 更新请求会成功但数据不会保存。务必检查 Schema。
+*   **逻辑**: 前端计算新 `order` (全量更新，`order = total - index`) -> 批量并发发送 Update 请求 -> 乐观更新 UI。
+
+#### 2. Windows 环境变量导致工具失效
+*   **问题**: Agent 的 Browser Tool (Playwright) 启动失败，报错 `failed to install playwright: $HOME environment variable is not set`.
+*   **原因**: Windows 默认不设置 `HOME` 变量，而在 Linux/Mac 环境下这是标配。
+*   **修复**: PowerShell 执行 `[Environment]::SetEnvironmentVariable("HOME", $env:USERPROFILE, "User")`。重启生效。

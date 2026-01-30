@@ -39,7 +39,7 @@ export default async function NewsPage() {
                             <div className="aspect-video w-full bg-slate-100 relative overflow-hidden">
                                 {item.cover ? (
                                     <img
-                                        src={pb.files.getUrl(item, item.cover)}
+                                        src={`/api/pb/api/files/${item.collectionId}/${item.id}/${item.cover}`}
                                         alt={item.title}
                                         className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
                                     />

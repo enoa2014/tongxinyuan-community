@@ -1,79 +1,31 @@
 version: '3.8'
 
 services:
-  # Nginx Gateway (SSL Termination & Reverse Proxy)
-  nginx:
-    container_name: txy_nginx
-    image: nginx:alpine
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    container_name: txy_pocketbase
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./backend/pb_data:/pb_data
+      - ./backend/pb_migrations:/pb_migrations
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8090/api/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    image: txy-web:latest
+    container_name: txy_web
     restart: always
     ports:
-      - "3000:443" # SSL: Map Host 3000 -> Container 443
-      # - "443:443"
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./nginx/certs:/etc/nginx/certs
-      - ./nginx/logs:/var/log/nginx
-    depends_on:
-      - app
-      - api
-
-  # Next.js Web Application
-  app:
-    container_name: txy_web
-    build:
-      context: ./apps/web
-      dockerfile: Dockerfile # This corresponds to Dockerfile.prod in deployment package
-    restart: always
-    # ports:
-    #   - "3000:3000" # Removed to avoid host conflict. Accessed via Nginx on 3000.
+      - "3001:3000"
     environment:
       - NODE_ENV=production
-      - HOSTNAME=0.0.0.0
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/tongxinyuan
-      - NEXT_PUBLIC_API_URL=http://localhost:8000 # Should be updated if API has domain
+      - NEXT_PUBLIC_API_URL=http://tongxy.xyz:8090
+      - PB_URL=http://pocketbase:8090
     depends_on:
-      - db
-      - redis
-    # No volumes for code - strictly immutable container
-
-    # Python AI Agent
-  api:
-    container_name: txy_api
-    build:
-      context: ./apps/ai-agent
-      dockerfile: Dockerfile
-    restart: always
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/tongxinyuan
-      - REDIS_URL=redis://redis:6379/0
-      # ALIYUN_API_KEY injected via .env on server
-    depends_on:
-      - db
-      - redis
-
-  # PostgreSQL Database
-  db:
-    container_name: txy_db
-    image: pgvector/pgvector:pg16
-    restart: always
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=tongxinyuan
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data
-    shm_size: 256mb
-
-  # Redis Cache
-  redis:
-    container_name: txy_redis
-    image: redis:alpine
-    restart: always
-    ports:
-      - "6379:6379"
-    volumes:
-      - ./data/redis:/data
+      pocketbase:
+        condition: service_healthy

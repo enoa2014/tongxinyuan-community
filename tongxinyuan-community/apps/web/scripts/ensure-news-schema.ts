@@ -6,19 +6,26 @@ const ADMIN_EMAIL = '86152@tongxy.xyz';
 const ADMIN_PASS = '1234567890';
 
 async function main() {
-    console.log("📰 Ensuring 'news' Collection Schema...");
+    console.log("📰 Ensuring 'news' Collection Schema (v0.23+ Flattened)...");
 
     // 1. Login
     try {
         await pb.admins.authWithPassword(ADMIN_EMAIL, ADMIN_PASS);
-        console.log("✅ Admin Logged In");
     } catch (e) {
         console.error("❌ Admin Login Failed:", e);
         return;
     }
 
-    // 2. Define Schema
-    const schema = [
+    // 2. Define Schema (Fields) - FLATTENED STRUCTURE
+    const fields = [
+        {
+            name: "id",
+            type: "text",
+            required: true,
+            primaryKey: true,
+            pattern: "^[a-z0-9]+$",
+            autogeneratePattern: "[a-z0-9]{15}"
+        },
         {
             name: 'title',
             type: 'text',
@@ -29,16 +36,15 @@ async function main() {
             name: 'slug',
             type: 'text',
             required: true,
-            unique: true, // URL friendly ID
+            unique: true,
         },
         {
             name: 'description',
             type: 'text',
-            // multiline in UI, standard text in DB
         },
         {
             name: 'content',
-            type: 'editor', // Rich text
+            type: 'editor',
         },
         {
             name: 'author',
@@ -47,53 +53,76 @@ async function main() {
         {
             name: 'cover',
             type: 'file',
-            options: {
-                maxSelect: 1,
-                maxSize: 5242880, // 5MB
-                mimeTypes: ['image/jpeg', 'image/png', 'image/svg+xml', 'image/gif', 'image/webp'],
-            }
+            maxSelect: 1, // Flattened
+            maxSize: 5242880, // 5MB Flattened
+            mimeTypes: ['image/jpeg', 'image/png', 'image/svg+xml', 'image/gif', 'image/webp'], // Flattened
         },
         {
             name: 'category',
             type: 'select',
-            options: {
-                maxSelect: 1,
-                values: ['news', 'story', 'notice', 'activity'],
-            }
+            maxSelect: 1, // Flattened
+            values: ['news', 'story', 'notice', 'activity'], // Flattened
         },
         {
             name: 'published',
             type: 'bool',
+        },
+        {
+            name: "created",
+            type: "autodate",
+            onCreate: true,
+            onUpdate: false
+        },
+        {
+            name: "updated",
+            type: "autodate",
+            onCreate: true,
+            onUpdate: true
         }
     ];
 
-    // 3. Check if exists
+    // 3. Recreate if broken or missing
     try {
-        const existing = await pb.collections.getOne('news');
-        console.log("ℹ️ Collection 'news' already exists. (Skipping creation)");
-        // Optional: Update schema if needed (skipped for safety to avoid data loss)
-    } catch (e: any) {
-        if (e.status === 404) {
-            console.log("✨ Creating 'news' collection...");
-            try {
+        try {
+            const existing = await pb.collections.getOne('news');
+            console.log("⚠️ Collection 'news' exists. Checking if valid or legacy...");
+
+            // Heuristic: Check if 'category' field has values (if legacy, it might be empty or wrong structure)
+            const catField: any = existing.fields?.find((f: any) => f.name === 'category');
+            if (!catField?.values?.length) {
+                console.log("🔥 Found BROKEN/LEGACY 'news' collection. Deleting...");
+                await pb.collections.delete(existing.id);
+                throw { status: 404 };
+            } else {
+                console.log("✅ Collection seems valid (has flatten properties). Skipping.");
+            }
+
+        } catch (e: any) {
+            if (e.status === 404) {
+                console.log("✨ Creating 'news' collection (New Schema)...");
                 await pb.collections.create({
                     name: 'news',
                     type: 'base',
-                    schema: schema as any, // TypeScript strictness workaround
+                    fields: fields,
                     system: false,
-                    listRule: '',   // Public readable
-                    viewRule: '',   // Public readable
-                    createRule: null, // Admin only
-                    updateRule: null, // Admin only
-                    deleteRule: null, // Admin only
+                    listRule: '',
+                    viewRule: '',
+                    createRule: null,
+                    updateRule: null,
+                    deleteRule: null,
                 });
                 console.log("✅ Collection 'news' created successfully!");
-            } catch (createError: any) {
-                console.error("❌ Failed to create collection:", createError);
-                console.error(createError.data);
+            } else {
+                throw e;
             }
-        } else {
-            console.error("❌ Unexpected error fetching collection:", e);
+        }
+
+    } catch (e: any) {
+        console.error("❌ Failed to ensure schema:", e);
+        if (e.originalError?.data) {
+            console.error("Detailed Error:", JSON.stringify(e.originalError.data, null, 2));
+        } else if (e.data) {
+            console.error("Error Data:", JSON.stringify(e.data, null, 2));
         }
     }
 }

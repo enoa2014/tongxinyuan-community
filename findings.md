@@ -2,6 +2,28 @@
 > **Project**: Tongxinyuan Community Platform
 > **Context**: Ongoing development and legacy maintenance.
 
+## 2026-01-30: PocketBase Integration Findings
+
+### 1. API Collection Creation (v0.23+)
+**Issue**: Creating a collection via JS SDK using `schema: [...]` resulted in an empty collection.
+**Discovery**: Newer PocketBase versions have renamed `schema` to `fields` in the creation payload.
+**Fix**: Updated update scripts to use `fields`.
+
+### 2. Guest Access & Sorting
+**Issue**: Public access to `services` collection worked (`listRule = ""`), but requests with `sort: 'created'` returned `400 Bad Request`.
+**Diagnosis**: The error only occurred for unauthenticated (Guest) users. Authenticated admins could sort fine.
+**Solution**: Removed the `sort` parameter for the public-facing page.
+
+### 3. Windows Environment Variables (Playwright)
+**Issue**: Playwright failed to launch with error `$HOME environment variable is not set`.
+**Context**: On Windows, typical Linux/Node tools expect `HOME` to be set, but Windows uses `USERPROFILE`.
+**Fix**: Set user-level environment variable `HOME` to `%USERPROFILE%`. Restart required.
+
+### 4. Browser Tool Proxy Conflict (502 Error)
+**Issue**: Browser component failed with `502 Bad Gateway` when connecting to CDP port (9222).
+**Cause**: `HTTP_PROXY` env var was set (e.g., to `127.0.0.1:7890`), forcing localhost traffic through the proxy, which rejected CDP traffic.
+**Fix**: Remove `HTTP_PROXY` and `HTTPS_PROXY` from User Environment variables. `[Environment]::SetEnvironmentVariable("HTTP_PROXY", $null, "User")`.
+
 ## 2026-01-30: Legacy Site Recovery Post-Mortem
 
 ### 1. Network & Connectivity: The "502 Bad Gateway" Loop

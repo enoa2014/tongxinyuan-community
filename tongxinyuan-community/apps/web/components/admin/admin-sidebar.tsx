@@ -27,8 +27,13 @@ const sidebarItems = [
         icon: MessageSquareText,
     },
     {
+        title: "服务项目管理",
+        href: "/admin/services",
+        icon: LayoutDashboard, // Reusing icon or better one if imported
+    },
+    {
         title: "文章发布",
-        href: "/admin/articles",
+        href: "/admin/news",
         icon: FileText,
     },
     {

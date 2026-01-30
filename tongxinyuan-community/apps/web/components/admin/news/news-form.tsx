@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -29,6 +28,7 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2 } from "lucide-react"
+import { MarkdownEditor } from "./markdown-editor"
 
 const newsFormSchema = z.object({
     title: z.string().min(2, "标题至少需要2个字符"),
@@ -55,14 +55,14 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
 
     const form = useForm<NewsFormValues>({
         resolver: zodResolver(newsFormSchema),
-        defaultValues: initialData || {
-            title: "",
-            slug: "",
-            description: "",
-            author: "同心源",
-            category: "news",
-            content: "",
-            published: false,
+        defaultValues: {
+            title: initialData?.title || "",
+            slug: initialData?.slug || "",
+            description: initialData?.description || "",
+            author: initialData?.author || "同心源",
+            category: (initialData?.category as "news" | "story" | "notice" | "activity") || "news",
+            content: initialData?.content || "",
+            published: initialData?.published || false,
         },
     })
 
@@ -215,16 +215,16 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
                     name="content"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>文章正文 (Markdown/HTML)</FormLabel>
+                            <FormLabel>文章正文 (Markdown)</FormLabel>
                             <FormControl>
-                                <Textarea
+                                <MarkdownEditor
+                                    value={field.value}
+                                    onChange={field.onChange}
                                     placeholder="# 请在此撰写文章内容..."
-                                    className="min-h-[300px] font-mono text-sm"
-                                    {...field}
                                 />
                             </FormControl>
                             <FormDescription>
-                                暂时支持纯文本或 Markdown 语法。
+                                支持 Markdown 语法。使用工具栏快速插入格式。
                             </FormDescription>
                             <FormMessage />
                         </FormItem>

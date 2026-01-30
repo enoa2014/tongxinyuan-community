@@ -11,6 +11,32 @@
 
 
 
+## Session Update: Dynamic Services & Admin Portal V1
+**Date:** 2026-01-30
+**Status:** ✅ Making Progress (Phase 1.5 & 5)
+
+### 1. Achievements
+- **Dynamic Content (Phase 1.5)**:
+    - Successfully synced `Services` page with PocketBase.
+    - Resolved 403 Forbidden permissions for guest access.
+    - Fixed Guest Fetch 400 Error by removing incompatible `sort` parameter.
+- **Admin Portal (Phase 5)**:
+    - Implemented secure `AdminLayout` with client-side auth redirection.
+    - Connected `AdminDashboard` to real PocketBase stats (Volunteers, Services, News).
+    - Added "Service Management" list view for admins.
+
+### 2. Technical Learnings
+- **PocketBase v0.23+ Schema**: Creating collections via API now requires `fields` property, not `schema`. The `schema` property is ignored, resulting in empty collections.
+- **Guest API Limitations**: Unauthenticated (Guest) users cannot use the `sort: 'created'` parameter on the `services` collection.
+- **Docker CLI Bypass**: When browser automation fails (network/env issues), use `docker exec txy_pocketbase pocketbase superuser create ...` to generate temp credentials for API scripts. This is more robust than debugging local proxies.
+- **Environment Stabilization**: Fixed "Browser Tool Connection Error" (502) by removing conflicting `HTTP_PROXY` variables from the Windows Registry. Automated tools are now fully operational.
+
+### 3. Next Steps
+- Refine Admin Portal (Edit/Delete functionality).
+- Begin Phase 2: User Login & Volunteer Workflow.
+
+---
+
 ## 阶段: 2025/2026 同心源文档分析与规划
 **日期**: 2026-01-27
 

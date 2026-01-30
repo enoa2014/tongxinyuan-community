@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic"; // Don't cache this
 
-const TARGET_BASE = "http://127.0.0.1:8090";
+const TARGET_BASE = process.env.PB_URL || "http://127.0.0.1:8090";
 
 async function proxy(request: NextRequest, props: { params: Promise<{ path: string[] }> }) {
     // 1. Construct Target URL
@@ -13,7 +13,8 @@ async function proxy(request: NextRequest, props: { params: Promise<{ path: stri
     const queryString = request.nextUrl.search; // includes ?
     const targetUrl = `${TARGET_BASE}/${path}${queryString}`;
 
-    console.log(`[Proxy] ${request.method} -> ${targetUrl}`);
+    console.log(`[Proxy Request] Path: ${path}`);
+    console.log(`[Proxy Request] Target: ${targetUrl}`);
 
     try {
         // 2. Prepare Headers
@@ -36,6 +37,11 @@ async function proxy(request: NextRequest, props: { params: Promise<{ path: stri
         };
 
         const response = await fetch(targetUrl, fetchOptions);
+
+        if (!response.ok) {
+            const errorText = await response.clone().text();
+            console.error(`[Proxy Error] Upstream ${response.status}: ${errorText}`);
+        }
 
         // 4. Return Response
         // Create new headers to avoid immutable/read-only issues

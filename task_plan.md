@@ -70,11 +70,30 @@ Phase 3: 网站规划与设计 (Website Planning & Design)
 - [x] 初始化 Next.js 项目
 - [x] 实施设计系统 (Tailwind)
 - [x] 构建主页 (Hero, 影响力, 捐赠引导)
-- [x] 构建“社区中心”服务页面
+- [x] 构建“社区中心”服务页面 (动态数据)
 - [x] 构建“参与” (志愿者/捐赠) 页面
+- [x] 构建“新闻”页面 (动态数据)
 - [x] **[检查点]** 创建 Phase 1 设计评审包
-- [ ] 根据评审意见修改 (待定)
-- **Status:** in_progress
+- **Status:** complete
+
+### Phase 5: 内部管理系统 (Internal Admin)
+<!-- 
+  WHAT: 志愿者与社工的后台管理系统。
+  WHY: 支持业务运营 (Phase 2 目标)。
+-->
+- [x] **Allow Reordering** (2026-01-30) <!-- id: 5 -->
+    - [x] Add `order` field to Service model (PocketBase) <!-- id: 6 -->
+    - [x] **[Feature]** Implement Drag-and-Drop Reordering (replaced Table view) <!-- id: 7 -->
+    - [x] Update frontend to sort by Order <!-- id: 8 -->
+- [x] **[基建]** 搭建 Admin 基础框架 (Protected Routes, Client-side Auth)
+- [x] **[Dash]** 实现管理端 Dashboard 数据概览
+- [x] **[列表]** 实现“服务项目”列表视图
+- [x] **[列表]** 实现“新闻动态”列表视图
+- [x] **[列表]** 实现“志愿者”列表视图
+- [x] **[CRUD]** 实现服务的编辑 (Edit) 和删除 (Delete)
+- [x] **[CRUD]** 实现新闻的发布 (Create) 和编辑 (Edit)
+- [x] **[Flow]** 志愿者审核流程 (Approve/Reject)
+- **Status:** complete
 
 ## 关键问题 (Key Questions)
 1. “穿透式管理”部分提到的具体合规要求是什么？（在 findings 中部分回答）
@@ -92,3 +111,4 @@ Phase 3: 网站规划与设计 (Website Planning & Design)
 |---|---|---|
 | PDF 搜索失败 | 1 | 用户确认 PDF 相关；切换到通过 python 脚本提取内容 |
 | PS 编码错误 | 1 | 确保传递提示时使用 UTF-8 编码 |
+| Proxy Sort 400 Error | 1 | 切换为客户端排序 (Client-side Sorting) 以避开 Proxy 参数解析问题 |

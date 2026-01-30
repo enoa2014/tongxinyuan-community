@@ -1,27 +1,49 @@
-# 同心源项目文档索引 (Documentation Index)
+# 同心源数字化平台 - 项目文档索引 (Project Index)
 
-> **文档根目录**: `ws/2026/tongxy/_bmad-output/`
+> **Last Updated**: 2026-01-30
+> **Status**: Phase 1 (Complete) / Phase 5 (In Progress)
 
-## 1. 核心战略与规划 (Strategy & Planning) - `01-strategy/`
-*   [统一需求文档 (Product Design)](../01-strategy/product-design.md): **(Master)** 包含用户画像、功能列表、合规要求 (捐赠指引) 及 MVP 范围。
-*   [实施路线图 (Roadmap)](../01-strategy/roadmap.md): "先对外 (Phase 1)，后对内 (Phase 2)" 的分阶段实施策略。
-*   [设计系统 (Design System)](../01-strategy/design-system.md): 视觉规范、色彩、字体与组件库定义。
-*   [技术实施计划 (Tech Plan)](../01-strategy/technical-implementation-plan.md): 架构设计、数据库 Schema 与 合规技术实现。
+本文档是“同心源关爱计划”数字化转型项目的核心导航索引。
 
-## 2. 旧版系统分析 (Legacy Analysis) - `02-analysis/`
-*   [功能深度拆解 (Functional Analysis)](../02-analysis/legacy-functional-analysis.md): 旧版 PHP 网站的功能模块与数据结构解析。
-*   [旧版网站地图 (Site Map)](../02-analysis/legacy-site-map.md): 旧版网站的完整页面层级。
-*   [功能迁移差异分析 (Gap Analysis)](../02-analysis/feature-migration-gap.md): 新旧版功能对比与迁移建议 (含合规性调整)。
-*   [早期调研发现 (Findings)](../02-analysis/findings.md): 基于原始 PPT/PDF 的早期分析。
-*   [技术经验总结 (Tech Lessons)](../02-analysis/tech-lessons-20260129.md): Nginx端口策略、设计规范实施与Docker构建经验。
+## 📂 01-Strategy (战略与规划)
+项目的核心愿景、路线图和产品定义。
 
-## 3. 新版产品设计 (New Site Design) - `03-design/`
-*   [用户体验与交互设计 (UX & Sitemap)](../03-design/new-site-ux-sitemap.md): **(Core UX)** 详细的网站地图、用户交互流程图与线框图规划。
-*   [线框图 (Wireframes)](../03-design/wireframes.md): 关键页面 (首页、捐赠、网点) 的低保真原型。
-*   [工程设计规范 (Engineering Design System)](../03-design/design-system.md): **(Execution)** 包含视觉基础、布局逻辑(Padding/Container)与组件详细规范。
+- **[roadmap.md](./01-strategy/roadmap.md)**: 实施路线图 (Track A/B 并行策略)。
+- **[product-brief.md](./01-strategy/product-brief.md)**: 产品简报与核心价值定义。
+- **[product-design.md](./01-strategy/product-design.md)**: 统一产品设计文档 (功能、角色、UX)。
+- **[sprint-status.md](./01-strategy/sprint-status.md)**: 当前冲刺状态 (Tasks & Risks)。
 
-## 4. 开发流程 (Process) - `04-process/`
-*   [开发流程规范 (Process)](../04-process/development-process.md): **(Standard)** 标准化的开发与协作流程。
+## 📂 02-Analysis (分析与研究)
+对现有资产、文档和需求的深入分析。
 
-## 5. 历史归档 (Archive) - `99-archive/`
-*   包含早期的 `product-brief`、`epics` 及旧版分析 Artifacts。仅作参考。
+- **[findings.md](../findings.md)**: **(Root)** 关键技术发现与决策记录 (e.g., 环境修复, 代理冲突)。
+- **[requirements.md](./02-analysis/requirements.md)**: 详细功能需求列表。
+- **[legacy-analysis.md](./02-analysis/legacy-analysis.md)**: 旧版系统分析 (PHP/MySQL)。
+
+## 📂 03-Design (设计与架构)
+技术架构、数据库设计与 UI/UX 规范。
+
+- **[design-system.md](./03-design/design-system.md)**: UI 设计系统 (Colors, Typography, Components)。
+- **[architecture.md](./03-design/architecture.md)**: 系统架构图 (Next.js + PocketBase + Docker)。
+- **[database-schema.md](./03-design/database-schema.md)**: 数据库模型设计 (Services, News, Users)。
+- **[wireframes.md](./03-design/wireframes.md)**: 低保真原型图。
+
+## 📂 04-Process (流程与规范)
+开发流程、部署指南与最佳实践。
+
+- **[deploy_guide_ecs.md](../deploy_guide_ecs.md)**: **(Root)** 阿里云 ECS 部署指南。
+- **[development-guide.md](./04-process/development-guide.md)**: 本地开发环境配置指南 (含 Windows 避坑)。
+
+## 📂 99-Archive (归档)
+历史文档与不再使用的计划。
+
+- **[implementation_plan.md](../implementation_plan.md)**: 早期实施计划 (Phase 1)。
+- **[implementation_plan_reorder.md](../implementation_plan_reorder.md)**: 服务排序功能专项计划。
+
+---
+
+## 🚀 快速链接 (Quick Links)
+
+- **当前任务**: [task_plan.md](../task_plan.md)
+- **进度日志**: [progress.md](../progress.md)
+- **本地服务**: [http://localhost:3000](http://localhost:3000) (Web), [http://localhost:8090/_/](http://localhost:8090/_/) (Admin)

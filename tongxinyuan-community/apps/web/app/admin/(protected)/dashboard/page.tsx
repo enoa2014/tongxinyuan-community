@@ -1,8 +1,52 @@
 
+"use client"
+
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, MessageSquareText, FileText, Activity } from "lucide-react"
+import { Users, MessageSquareText, FileText, Activity, Loader2 } from "lucide-react"
+import { pb } from "@/lib/pocketbase"
 
 export default function AdminDashboardPage() {
+    const [stats, setStats] = useState({
+        volunteers: 0,
+        services: 0,
+        news: 0,
+        loading: true
+    })
+
+    useEffect(() => {
+        async function fetchStats() {
+            try {
+                // Run in parallel
+                const [volunteers, services, news] = await Promise.all([
+                    pb.collection('volunteer_applications').getList(1, 1),
+                    pb.collection('services').getList(1, 1),
+                    pb.collection('news').getList(1, 1),
+                ])
+
+                setStats({
+                    volunteers: volunteers.totalItems,
+                    services: services.totalItems,
+                    news: news.totalItems,
+                    loading: false
+                })
+            } catch (e) {
+                console.error("Failed to fetch dashboard stats", e)
+                setStats(prev => ({ ...prev, loading: false }))
+            }
+        }
+
+        fetchStats()
+    }, [])
+
+    if (stats.loading) {
+        return (
+            <div className="flex h-64 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-slate-300" />
+            </div>
+        )
+    }
+
     return (
         <div className="space-y-8">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h2>
@@ -14,18 +58,18 @@ export default function AdminDashboardPage() {
                         <Users className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">12</div>
-                        <p className="text-xs text-muted-foreground">+2 from last week</p>
+                        <div className="text-2xl font-bold">{stats.volunteers}</div>
+                        <p className="text-xs text-muted-foreground">Total applications</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">服务咨询</CardTitle>
+                        <CardTitle className="text-sm font-medium">服务项目</CardTitle>
                         <MessageSquareText className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">5</div>
-                        <p className="text-xs text-muted-foreground">+1 since yesterday</p>
+                        <div className="text-2xl font-bold">{stats.services}</div>
+                        <p className="text-xs text-muted-foreground">Active services</p>
                     </CardContent>
                 </Card>
                 <Card>
@@ -34,8 +78,8 @@ export default function AdminDashboardPage() {
                         <FileText className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">24</div>
-                        <p className="text-xs text-muted-foreground">All categories</p>
+                        <div className="text-2xl font-bold">{stats.news}</div>
+                        <p className="text-xs text-muted-foreground">News & Stories</p>
                     </CardContent>
                 </Card>
                 <Card>
