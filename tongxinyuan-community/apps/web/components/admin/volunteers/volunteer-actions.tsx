@@ -34,7 +34,7 @@ export function VolunteerActions({ volunteer, onRefresh }: VolunteerActionsProps
     const [detailOpen, setDetailOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const [confirmOpen, setConfirmOpen] = useState(false)
-    const [pendingAction, setPendingAction] = useState<"approved" | "rejected" | "pending" | null>(null)
+    const [pendingAction, setPendingAction] = useState<"approved" | "rejected" | "pending" | "delete" | null>(null)
 
     const handleStatusUpdate = async (status: "approved" | "rejected" | "pending") => {
         try {
@@ -91,6 +91,33 @@ export function VolunteerActions({ volunteer, onRefresh }: VolunteerActionsProps
         }
     }
 
+    const triggerDelete = () => {
+        setPendingAction("delete")
+        setConfirmOpen(true)
+    }
+
+    const handleDelete = async () => {
+        try {
+            setLoading(true)
+            await pb.collection('volunteer_applications').delete(volunteer.id)
+            toast({
+                title: "已删除记录",
+                description: "该志愿者申请已永久删除",
+            })
+            onRefresh()
+        } catch (e: any) {
+            toast({
+                title: "删除失败",
+                description: e.message,
+                variant: "destructive"
+            })
+        } finally {
+            setLoading(false)
+            setConfirmOpen(false)
+            setPendingAction(null)
+        }
+    }
+
     return (
         <>
             <DropdownMenu>
@@ -142,6 +169,16 @@ export function VolunteerActions({ volunteer, onRefresh }: VolunteerActionsProps
                             <span className="ml-[22px]">重置为待审核</span>
                         </DropdownMenuItem>
                     )}
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem
+                        className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                        onClick={triggerDelete}
+                        disabled={loading}
+                    >
+                        <span className="ml-[22px]">删除记录</span>
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
 
@@ -154,18 +191,33 @@ export function VolunteerActions({ volunteer, onRefresh }: VolunteerActionsProps
             <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>确认修改状态？</AlertDialogTitle>
+                        <AlertDialogTitle>{pendingAction === "delete" ? "确认删除记录？" : "确认修改状态？"}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            当前状态为 <b>{volunteer.status === "approved" ? "已通过" : volunteer.status === "rejected" ? "已拒绝" : "待审核"}</b>。
-                            <br />
-                            您确定要将其修改为 <b>{pendingAction === "approved" ? "已通过" : pendingAction === "rejected" ? "已拒绝" : "待审核"}</b> 吗？
-                            此操作将被记录在审计日志中。
+                            {pendingAction === "delete" ? (
+                                <span className="text-red-600 font-bold">此操作无法撤销。该志愿者申请将被永久删除。</span>
+                            ) : (
+                                <>
+                                    当前状态为 <b>{volunteer.status === "approved" ? "已通过" : volunteer.status === "rejected" ? "已拒绝" : "待审核"}</b>。
+                                    <br />
+                                    您确定要将其修改为 <b>{pendingAction === "approved" ? "已通过" : pendingAction === "rejected" ? "已拒绝" : "待审核"}</b> 吗？
+                                    此操作将被记录在审计日志中。
+                                </>
+                            )}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>取消</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => pendingAction && handleStatusUpdate(pendingAction)}>
-                            确认修改
+                        <AlertDialogAction
+                            onClick={() => {
+                                if (pendingAction === 'delete') {
+                                    handleDelete()
+                                } else if (pendingAction) {
+                                    handleStatusUpdate(pendingAction)
+                                }
+                            }}
+                            className={pendingAction === 'delete' ? "bg-red-600 hover:bg-red-700" : ""}
+                        >
+                            {pendingAction === 'delete' ? "确认删除" : "确认修改"}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

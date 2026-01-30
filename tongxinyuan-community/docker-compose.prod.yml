@@ -17,7 +17,12 @@ services:
       retries: 5
 
   web:
-    image: txy-web:latest
+    # image: txy-web:latest
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile.prod
+      args:
+        NEXT_PUBLIC_API_URL: http://tongxy.xyz:8090
     container_name: txy_web
     restart: always
     ports:

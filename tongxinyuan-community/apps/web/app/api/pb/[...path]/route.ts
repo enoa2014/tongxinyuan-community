@@ -26,6 +26,44 @@ async function proxy(request: NextRequest, props: { params: Promise<{ path: stri
 
         // Log headers for debugging
         headers.forEach((v, k) => console.log(`[Proxy Header] ${k}: ${v}`));
+        console.log(`[Proxy Auth Check] Authorization Present: ${headers.has('authorization')}`);
+        console.log(`[Proxy Auth Check] Cookie Present: ${headers.has('cookie')}`);
+
+        // Fallback: If Authorization is missing, try to get it from cookie (pb_auth)
+        if (!headers.has("authorization") && headers.has("cookie")) {
+            const cookies = headers.get("cookie") || "";
+            const pbAuthMatch = cookies.match(/pb_auth=([^;]+)/);
+            if (pbAuthMatch && pbAuthMatch[1]) {
+                try {
+                    const token = decodeURIComponent(pbAuthMatch[1]);
+                    // PB auth cookie is usually a JSON object {token: "...", model: ...} or just "token"
+                    // The SDK exportToCookie produces: pb_auth={%22token%22:%22...%22,...}
+
+                    // It might be URL encoded JSON
+                    let tokenValue = token;
+                    if (token.startsWith("{") || token.startsWith("%7B")) {
+                        const parsed = JSON.parse(token); // if it was already decoded? no check format
+                        tokenValue = parsed.token;
+                    } else {
+                        // Double decode might be needed if it was %7B...
+                        try {
+                            const decodedTwice = decodeURIComponent(token);
+                            const parsed = JSON.parse(decodedTwice);
+                            tokenValue = parsed.token;
+                        } catch (e) {
+                            // Maybe it's just the raw token string? Unlikely with implicit export
+                        }
+                    }
+
+                    if (tokenValue) {
+                        headers.set("authorization", tokenValue);
+                        console.log("[Proxy] Recovered Authorization from Cookie");
+                    }
+                } catch (e) {
+                    console.log("[Proxy] Failed to parse/decode pb_auth cookie", e);
+                }
+            }
+        }
 
         // 3. Forward Request
         const isMutation = request.method !== "GET" && request.method !== "HEAD";

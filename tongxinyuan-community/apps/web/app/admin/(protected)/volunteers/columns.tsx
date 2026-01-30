@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { VolunteerActions } from "@/components/admin/volunteers/volunteer-actions"
+import { Checkbox } from "@/components/ui/checkbox"
 
 // Type definition matching our PocketBase schema
 export type VolunteerApplication = {
@@ -21,6 +22,28 @@ export type VolunteerApplication = {
 
 export const getColumns = (onRefresh: () => void): ColumnDef<VolunteerApplication>[] => [
     {
+        id: "select",
+        header: ({ table }) => (
+            <Checkbox
+                checked={
+                    table.getIsAllPageRowsSelected() ||
+                    (table.getIsSomePageRowsSelected() && "indeterminate")
+                }
+                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                aria-label="Select all"
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="Select row"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
+    {
         accessorKey: "name",
         header: "姓名",
     },
@@ -32,7 +55,16 @@ export const getColumns = (onRefresh: () => void): ColumnDef<VolunteerApplicatio
         accessorKey: "skills.level",
         header: "技能等级",
         cell: ({ row }) => {
-            const level = row.original.skills?.level
+            let skills = row.original.skills
+            // Handle if skills is string (JSON string)
+            if (typeof skills === 'string') {
+                try {
+                    skills = JSON.parse(skills)
+                } catch (e) {
+                    skills = {}
+                }
+            }
+            const level = skills?.level
             const levelMap: Record<string, string> = {
                 level1: "Level 1: 普适型",
                 level2: "Level 2: 技能型",

@@ -25,13 +25,22 @@ import { Button } from "@/components/ui/button"
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
+    itemLabel?: string
+    batchActions?: {
+        label: string
+        onClick: (selectedRows: TData[]) => void
+        variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
+    }[]
 }
 
 export function DataTable<TData, TValue>({
     columns,
     data,
+    itemLabel = "条数据",
+    batchActions,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([])
+    const [rowSelection, setRowSelection] = React.useState({})
 
     const table = useReactTable({
         data,
@@ -40,13 +49,39 @@ export function DataTable<TData, TValue>({
         getPaginationRowModel: getPaginationRowModel(),
         onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
+        onRowSelectionChange: setRowSelection,
         state: {
             sorting,
+            rowSelection,
         },
     })
 
+    const selectedRows = table.getFilteredSelectedRowModel().rows.map(row => row.original)
+
     return (
         <div>
+            {batchActions && selectedRows.length > 0 && (
+                <div className="mb-4 flex items-center gap-4 rounded-md border bg-muted/50 p-4">
+                    <span className="text-sm font-medium">
+                        已选择 {selectedRows.length} {itemLabel}
+                    </span>
+                    <div className="flex items-center gap-2">
+                        {batchActions.map((action, index) => (
+                            <Button
+                                key={index}
+                                size="sm"
+                                variant={action.variant || "outline"}
+                                onClick={() => {
+                                    action.onClick(selectedRows)
+                                    table.resetRowSelection()
+                                }}
+                            >
+                                {action.label}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
+            )}
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>
@@ -93,7 +128,7 @@ export function DataTable<TData, TValue>({
             </div>
             <div className="flex items-center justify-between px-2 py-4">
                 <div className="flex-1 text-sm text-muted-foreground hidden md:block">
-                    {table.getFilteredRowModel().rows.length} 篇文章
+                    {table.getFilteredSelectedRowModel().rows.length} / {table.getFilteredRowModel().rows.length} {itemLabel}
                 </div>
                 <div className="flex items-center space-x-6 lg:space-x-8">
                     <div className="flex items-center space-x-2">
