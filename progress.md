@@ -108,6 +108,21 @@
 - **约束条件**: 国内访问（无 VPN）是硬性要求，必须使用国内云厂商。
 - **UX 洞察**: “登录墙”阻碍了品牌传播和筹款的初始目标。Phase 1 必须是开放访问的。
 
+### 4. Session Update: Admin News Image Upload
+**Date:** 2026-01-30
+**Status:** ✅ Completed
+
+#### 1. Achievements
+- **Image Upload Feature**: Implemented direct image upload in Tiptap Rich Text Editor.
+    - Integrated with PocketBase `media` collection.
+    - Configured admin-only upload security.
+    - Added UI for file selection and instant preview.
+- **Proxy Optimization**: Optimized Next.js API Proxy to handle large file uploads correctly.
+
+#### 2. Technical Learnings
+- **Next.js Proxy & Multipart**: The Next.js API proxy (`fetch`) forwards the `content-length` header from the client request. However, when the body is read and re-streamed, the length might slightly vary (or chunking issues occur), causing upstream 400 errors. **Fix**: Delete `content-length` header in the proxy and let `fetch` calculate it.
+- **PocketBase Schema Flattener**: In v0.23+, field options (like `mimeTypes`, `maxSize`) must be **flattened** into the field object, not nested property `options: {}`. Nested options result in null constraints.
+
 ### 下一步 (Next Steps)
 - **立即执行**: 与利益相关者评审 `review-packet-phase1.md`。
 - **随后**: 根据批准的线框图制作高保真视觉稿。

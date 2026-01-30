@@ -87,4 +87,24 @@
 1. [ ] **Network**: Ensure Nginx points to a stable IP/Port.
 2. [ ] **DB Import**: ALWAYS use `--default-character-set=utf8` when importing SQL dumps.
 3. [ ] **Cache**: ALWAYS clear framework/file caches (`rm -rf caches/*`) after DB operations.
-4. [ ] **Logs**: Use `docker logs` and `php_errors.log` immediately; don't guess.
+### 4. Logs: Use `docker logs` and `php_errors.log` immediately; don't guess.
+
+## 2026-01-30: Next.js Auth Proxy & PocketBase SDK
+
+### 1. API Proxy Authorization Stripping
+**Issue**: Frontend calls to `/api/pb/...` were returning empty lists (`items: []`) despite valid user login.
+**Diagnosis**: 
+- Next.js default `fetch` or Middleware environment was not automatically forwarding the `Authorization` header from the browser request to the upstream PocketBase.
+- Client-side SDK relies on the `Authorization` header, but browsers also send cookies.
+**Solution**:
+- Implemented **Cookie Fallback** in the Proxy (`route.ts`).
+- If `Authorization` header is missing, the proxy now explicitly parses the `pb_auth` cookie and injects it as the `Authorization` header for the upstream request.
+
+### 2. Server-Side Safety: `decodeURIComponent` Crash
+**Issue**: The Proxy endpoint crashed with `500 Internal Server Error` during the cookie fallback implementation.
+**Cause**: User cookies can contain malformed or non-standard encoding. Calling `decodeURIComponent()` on a raw cookie string (e.g., `pb_auth=%...`) without a `try/catch` block caused the Node.js server to throw a `URIError` and crash the request.
+**Fix**: Always wrap `decodeURIComponent` in `try/catch` when processing user input or cookies.
+
+### 3. Auth Model: `users` vs `_superusers`
+**Discovery**: Admin users in PocketBase (v0.23+) belong to the system collection `_superusers`, NOT `users`. 
+**Impact**: When debugging permissions, ensuring the rules allow `@request.auth.isAdmin = true` is critical. Authentication attempts must target the correct collection (`pb.collection('_superusers').authWithPassword`).

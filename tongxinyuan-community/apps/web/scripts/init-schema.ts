@@ -60,6 +60,21 @@ async function main() {
             deleteRule: "@request.auth.isAdmin = true"
         });
 
+        // 4. Site Settings Collection (Singleton-like)
+        await createCollection('site_settings', [
+            { name: 'site_name', type: 'text', required: true },
+            { name: 'description', type: 'text' },
+            { name: 'contact_phone', type: 'text' },
+            { name: 'contact_email', type: 'text' },
+            { name: 'announcement', type: 'text' }
+        ], {
+            listRule: "", // Public legible (for footer/header)
+            viewRule: "", // Public legible
+            createRule: "@request.auth.isAdmin = true",
+            updateRule: "@request.auth.isAdmin = true",
+            deleteRule: "@request.auth.isAdmin = true"
+        });
+
     } catch (e) {
         console.error("Error:", e);
     }

@@ -82,9 +82,12 @@ Phase 3: 网站规划与设计 (Website Planning & Design)
   WHY: 支持业务运营 (Phase 2 目标)。
 -->
 - [x] **Allow Reordering** (2026-01-30) <!-- id: 5 -->
-    - [x] Add `order` field to Service model (PocketBase) <!-- id: 6 -->
-    - [x] **[Feature]** Implement Drag-and-Drop Reordering (replaced Table view) <!-- id: 7 -->
-    - [x] Update frontend to sort by Order <!-- id: 8 -->
+    - [x] Create detail view page: `apps/web/app/admin/(protected)/volunteers/[id]/page.tsx`
+- [x] Add "Status" badge component
+- [x] Add "Approve/Reject" action buttons
+- [x] Implement server action for status updates
+- [x] Add filtering/sorting to the list (optional but good for VX)
+- [x] **Debug Volunteer Visibility Issue** (Fixed Auth Proxy)<!-- id: 8 -->
 - [x] **[基建]** 搭建 Admin 基础框架 (Protected Routes, Client-side Auth)
 - [x] **[Dash]** 实现管理端 Dashboard 数据概览
 - [x] **[列表]** 实现“服务项目”列表视图
@@ -94,8 +97,59 @@ Phase 3: 网站规划与设计 (Website Planning & Design)
 - [x] **[CRUD]** 实现新闻的发布 (Create) 和编辑 (Edit)
 - [x] **[RichText]** 集成 Tiptap 富文本编辑器 (News Editors) <!-- id: 9 -->
 - [x] **[RichText]** 实现富文本编辑器图片直接上传功能 (Polishing) <!-- id: 10 -->
+- [x] **[RichText]** 实现富文本编辑器图片直接上传功能 (Polishing) <!-- id: 10 -->
 - [x] **[Flow]** 志愿者审核流程 (Approve/Reject)
+- [x] **[Feature]** 服务咨询管理 (Service Consultations)
+    - [x] Admin Page & Columns (`apps/web/app/admin/(protected)/consultations`)
+    - [x] "Mark Contacted/Resolved" Actions
+    - [x] Sidebar Integration
+- [x] **[Feature]** Admin Batch Actions (Batch Operations)
+    - [x] Implement row selection in DataTable
+    - [x] Add checkbox column to Volunteers and Service Consultations
+    - [x] Implement "Batch Approve/Reject" for Volunteers
+    - [x] Implement "Batch Status Update" for Service Consultations
+    - [x] Implement "Batch Delete" and "Single Delete" for Volunteers and Consultations
+- [x] **[Feature]** System Settings (Global Config)
+    - [x] Create `site_settings` singleton collection
+    - [x] Build `/admin/settings` page with form
+    - [x] Connect public footer/header to dynamic settings (Optional - skipped for now)
 - **Status:** complete
+
+### Phase 6: Architecture Upgrade (RBAC)
+<!-- 
+  WHAT: Implement Role-Based Access Control to separate Staff, Admin, and Manager.
+-->
+- [ ] **[Feature]** Role-Based Access Control (RBAC)
+    - [x] Design: Define permissions matrix (Social Worker vs Admin vs Manager)
+    - [ ] Schema: Create `staff` collection with role field
+    - [ ] Auth: Migrate `/admin/login` to use `staff` collection
+    - [ ] UI: Update Sidebar to filter menu items by role
+
+### Phase 7: Core Domain Upgrade (Schema V2)
+<!-- 
+  WHAT: Implement the new "Beneficiary" and "Activity" models.
+-->
+- [ ] **[Feature]** Domain Schema V2
+    - [ ] Schema: Create `beneficiaries` collection (Polymorphic)
+    - [ ] Schema: Create `activities` & `activity_participations`
+    - [ ] Migration: Migrate existing volunteer/consultation data to new schema (optional/TBD)
+
+### Phase 8: Deployment & Handover
+<!-- 
+  WHAT: Add high-value user-facing features.
+-->
+- [ ] **[Feature]** Application Status Check
+    - [ ] Create generic "check-status" API (secure proxy)
+    - [x] **[Pending]** UI Page for checking status by phone
+- **Status:** in_progress
+
+### Phase 7: Deployment & Handover
+<!--
+  WHAT: 部署上线。
+-->
+- [ ] Deploy to Production (Vercel/Docker)
+- [ ] Set up persistent Backup Strategy
+- [ ] User Training (Admin Manual)
 
 ## 关键问题 (Key Questions)
 1. “穿透式管理”部分提到的具体合规要求是什么？（在 findings 中部分回答）
