@@ -29,7 +29,9 @@
 - **PocketBase v0.23+ Schema**: Creating collections via API now requires `fields` property, not `schema`. The `schema` property is ignored, resulting in empty collections.
 - **Guest API Limitations**: Unauthenticated (Guest) users cannot use the `sort: 'created'` parameter on the `services` collection.
 - **Docker CLI Bypass**: When browser automation fails (network/env issues), use `docker exec txy_pocketbase pocketbase superuser create ...` to generate temp credentials for API scripts. This is more robust than debugging local proxies.
-- **Environment Stabilization**: Fixed "Browser Tool Connection Error" (502) by removing conflicting `HTTP_PROXY` variables from the Windows Registry. Automated tools are now fully operational.
+- **[Bug Fix] PocketBase v0.23+ Auth**: The admin login failed with 400 because v0.23+ replaced `pb.admins` with `pb.collection('_superusers')`. Fixed by updating the SDK call.
+- **[Bug Fix] Tiptap Hydration**: Tiptap caused a "Hydration Mismatch" error in Next.js. Fixed by setting `immediatelyRender: false` in `useEditor`.
+- **[Env] Browser Tool Proxy**: `HTTP_PROXY` env vars caused 502 errors for the browser tool. Fixed by clearing them. Automated tools are now fully operational.
 
 ### 3. Next Steps
 - Refine Admin Portal (Edit/Delete functionality).

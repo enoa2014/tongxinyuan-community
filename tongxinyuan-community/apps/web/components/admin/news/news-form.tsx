@@ -28,7 +28,7 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2 } from "lucide-react"
-import { MarkdownEditor } from "./markdown-editor"
+import { RichTextEditor } from "./rich-text-editor"
 
 const newsFormSchema = z.object({
     title: z.string().min(2, "标题至少需要2个字符"),
@@ -54,7 +54,7 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
     const [coverFile, setCoverFile] = useState<File | null>(null)
 
     const form = useForm<NewsFormValues>({
-        resolver: zodResolver(newsFormSchema),
+        resolver: zodResolver(newsFormSchema) as any,
         defaultValues: {
             title: initialData?.title || "",
             slug: initialData?.slug || "",
@@ -215,16 +215,16 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
                     name="content"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>文章正文 (Markdown)</FormLabel>
+                            <FormLabel>文章正文</FormLabel>
                             <FormControl>
-                                <MarkdownEditor
+                                <RichTextEditor
                                     value={field.value}
                                     onChange={field.onChange}
-                                    placeholder="# 请在此撰写文章内容..."
+                                    placeholder="请在此撰写文章内容... 可使用模板快速开始"
                                 />
                             </FormControl>
                             <FormDescription>
-                                支持 Markdown 语法。使用工具栏快速插入格式。
+                                支持富文本编辑与即时预览。点击工具栏“使用模板”可快速插入布局。
                             </FormDescription>
                             <FormMessage />
                         </FormItem>

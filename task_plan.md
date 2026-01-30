@@ -92,6 +92,7 @@ Phase 3: 网站规划与设计 (Website Planning & Design)
 - [x] **[列表]** 实现“志愿者”列表视图
 - [x] **[CRUD]** 实现服务的编辑 (Edit) 和删除 (Delete)
 - [x] **[CRUD]** 实现新闻的发布 (Create) 和编辑 (Edit)
+- [x] **[RichText]** 集成 Tiptap 富文本编辑器 (News Editors) <!-- id: 9 -->
 - [x] **[Flow]** 志愿者审核流程 (Approve/Reject)
 - **Status:** complete
 
