@@ -4,7 +4,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import * as React from "react"
-import { LayoutDashboard, Users, MessageSquareText, FileText, Settings, LogOut, Calendar } from "lucide-react"
+import { LayoutDashboard, Users, MessageSquareText, FileText, Settings, LogOut, Calendar, HeartHandshake } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -22,6 +22,12 @@ const sidebarItems = [
         title: "志愿者管理",
         href: "/admin/volunteers",
         icon: Users,
+        roles: ['social_worker', 'web_admin', 'manager'],
+    },
+    {
+        title: "受助人档案",
+        href: "/admin/beneficiaries",
+        icon: HeartHandshake,
         roles: ['social_worker', 'web_admin', 'manager'],
     },
     {

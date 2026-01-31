@@ -108,3 +108,21 @@
 ### 3. Auth Model: `users` vs `_superusers`
 **Discovery**: Admin users in PocketBase (v0.23+) belong to the system collection `_superusers`, NOT `users`. 
 **Impact**: When debugging permissions, ensuring the rules allow `@request.auth.isAdmin = true` is critical. Authentication attempts must target the correct collection (`pb.collection('_superusers').authWithPassword`).
+
+## 2026-02-01: Beneficiary Profile Form Debugging
+
+### 1. Field Mapping Mismatch: `guardian_phone` vs `phone`
+**Issue**: Creating/Saving a beneficiary failed to persist the contact phone number locally or potentially caused validation errors.
+**Discovery**: 
+- The Frontend Form (`profile-form.tsx`) was binding the "Contact Phone" input to a field named `guardian_phone`.
+- The Backend Schema (`beneficiaries` collection) expects the main contact number in a field named `phone`.
+- PocketBase silently ignored the unknown `guardian_phone` field (or failed if not defined), leaving `phone` empty.
+**Fix**: 
+- Updated `profile-form.tsx` to key the input to `phone`.
+- **Lesson**: When extending schemas, always verify the exact field codenames in the PocketBase Admin UI, especially for fields that might have "logical" names (like "Guardian Phone") vs "system" names (like "Phone").
+
+### 2. Frontend Validation vs Backend Validation
+**Observation**: The frontend Zod schema allowed optional fields, but if the backend has `required` constraints, the error returned (400 Bad Request) needs to be carefully parsed.
+**Solution**: 
+- Implemented robust `fill_and_save` browser scripts to bypass potential React state sync issues during automated testing.
+- Frontend form now correctly maps all fields, ensuring backend validation passes.

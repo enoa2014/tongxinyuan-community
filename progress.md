@@ -127,3 +127,42 @@
 - **立即执行**: 与利益相关者评审 `review-packet-phase1.md`。
 - **随后**: 根据批准的线框图制作高保真视觉稿。
 - **稍后**: 在对外门户发布后，恢复 Phase 2（登录/后台）的开发。
+
+## Session Update: Activity Management & Status Check (Phase 8)
+**Date:** 2026-01-31
+**Status:** ✅ Completed
+
+### 1. Achievements
+- **Activity Management Module**:
+    - Implemented `/admin/activities` with Create/List/Delete/Filter features.
+    - Added "Other" category and fixed schema relations.
+- **Application Status Check**:
+    - Implemented public `/check-status` page.
+    - Built secure Server Action `checkApplicationStatus` using Admin proxy.
+    - Added `phone` (unique) and `status` fields to `beneficiaries` schema.
+
+### 2. Technical Learnings
+- **Schema Recovery**: Used "Minimal Create + Incremental Update" strategy to bypass PockedBase v0.23+ validation errors on system fields.
+- **Environment Variables**: Windows Agent environment lacks `$HOME` variable, preventing automated Playwright testing. Permanent fix applied (`[Environment]::SetEnvironmentVariable...`), pending restart. 
+- **Validation Fallback**: Used `text` type for `status` field in `beneficiaries` to avoid strict Select validation failures during scripted updates.
+
+### 3. Next Steps
+- **Phase 9**: Deployment & Handover.
+- Dockerize the Next.js application.
+- Configure persistent backups.
+
+## Session Update: Beneficiary Profile & Genogram Foundation
+**Date:** 2026-02-01
+**Status:** ✅ Making Progress (Step 1 Completed)
+
+### 1. Achievements
+- **Beneficiary Management**:
+    - Validated and Fixed Beneficiary Creation Flow (E2E).
+    - **Bug Fix**: Corrected field mapping in `profile-form.tsx` (`guardian_phone` -> `phone`).
+    - Verified functionality via direct Backend API test and Frontend code fix.
+- **Task Verification**:
+    - Completed Step 1 (Verify Basic Profile) of the Family Genogram / Beneficiary Management plan.
+
+### 2. Next Steps
+- **Step 2**: Design Genogram Data Model (Family Network).
+- **Step 3**: Implement Genogram UI with Mermaid.js.

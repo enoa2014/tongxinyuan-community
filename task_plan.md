@@ -17,7 +17,7 @@
   WHAT: 你当前正在进行的阶段（例如，“Phase 1”，“Phase 3”）。
   WHY: 快速参考你在任务中的位置。随着进度更新此项。
 -->
-Phase 3: 网站规划与设计 (Website Planning & Design)
+Phase 9: Deployment & Handover
 
 ## 阶段 (Phases)
 <!-- 
@@ -94,8 +94,10 @@ Phase 3: 网站规划与设计 (Website Planning & Design)
 - [x] **[列表]** 实现“新闻动态”列表视图
 - [x] **[列表]** 实现“志愿者”列表视图
 - [x] **[CRUD]** 实现服务的编辑 (Edit) 和删除 (Delete)
-- [x] **[CRUD]** 实现新闻的发布 (Create) 和编辑 (Edit)
-- [x] **[RichText]** 集成 Tiptap 富文本编辑器 (News Editors) <!-- id: 9 -->
+- [x] **[Activities]** 实现活动编辑功能 (Edit Page)
+- [x] **[Activities]** 增强活动列表筛选 (Status, Category)
+- [x] **[Activities]** 修复 Schema 枚举不匹配问题
+- [x] **[RichText]** 实现新闻的发布 (Create) 和编辑 (Edit)
 - [x] **[RichText]** 实现富文本编辑器图片直接上传功能 (Polishing) <!-- id: 10 -->
 - [x] **[RichText]** 实现富文本编辑器图片直接上传功能 (Polishing) <!-- id: 10 -->
 - [x] **[Flow]** 志愿者审核流程 (Approve/Reject)
@@ -119,31 +121,57 @@ Phase 3: 网站规划与设计 (Website Planning & Design)
 <!-- 
   WHAT: Implement Role-Based Access Control to separate Staff, Admin, and Manager.
 -->
-- [ ] **[Feature]** Role-Based Access Control (RBAC)
+- [x] **[Feature]** Role-Based Access Control (RBAC)
     - [x] Design: Define permissions matrix (Social Worker vs Admin vs Manager)
-    - [ ] Schema: Create `staff` collection with role field
-    - [ ] Auth: Migrate `/admin/login` to use `staff` collection
-    - [ ] UI: Update Sidebar to filter menu items by role
+    - [x] Schema: Create `staff` collection with role field
+    - [x] Auth: Migrate `/admin/login` to use `staff` collection
+    - [x] UI: Update Sidebar to filter menu items by role
+- **Status:** complete
 
 ### Phase 7: Core Domain Upgrade (Schema V2)
 <!-- 
   WHAT: Implement the new "Beneficiary" and "Activity" models.
 -->
-- [ ] **[Feature]** Domain Schema V2
-    - [ ] Schema: Create `beneficiaries` collection (Polymorphic)
-    - [ ] Schema: Create `activities` & `activity_participations`
+- [x] **[Feature]** Domain Schema V2
+    - [x] Schema: Create `beneficiaries` collection (Polymorphic)
+    - [x] Schema: Create `activities` & `activity_participations`
     - [ ] Migration: Migrate existing volunteer/consultation data to new schema (optional/TBD)
 
-### Phase 8: Deployment & Handover
+### Phase 8: Functional Implementation (Social Worker Workspace)
 <!-- 
   WHAT: Add high-value user-facing features.
 -->
-- [ ] **[Feature]** Application Status Check
-    - [ ] Create generic "check-status" API (secure proxy)
-    - [x] **[Pending]** UI Page for checking status by phone
-- **Status:** in_progress
+- [x] **[Feature]** Activity Management Module (`/admin/activities`)
+    - [x] UI: Add "Activities" to Admin Sidebar (Worker/Manager only)
+    - [x] Page: Activity List with filters (Status/Category)
+    - [x] Page: Activity Create/Edit Form
+    - [x] Logic: Auto-assign current user as "Lead Staff"
+    - [x] **[Verified]** via `verify-features.ts` and **Browser E2E** (Fixed Schema/Permissions)
+- [x] **[Feature]** Application Status Check
+    - [x] Create generic "check-status" API (secure proxy)
+    - [x] **[Done]** UI Page for checking status by phone
+    - [x] **[Verified]** via `verify-features.ts` and **Browser E2E** (Verified Logic)
+- **Status:** complete
 
-### Phase 7: Deployment & Handover
+### Phase 8.1: Beneficiary Management (Professional Profile) <!-- id: 11 -->
+- [x] **[Database]** Upgrade `beneficiaries` schema (V2.2)
+    - [x] Add Genogram JSON: `family_members` (inc. health, occupation, caregiver status)
+    - [x] Add Privacy & Media: `photo_consent`, `photos`, `documents`
+- [ ] **[UI]** Beneficiary Detail Page (Tabs)
+    - [ ] **Family Tab**: Structured list for Genogram data
+    - [ ] **Media Tab**: Photo wall & Privacy toggle
+    - [ ] **Files Tab**: Document management (Poverty/Medical proofs)
+    - [ ] **Activities Tab**: History of participation (Relation View)
+
+### Phase 8.2: Accommodation System (Inventory & Workflow)
+- [x] **[Database]** Create `accommodation_units` (Rooms/Beds Inventory)
+- [x] **[Database]** Create `accommodation_records` (Workflow & Fees)
+- [ ] **[UI]** Accommodation Manager
+    - [ ] **Inventory View**: Room status board
+    - [ ] **Workflow**: Apply -> Approve (Select Bed) -> Check-in
+    - [ ] **Finance**: Fee tracking & Waiver option
+
+### Phase 9: Deployment & Handover
 <!--
   WHAT: 部署上线。
 -->
