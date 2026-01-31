@@ -75,12 +75,55 @@ async function main() {
             deleteRule: "@request.auth.isAdmin = true"
         });
 
+        // 5. Staff Collection (RBAC)
+        // 5. Staff Collection (RBAC) - Manual robust creation
+        try {
+            await pb.collections.getOne('staff');
+            console.log("Collection 'staff' already exists. Skipping.");
+        } catch {
+            console.log("Creating collection 'staff' (Auth)...");
+            try {
+                // 1. Create empty auth collection
+                const col = await pb.collections.create({
+                    name: 'staff',
+                    type: 'auth',
+                    listRule: "id = @request.auth.id",
+                    viewRule: "id = @request.auth.id",
+                    createRule: "",
+                    updateRule: "id = @request.auth.id",
+                    deleteRule: "",
+                    authRule: "",
+                });
+
+                // 2. Add custom fields
+                // Custom fields: Name, Avatar, Role
+                const fieldsToAdd = [
+                    { name: 'name', type: 'text' },
+                    { name: 'avatar', type: 'file', options: { maxSelect: 1 } },
+                    { name: 'role', type: 'select', required: true, options: { values: ['social_worker', 'web_admin', 'manager'] } }
+                ];
+
+                // Append to existing fields (which include system fields)
+                // We use Array.prototype.push.apply to append all
+                // But col.fields is an array.
+                for (const f of fieldsToAdd) {
+                    col.fields.push(f);
+                }
+
+                await pb.collections.update(col.id, col);
+                console.log("Collection 'staff' created and fields updated.");
+
+            } catch (err) {
+                console.error("Failed to create 'staff':", err);
+            }
+        }
+
     } catch (e) {
         console.error("Error:", e);
     }
 }
 
-async function createCollection(name: string, schema: any[], rules: any) {
+async function createCollection(name: string, fields: any[], rules: any) {
     try {
         await pb.collections.getOne(name);
         console.log(`Collection '${name}' already exists. Skipping.`);
@@ -89,8 +132,8 @@ async function createCollection(name: string, schema: any[], rules: any) {
         try {
             await pb.collections.create({
                 name,
-                type: 'base',
-                schema,
+                type: name === 'staff' ? 'auth' : 'base', // FIXED: Staff must be auth collection
+                fields,
                 ...rules
             });
             console.log(`Collection '${name}' created.`);

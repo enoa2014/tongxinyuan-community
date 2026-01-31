@@ -10,6 +10,8 @@ import {
     getPaginationRowModel,
     SortingState,
     getSortedRowModel,
+    ColumnFiltersState,
+    getFilteredRowModel,
 } from "@tanstack/react-table"
 
 import {
@@ -26,6 +28,8 @@ interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
     itemLabel?: string
+    searchKey?: string
+    searchPlaceholder?: string
     batchActions?: {
         label: string
         onClick: (selectedRows: TData[]) => void
@@ -37,9 +41,12 @@ export function DataTable<TData, TValue>({
     columns,
     data,
     itemLabel = "条数据",
+    searchKey,
+    searchPlaceholder = "搜索...",
     batchActions,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([])
+    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [rowSelection, setRowSelection] = React.useState({})
 
     const table = useReactTable({
@@ -50,16 +57,33 @@ export function DataTable<TData, TValue>({
         onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
         onRowSelectionChange: setRowSelection,
+        onColumnFiltersChange: setColumnFilters,
+        getFilteredRowModel: getFilteredRowModel(),
         state: {
             sorting,
             rowSelection,
+            columnFilters,
         },
     })
 
+    // ... existing render logic ...
     const selectedRows = table.getFilteredSelectedRowModel().rows.map(row => row.original)
 
     return (
         <div>
+            {searchKey && (
+                <div className="flex items-center py-4">
+                    <input
+                        placeholder={searchPlaceholder}
+                        value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
+                        onChange={(event) =>
+                            table.getColumn(searchKey)?.setFilterValue(event.target.value)
+                        }
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 max-w-sm"
+                    />
+                </div>
+            )}
+
             {batchActions && selectedRows.length > 0 && (
                 <div className="mb-4 flex items-center gap-4 rounded-md border bg-muted/50 p-4">
                     <span className="text-sm font-medium">

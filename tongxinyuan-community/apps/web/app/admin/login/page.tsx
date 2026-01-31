@@ -48,8 +48,9 @@ export default function AdminLoginPage() {
         setIsLoading(true)
 
         try {
-            // PocketBase Auth (v0.23+ uses _superusers collection)
-            const authData = await pb.collection('_superusers').authWithPassword(values.email, values.password)
+            // NEW: RBAC Login (Authenticate against 'staff' collection)
+            // Was: const authData = await pb.collection('_superusers').authWithPassword(values.email, values.password)
+            const authData = await pb.collection('staff').authWithPassword(values.email, values.password)
 
             // Set cookie for middleware (optional, PB SDK uses local storage by default but Next.js middleware can't see LS)
             // For now, we rely on PB client-side auth state for rendering, 
@@ -101,7 +102,7 @@ export default function AdminLoginPage() {
                                 <FormItem>
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="admin@tongxy.xyz" {...field} />
+                                        <Input placeholder="worker@tongxy.xyz" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
