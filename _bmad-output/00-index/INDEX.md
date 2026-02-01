@@ -1,6 +1,6 @@
 # 同心源数字化平台 - 项目文档索引 (Project Index)
 
-> **Last Updated**: 2026-01-30
+> **Last Updated**: 2026-02-01
 > **Status**: Phase 1 (Complete) / Phase 5 (In Progress)
 
 本文档是“同心源关爱计划”数字化转型项目的核心导航索引。
@@ -27,6 +27,15 @@
 - **[architecture.md](./03-design/architecture.md)**: 系统架构图 (Next.js + PocketBase + Docker)。
 - **[database-schema.md](./03-design/database-schema.md)**: 数据库模型设计 (Services, News, Users)。
 - **[wireframes.md](./03-design/wireframes.md)**: 低保真原型图。
+
+## 📂 04-Implementation (实施与开发)
+功能开发计划与实施记录。
+
+### Feature: Family Genogram (家庭基因图谱)
+- **[01_task_plan.md](../04-implementation/feature-genogram/01_task_plan.md)**: 基因图谱功能开发计划。
+- **[02_findings.md](../04-implementation/feature-genogram/02_findings.md)**: 技术发现 (Zod验证, React控制组件)。
+- **[03_walkthrough.md](../04-implementation/feature-genogram/03_walkthrough.md)**: 功能演示与验证报告。
+- **[04_progress_log.md](../04-implementation/feature-genogram/04_progress_log.md)**: 开发进度日志。
 
 ## 📂 04-Process (流程与规范)
 开发流程、部署指南与最佳实践。

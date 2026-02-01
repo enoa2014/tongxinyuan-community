@@ -126,3 +126,26 @@
 **Solution**: 
 - Implemented robust `fill_and_save` browser scripts to bypass potential React state sync issues during automated testing.
 - Frontend form now correctly maps all fields, ensuring backend validation passes.
+
+## 2026-02-01: Dev Experience & Environment Optimization
+
+### 1. PocketBase Port Conflict (Zombie Process)
+**Issue**: `pocketbase serve` failed with "address already in use: 8090", but `taskkill` could not terminate the process (Access Denied / Not Found). Likely a "zombie" process from a previous session or system service.
+**Fix**:
+- **Port Migration**: Switched backend port from `8090` to `8091`.
+- **Config Update**: Updated `package.json` (typegen script), `next.config.ts` (image proxy), and `.env.local` / `pocketbase.ts` (API Client).
+- **Lesson**: When "kill" fails on Windows, migrating ports is often faster than deep system debugging.
+
+### 2. Next.js Hydration Mismatch (Layout)
+**Issue**: Warning `A tree hydrated but some attributes... match` in console.
+**Diagnosis**:
+- Often caused by browser extensions (Grammarly, Password Managers) injecting `style` or `class` attributes into `<body>`.
+- Next.js requires server HTM and initial client DOM to match exactly.
+**Fix**:
+- Added `suppressHydrationWarning` to the `<body>` tag in `layout.tsx`.
+- (Note: `<html>` already had it, but `<body>` is safer for extension-heavy environments).
+
+### 3. TypeScript Integration
+**Optimization**: Integrated `pocketbase-typegen`.
+- **Benefit**: Replaced manual `Record` typing with auto-generated `TypedPocketBase`.
+- **Result**: Autocomplete for collection names (`pb.collection('beneficiaries')`) and field names/types.

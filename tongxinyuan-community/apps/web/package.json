@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "next lint",
+    "typegen": "pocketbase-typegen --url http://127.0.0.1:8091 --out types/pocketbase-types.ts --email dev@admin.com --password dev123456"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -61,6 +62,7 @@
     "autoprefixer": "^10.4.23",
     "eslint": "^9",
     "eslint-config-next": "16.1.5",
+    "pocketbase-typegen": "^1.3.3",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.19",
     "typescript": "^5"

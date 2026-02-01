@@ -1,10 +1,20 @@
 # 发现与记录
 
-## 数据模型变更
-- 我们正在从 `beneficiaries` 集合中的 JSON 字段 `family_members` 迁移到独立的 `family_members` 集合。
-- 这样可以更好地支持复杂查询和关系管理 (如健康状况、收入贡献等)。
+## 全局规范 (Supreme Directive)
+- **语言强制**: 所有计划、文档、代码注释、Git 提交信息必须使用 **中文**。
+- **例外**: 专有名词 (Next.js, Supabase) 和代码及其输出保留原文。
 
 ## 技术栈选择
+- **后端迁移**: 尝试迁移 Supabase 失败。原因：阿里云 ECS 只有 2-4G 内存，无法承载 Supabase Docker 全家桶 (需 10+ 容器)。
+- **最终决定**: 回归 **PocketBase**。通过 TypeGen 和日志优化改善开发体验。
+- **部署环境差异分析 (Windows Dev -> Linux Prod)**:
+    - **风险等级**: 中等 (Medium)。
+    - **一致性**: Docker屏蔽了大部分差异，Supabase 的 Docker Compose 配置在两端基本通用。
+    - **潜在坑点**:
+        1. **换行符 (CRLF vs LF)**: Windows 编辑的 `.sh` 脚本或 `.env` 文件若带 CRLF，在 Linux 容器内执行会报错。需配置 `.gitattributes` 强制 `text=auto eol=lf`。
+        2. **文件权限**: Windows 对挂载卷 (Volumes) 的权限管理宽松，Linux 严格。PGData 目录可能在生产环境遇到 Permission Denied 问题。
+        3. **网络模式**: Docker Desktop for Windows 的 `host` 网络模式限制较多，不过 Supabase 默认使用 bridge 网络，影响较小。
+
 - **可视化**: 使用 `mermaid.js` 渲染家庭成员关系的基因图谱。
 - **后端**: PocketBase，使用 `relation` 字段链接到 `beneficiaries`。
 - **前端**: Next.js + React Hook Form + Radix UI。

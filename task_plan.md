@@ -168,8 +168,12 @@ Phase 9: Deployment & Handover
 - [x] **[Database]** Create `accommodation_records` (Workflow & Fees)
 - [ ] **[UI]** Accommodation Manager
     - [ ] **Inventory View**: Room status board
-    - [ ] **Workflow**: Apply -> Approve (Select Bed) -> Check-in
     - [ ] **Finance**: Fee tracking & Waiver option
+    - [ ] **[Dev Environment]** Optimization (2026-02-01) <!-- id: 12 -->
+        - [x] **[TypeGen]** Install & Configure `pocketbase-typegen`
+        - [x] **[Fix]** Resolve Port 8090 Conflict (Migrated to 8091)
+        - [x] **[Logs]** Implement global error interceptor in `pocketbase.ts`
+        - [x] **[Fix]** Resolve Hydration Mismatch (Layout Update)
 
 ### Phase 9: Deployment & Handover
 <!--

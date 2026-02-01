@@ -28,6 +28,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <body
+        suppressHydrationWarning
         className={`antialiased bg-background text-text font-sans`}
       >
         {children}
