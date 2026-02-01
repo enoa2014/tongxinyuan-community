@@ -76,7 +76,7 @@ export function MediaGallery({ items, onRefresh }: MediaGalleryProps) {
                                         <Maximize2 className="h-4 w-4" />
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden bg-black/90 border-none [&>button]:text-white/70 [&>button]:hover:text-white [&>button]:focus:ring-0 [&>button]:focus:ring-offset-0 [&>button]:bg-black/20 [&>button]:hover:bg-black/40 [&>button]:rounded-full [&>button]:p-1 [&>button]:top-2 [&>button]:right-2">
+                                <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden bg-black/90 border-none [&>button]:text-white/70 [&>button]:hover:text-white [&>button]:!ring-0 [&>button]:!ring-offset-0 [&>button]:!outline-none [&>button]:bg-black/20 [&>button]:hover:bg-black/40 [&>button]:rounded-full [&>button]:p-1 [&>button]:top-2 [&>button]:right-2">
                                     <DialogTitle className="sr-only">Photo Preview</DialogTitle>
                                     <div className="relative w-full h-[80vh]">
                                         <Image
