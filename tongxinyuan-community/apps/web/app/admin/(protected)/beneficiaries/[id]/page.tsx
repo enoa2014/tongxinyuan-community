@@ -26,6 +26,12 @@ import { FamilyMember } from "@/types/family-member"
 import { MediaGallery } from "@/components/admin/media/media-gallery"
 import { MediaUpload } from "@/components/admin/media/media-upload"
 import { BeneficiaryMedia } from "@/types/media"
+import { DocumentList } from "@/components/admin/documents/document-list"
+import { DocumentUpload } from "@/components/admin/documents/document-upload"
+import { BeneficiaryDocument } from "@/types/document"
+import { AccommodationHistory } from "@/components/admin/accommodation/accommodation-history"
+import { AccommodationForm } from "@/components/admin/accommodation/accommodation-form"
+import { AccommodationRecord } from "@/types/accommodation"
 
 // import PhotoWall from "@/components/admin/beneficiary/photo-wall"
 // import DocumentManager from "@/components/admin/beneficiary/document-manager"
@@ -50,6 +56,13 @@ export default function BeneficiaryDetailPage() {
     const [editingMember, setEditingMember] = useState<FamilyMember | undefined>(undefined)
     const [mediaItems, setMediaItems] = useState<BeneficiaryMedia[]>([])
     const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false)
+    const [documentItems, setDocumentItems] = useState<BeneficiaryDocument[]>([])
+    const [isDocsDialogOpen, setIsDocsDialogOpen] = useState(false)
+
+    // Accommodation State
+    const [accommodationItems, setAccommodationItems] = useState<AccommodationRecord[]>([])
+    const [isAccommodationDialogOpen, setIsAccommodationDialogOpen] = useState(false)
+    const [editingAccommodation, setEditingAccommodation] = useState<AccommodationRecord | undefined>(undefined)
 
     useEffect(() => {
         if (isNew) {
@@ -58,7 +71,9 @@ export default function BeneficiaryDetailPage() {
         }
         fetchData()
         fetchFamilyMembers()
-        fetchMedia() // Add this
+        fetchMedia()
+        fetchDocuments()
+        fetchAccommodation()
     }, [id])
 
     async function fetchData() {
@@ -99,6 +114,41 @@ export default function BeneficiaryDetailPage() {
             setMediaItems(records.items)
         } catch (e) {
             console.error("Failed to fetch media", e)
+        }
+    }
+
+    async function fetchDocuments() {
+        if (isNew) return
+        try {
+            const records = await pb.collection("beneficiary_documents").getList<BeneficiaryDocument>(1, 50, {
+                filter: `beneficiary_id='${id}'`, // Changed from beneficiary to beneficiary_id to match backend behavior
+            })
+            setDocumentItems(records.items)
+        } catch (e) {
+            console.error("Failed to fetch documents", e)
+        }
+    }
+
+    async function fetchAccommodation() {
+        if (isNew) return
+        try {
+            const records = await pb.collection("accommodation_records").getList<AccommodationRecord>(1, 50, {
+                filter: `beneficiary='${id}'`, // Trying 'beneficiary' as defined in migration
+                sort: '-start_date'
+            })
+            setAccommodationItems(records.items)
+        } catch (e: any) {
+            console.error("Failed to fetch accommodation", e)
+            if (e.status === 400) {
+                // Fallback attempt for field name mismatch
+                try {
+                    const records = await pb.collection("accommodation_records").getList<AccommodationRecord>(1, 50, {
+                        filter: `beneficiary_id='${id}'`,
+                        sort: '-start_date'
+                    })
+                    setAccommodationItems(records.items)
+                } catch (err) { console.error("Fallback fetch failed", err) }
+            }
         }
     }
 
@@ -273,15 +323,81 @@ export default function BeneficiaryDetailPage() {
                 </TabsContent>
 
                 <TabsContent value="files" className="space-y-4">
-                    <div className="p-4 border border-dashed rounded text-center text-muted-foreground">
-                        Documents Manager Placeholder
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h3 className="text-lg font-medium">文档附件 Documents</h3>
+                            <p className="text-sm text-muted-foreground">管理受助人的相关文档（PDF, Word, Excel等）。</p>
+                        </div>
+                        <Dialog open={isDocsDialogOpen} onOpenChange={setIsDocsDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button size="sm">
+                                    <Plus className="h-4 w-4 mr-2" /> 上传文档 Upload
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>上传文档 Upload Document</DialogTitle>
+                                    <DialogDescription>
+                                        支持 PDF, Word, Excel 等格式，最大 10MB。
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DocumentUpload
+                                    beneficiaryId={id}
+                                    onSuccess={() => {
+                                        setIsDocsDialogOpen(false)
+                                        fetchDocuments()
+                                    }}
+                                />
+                            </DialogContent>
+                        </Dialog>
                     </div>
+
+                    <DocumentList items={documentItems} onRefresh={fetchDocuments} />
                 </TabsContent>
 
                 <TabsContent value="accommodation" className="space-y-4">
-                    <div className="p-4 border border-dashed rounded text-center text-muted-foreground">
-                        Accommodation History Placeholder
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h3 className="text-lg font-medium">住宿记录 Accommodation History</h3>
+                            <p className="text-sm text-muted-foreground">记录受助人的入住、转房及退房信息。</p>
+                        </div>
+                        <Dialog open={isAccommodationDialogOpen} onOpenChange={(open) => {
+                            setIsAccommodationDialogOpen(open)
+                            if (!open) setEditingAccommodation(undefined)
+                        }}>
+                            <DialogTrigger asChild>
+                                <Button size="sm" onClick={() => setEditingAccommodation(undefined)}>
+                                    <Plus className="h-4 w-4 mr-2" /> 登记入住/Add Record
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>{editingAccommodation ? "编辑记录 Edit Record" : "登记住宿 Add Accommodation"}</DialogTitle>
+                                    <DialogDescription>
+                                        请准确填写房间号和日期。
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <AccommodationForm
+                                    beneficiaryId={id}
+                                    initialData={editingAccommodation}
+                                    onSuccess={() => {
+                                        setIsAccommodationDialogOpen(false)
+                                        fetchAccommodation()
+                                    }}
+                                    onCancel={() => setIsAccommodationDialogOpen(false)}
+                                />
+                            </DialogContent>
+                        </Dialog>
                     </div>
+
+                    <AccommodationHistory
+                        items={accommodationItems}
+                        onRefresh={fetchAccommodation}
+                        onEdit={(item) => {
+                            setEditingAccommodation(item)
+                            setIsAccommodationDialogOpen(true)
+                        }}
+                    />
                 </TabsContent>
 
                 <TabsContent value="activity" className="space-y-4">
