@@ -10,6 +10,7 @@ const ADMIN_PASS = process.env.PB_ADMIN_PASS || "Tongxinyuan2026!";
 // Helper to quickly get admin authenticated client
 async function getAdminClient() {
     const pb = new PocketBase(PB_URL);
+    pb.autoCancellation(false); // Disable auto-cancellation for parallel requests
     await pb.admins.authWithPassword(ADMIN_EMAIL, ADMIN_PASS);
     return pb;
 }
