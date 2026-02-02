@@ -65,7 +65,31 @@ export function InventoryView({ onSelectUnit }: InventoryViewProps) {
                     }))
             }))
 
-        return { ...building, children: floors }
+        // Handle rooms directly attached to building (no floor)
+        const directRooms = units.filter(u => u.parent === buildingId && u.type === AccommodationUnitsTypeOptions.room)
+            .map(room => ({
+                ...room,
+                children: units.filter(u => u.parent === room.id && u.type === AccommodationUnitsTypeOptions.bed)
+            }))
+
+        let hierarchyChildren = [...floors]
+
+        if (directRooms.length > 0) {
+            // Create a virtual floor for direct rooms
+            hierarchyChildren.push({
+                id: `virtual-floor-${building.id}`,
+                name: "General / Direct Rooms",
+                type: AccommodationUnitsTypeOptions.floor,
+                // Partial mock of required fields
+                collectionId: "",
+                collectionName: "",
+                created: "",
+                updated: "",
+                children: directRooms
+            } as unknown as HierarchyNode)
+        }
+
+        return { ...building, children: hierarchyChildren }
     }
 
     if (loading) return <div>Loading Inventory...</div>
@@ -99,7 +123,7 @@ export function InventoryView({ onSelectUnit }: InventoryViewProps) {
                                         <CardTitle className="text-base flex justify-between items-center">
                                             <span>{room.name}</span>
                                             <Badge variant="outline" className="text-xs font-normal">
-                                                {room.tags || "Standard"}
+                                                {(room as any).tags || "Standard"}
                                             </Badge>
                                         </CardTitle>
                                     </CardHeader>
