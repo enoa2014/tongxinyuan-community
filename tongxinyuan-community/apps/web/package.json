@@ -47,7 +47,7 @@
     "next": "16.1.5",
     "pocketbase": "^0.26.6",
     "react": "19.2.3",
-    "react-day-picker": "^8.10.0",
+    "react-day-picker": "^9.13.0",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.1",
     "tailwind-merge": "^3.4.0",

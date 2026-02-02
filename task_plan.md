@@ -157,17 +157,20 @@ Phase 9: Deployment & Handover
 - [x] **[Database]** Upgrade `beneficiaries` schema (V2.2)
     - [x] Add Genogram JSON: `family_members` (inc. health, occupation, caregiver status)
     - [x] Add Privacy & Media: `photo_consent`, `photos`, `documents`
-- [ ] **[UI]** Beneficiary Detail Page (Tabs)
-    - [ ] **Family Tab**: Structured list for Genogram data
-    - [ ] **Media Tab**: Photo wall & Privacy toggle
-    - [ ] **Files Tab**: Document management (Poverty/Medical proofs)
-    - [ ] **Activities Tab**: History of participation (Relation View)
+- [x] **[UI]** Beneficiary Detail Page (Tabs)
+    - [x] **Family Tab**: Genogram Visualization (`family_members` + Mermaid)
+    - [x] **Medical Tab**: Medical History & Timeline (`medical_logs`)
+    - [x] **Files Tab**: Document management (Poverty/Medical proofs)
+    - [x] **Media Tab**: Photo wall & Privacy toggle (Done)
+    - [x] **Activities Tab**: History of participation (Relation View)
 
 ### Phase 8.2: Accommodation System (Inventory & Workflow)
 - [x] **[Database]** Create `accommodation_units` (Rooms/Beds Inventory)
 - [x] **[Database]** Create `accommodation_records` (Workflow & Fees)
 - [ ] **[UI]** Accommodation Manager
-    - [ ] **Inventory View**: Room status board
+    - [x] **Inventory View**: Room status board
+    - [x] **Check-in/Check-out Workflow**: Dialogs & Logic
+    - [x] **[Verified]** Sidebar & Full Workflow (Fixed Sort 400 error)
     - [ ] **Finance**: Fee tracking & Waiver option
     - [ ] **[Dev Environment]** Optimization (2026-02-01) <!-- id: 12 -->
         - [x] **[TypeGen]** Install & Configure `pocketbase-typegen`

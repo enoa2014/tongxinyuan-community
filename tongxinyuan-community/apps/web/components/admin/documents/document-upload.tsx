@@ -65,7 +65,7 @@ export function DocumentUpload({ beneficiaryId, onSuccess }: DocumentUploadProps
             formData.append("title", values.title)
             formData.append("category", values.category)
             // Use beneficiary_id to match the filter behavior observed
-            formData.append("beneficiary_id", beneficiaryId)
+            formData.append("beneficiary", beneficiaryId)
 
             await pb.collection("beneficiary_documents").create(formData)
 

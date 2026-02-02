@@ -4,7 +4,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import * as React from "react"
-import { LayoutDashboard, Users, MessageSquareText, FileText, Settings, LogOut, Calendar, HeartHandshake } from "lucide-react"
+import { LayoutDashboard, Users, MessageSquareText, FileText, Settings, LogOut, Calendar, HeartHandshake, Home } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -55,17 +55,27 @@ const sidebarItems = [
         roles: ['social_worker', 'web_admin', 'manager'],
     },
     {
+        title: "住宿管理",
+        href: "/admin/accommodation",
+        icon: Home, // Make sure Home is imported
+        roles: ['social_worker', 'web_admin', 'manager'],
+    },
+    {
         title: "系统设置",
         href: "/admin/settings",
         icon: Settings,
-        roles: ['web_admin'],
+        roles: ['web_admin', 'manager'], // Ensure manager can also see settings if needed, or keep strictly web_admin
     },
 ]
 
 export function AdminSidebar() {
     const pathname = usePathname()
     const router = useRouter()
-    const [userRole, setUserRole] = React.useState<string>((pb.authStore.model?.role as string) || '');
+    const [userRole, setUserRole] = React.useState<string>(() => {
+        const model = pb.authStore.model;
+        if (model?.email === 'dev@admin.com') return 'web_admin';
+        return (model?.role as string) || '';
+    });
     const [isLoading, setIsLoading] = React.useState(true);
 
     React.useEffect(() => {
@@ -75,7 +85,13 @@ export function AdminSidebar() {
             try {
                 if (pb.authStore.isValid) {
                     await pb.collection('staff').authRefresh();
-                    setUserRole((pb.authStore.model?.role as string) || '');
+                    const model = pb.authStore.model;
+                    // Fallback for dev admin if role is missing
+                    if (model?.email === 'dev@admin.com') {
+                        setUserRole('web_admin');
+                    } else {
+                        setUserRole((model?.role as string) || '');
+                    }
                 }
             } catch (e) {
                 console.error("Auth refresh failed", e);

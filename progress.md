@@ -183,3 +183,47 @@
 
 ### 2. Next Steps
 - **Immediate**: Proceed to **Phase 8.1: Beneficiary Management** (Medical Logs / Genogram).
+
+## Session Update: Medical Logs, Genogram & Schema Fixing
+**Date:** 2026-02-02
+**Status:** ✅ Completed (Phase 8.1 Part 2)
+
+### 1. Achievements
+- **Beneficiary Documents**:
+    - **Fix**: Repaired `beneficiary_documents` schema using a custom script (`fix-document-schema.ts`) to add missing fields (`beneficiary` relation, `title`, `file`, `category`).
+    - **Note**: PocketBase v0.23+ API (specifically verified on v0.26) requires field options to be **FLATTENED** in the field object, not nested in `options: {}`.
+    - **UI**: Updated `DocumentUpload` component to use standardized `beneficiary` field (was `beneficiary_id`).
+- **Medical Logs**:
+    - Implemented `MedicalTimeline` component (grouped by Month/Year).
+    - Created `MedicalLogForm` with file upload support.
+    - Integrated "Medical Logs" tab into Beneficiary Detail Page.
+- **Family Genogram**:
+    - Enhanced `family_members` schema with `is_caregiver` boolean.
+    - Updated `GenogramView` to highlight primary caregivers (Blue nodes).
+    - Updated `FamilyMemberForm` UI.
+- **Dependency Upgrade**:
+    - Upgraded `react-day-picker` to v9 to resolve React 19 compatibility (`ReactCurrentDispatcher` error).
+    - Updated `calendar.tsx` to use new v9 API (replaced `IconLeft`/`IconRight` with `Chevron` component).
+
+### 2. Technical Learnings
+- **PocketBase Schema Flattener (Specifics)**: The validation error `collectionId: Cannot be blank` when updating a relation field via API means the `collectionId` property is buried inside `options`. It MUST be at the top level of the field object.
+- **React 19 & DayPicker**: Older `react-day-picker` (v8) breaks on Next.js 15/16 (React 19) due to internal React changes. Upgrade to v9 is mandatory.
+
+### 3. Next Steps
+- **Immediate**: Implement **Phase 8.2: Accommodation System** (Inventory & Workflow).
+- **Secondary**: Complete pending tabs in Beneficiary Detail (Media Tab, Activities Tab).
+
+## Session Update: Accommodation System (Phase 8.2)
+**Date:** 2026-02-02
+**Status:** ✅ Making Progress
+
+### 1. Achievements
+- **Accommodation System**:
+    - **Schema**: Created `accommodation_units` (Building/Floor/Room/Bed) and `accommodation_records` (Check-in/out logs).
+    - **Inventory View**: Implemented hierarchical view of beds with status indicators (Available/Occupied).
+    - **Workflow**: Implemented `CheckInDialog` and `CheckOutDialog` with validation and status updates.
+    - **Sidebar**: Fixed empty sidebar issue by adding fallback role logic for `dev@admin.com` and adding the "Accommodation" link.
+
+### 2. Next Steps
+- **Immediate**: Verify the sidebar fix and Check-out flow in the browser.
+- **Secondary**: Implement Finance/Fee tracking for accommodation.

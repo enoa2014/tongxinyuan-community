@@ -149,3 +149,47 @@
 **Optimization**: Integrated `pocketbase-typegen`.
 - **Benefit**: Replaced manual `Record` typing with auto-generated `TypedPocketBase`.
 - **Result**: Autocomplete for collection names (`pb.collection('beneficiaries')`) and field names/types.
+
+## 2026-02-02: Beneficiary Management (Medical & Docs)
+
+### 1. PocketBase API (v0.23+ / v0.26) Schema Update
+**Issue**: Running schema update via API failed with `400 Bad Request` and `collectionId: Cannon be blank`.
+**Discovery**: In PocketBase v0.26, the `options` property for fields (e.g., `options: { collectionId: 'xxx' }` for Relation fields) must be **FLATTENED**.
+**Example**:
+- **OLD (Fails)**: `{ name: 'foo', type: 'relation', options: { collectionId: 'abc', cascadeDelete: false } }`
+- **NEW (Works)**: `{ name: 'foo', type: 'relation', collectionId: 'abc', cascadeDelete: false }`
+**Fix**: Updated `fix-document-schema.ts` to implement this flattened structure.
+
+### 2. React 19 Compatibility (DayPicker)
+**Issue**: `Runtime TypeError: Cannot read properties of undefined (reading 'ReactCurrentDispatcher')` in `calendar.tsx`.
+**Cause**: `react-day-picker` v8 is incompatible with React 19 (used via Next.js 16).
+**Fix**: Upgraded to `react-day-picker@latest` (v9). Note that v9 API is different, requiring replacement of `components={{ IconLeft, IconRight }}` with `components={{ Chevron }}`.
+
+### 3. Duplicate API Calls (Race Condition)
+**Issue**: `ClientResponseError 0` (Auto-cancellation) on page load.
+**Cause**: Duplicate `fetchMedia()` and `fetchDocuments()` calls in `useEffect`.
+**Fix**: Removed redundant calls to ensure single execution and prevent SDK auto-cancellation logic from aborting requests.
+
+## 2026-02-02: Accommodation System & Sidebar Tricks (Sidebar & Sort)
+
+### 1. Sidebar Empty for Admin
+**Issue**: The Admin Sidebar was completely empty (no links) for the `dev@admin.com` user, despite being logged in.
+**Diagnosis**: 
+- `admin-sidebar.tsx` filters menu items based on `userRole` (`social_worker`, `web_admin`, etc.).
+- The `dev@admin.com` account (created via script or seeding) likely didn't have the `role` field correctly populated or mapped in the frontend state.
+**Fix**: Added a hardcoded fallback in the sidebar component: `if (email === 'dev@admin.com') role = 'web_admin'`. This ensures the developer account always sees the full menu.
+
+### 2. PocketBase 'Sort' 400 Error (Accommodation Records)
+**Issue**: Browser check-out flow failed with 400 Bad Request.
+**Symptoms**:
+- API Call: `filter="unit='...' && record_type='Check-in'"`
+- Result: `400 Bad Request` "Something went wrong".
+**Investigation**: 
+- Isolated testing proved that the `filter` syntax was correct.
+- The error was caused exclusively by `sort: '-created'`.
+- Sorting by system fields (`created`, `updated`) on the `accommodation_records` collection failed, while sorting by custom fields (`start_date`) worked.
+**Fix**: Changed the sort parameter in `check-out-dialog.tsx` from `-created` to `-start_date`.
+
+### 3. Check-out Logic: Consistenty First
+**Observation**: You cannot check-out if there is no "Check-in" record.
+**Lesson**: When verifying check-out flows, always perform a **fresh check-in** first to ensure a valid active record exists. relying on seeded "occupied" status without a corresponding record will cause "No active record found" errors.

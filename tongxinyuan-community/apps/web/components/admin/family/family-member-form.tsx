@@ -38,6 +38,7 @@ const formSchema = z.object({
     health_status: z.string().optional(),
     occupation: z.string().optional(),
     income_contribution: z.boolean().default(false),
+    is_caregiver: z.boolean().default(false),
     notes: z.string().optional(),
 })
 
@@ -61,6 +62,7 @@ export function FamilyMemberForm({ beneficiaryId, initialData, onSuccess, onCanc
             health_status: initialData?.health_status || "",
             occupation: initialData?.occupation || "",
             income_contribution: initialData?.income_contribution || false,
+            is_caregiver: initialData?.is_caregiver || false,
             notes: initialData?.notes || "",
         },
     })
@@ -201,6 +203,26 @@ export function FamilyMemberForm({ beneficiaryId, initialData, onSuccess, onCanc
                             <div className="space-y-1 leading-none">
                                 <FormLabel>
                                     家庭经济支柱 Income Contributor
+                                </FormLabel>
+                            </div>
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="is_caregiver"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                            <FormControl>
+                                <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                                <FormLabel>
+                                    主要照顾者 Primary Caregiver
                                 </FormLabel>
                             </div>
                         </FormItem>

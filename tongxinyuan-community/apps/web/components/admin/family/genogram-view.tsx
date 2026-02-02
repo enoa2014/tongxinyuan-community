@@ -50,6 +50,8 @@ export function GenogramView({ beneficiaryName, familyMembers }: GenogramViewPro
                     style = `style ${memberId} fill:#9CA3AF,stroke:#333,stroke-dasharray: 5 5`
                 } else if (member.health_status && (member.health_status.includes("病") || member.health_status.includes("Ill"))) {
                     style = `style ${memberId} fill:#FCA5A5,stroke:#EF4444`
+                } else if (member.is_caregiver) {
+                    style = `style ${memberId} fill:#BFDBFE,stroke:#2563EB,stroke-width:2px`
                 }
 
                 graphDefinition += `    ${memberId}("${safeLabel(member.name)}\n<small>${member.age ? member.age + '岁' : ''}</small>")\n`
@@ -98,6 +100,7 @@ export function GenogramView({ beneficiaryName, familyMembers }: GenogramViewPro
                 />
                 <div className="flex gap-4 text-xs mt-4 justify-center text-muted-foreground">
                     <span className="flex items-center gap-1"><span className="w-3 h-3 bg-green-600 rounded-sm"></span> 受助人</span>
+                    <span className="flex items-center gap-1"><span className="w-3 h-3 bg-blue-200 border-blue-600 border rounded-sm"></span> 照顾者 Caregiver</span>
                     <span className="flex items-center gap-1"><span className="w-3 h-3 bg-red-300 rounded-sm"></span> 患病</span>
                     <span className="flex items-center gap-1"><span className="w-3 h-3 bg-gray-400 rounded-sm border-dashed border border-gray-600"></span> 已故</span>
                 </div>

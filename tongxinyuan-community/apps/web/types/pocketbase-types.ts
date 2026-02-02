@@ -14,12 +14,14 @@ export enum Collections {
 	AccommodationRecords = "accommodation_records",
 	AccommodationUnits = "accommodation_units",
 	Activities = "activities",
+	ActivityParticipations = "activity_participations",
 	Articles = "articles",
 	Beneficiaries = "beneficiaries",
 	BeneficiaryDocuments = "beneficiary_documents",
 	BeneficiaryMedia = "beneficiary_media",
 	FamilyMembers = "family_members",
 	Media = "media",
+	MedicalLogs = "medical_logs",
 	News = "news",
 	ServiceConsultations = "service_consultations",
 	Services = "services",
@@ -121,6 +123,7 @@ export type AccommodationRecordsRecord = {
 	record_type: AccommodationRecordsRecordTypeOptions
 	room_number: string
 	start_date: IsoDateString
+	unit: RecordIdString
 }
 
 export enum AccommodationUnitsTypeOptions {
@@ -177,6 +180,21 @@ export type ActivitiesRecord<Texternal_links = unknown> = {
 	title: string
 	updated: IsoAutoDateString
 	videos?: FileNameString[]
+}
+
+export enum ActivityParticipationsStatusOptions {
+	"enrolled" = "enrolled",
+	"attended" = "attended",
+	"excused" = "excused",
+	"absent" = "absent",
+}
+export type ActivityParticipationsRecord = {
+	activity: RecordIdString
+	beneficiary: RecordIdString
+	feedback?: string
+	id: string
+	rating?: number
+	status?: ActivityParticipationsStatusOptions
 }
 
 export enum ArticlesCategoryOptions {
@@ -240,8 +258,19 @@ export type BeneficiariesRecord<Tfamily_members = unknown> = {
 	updated: IsoAutoDateString
 }
 
+export enum BeneficiaryDocumentsCategoryOptions {
+	"Medical Report" = "Medical Report",
+	"ID Document" = "ID Document",
+	"Application Form" = "Application Form",
+	"Agreement" = "Agreement",
+	"Other" = "Other",
+}
 export type BeneficiaryDocumentsRecord = {
+	beneficiary: RecordIdString
+	category?: BeneficiaryDocumentsCategoryOptions
+	file: FileNameString
 	id: string
+	title?: string
 }
 
 export enum BeneficiaryMediaCategoryOptions {
@@ -277,6 +306,7 @@ export type FamilyMembersRecord = {
 	health_status?: string
 	id: string
 	income_contribution?: boolean
+	is_caregiver?: boolean
 	name: string
 	notes?: string
 	occupation?: string
@@ -288,6 +318,22 @@ export type MediaRecord = {
 	alt?: string
 	file: FileNameString
 	id: string
+}
+
+export type MedicalLogsRecord = {
+	beneficiary?: RecordIdString
+	cost?: string
+	date?: IsoDateString
+	department?: string
+	diagnosis?: string
+	doctor?: string
+	field3?: number
+	field4?: FileNameString
+	hospital?: string
+	id: string
+	images?: string
+	notes?: string
+	treatment?: string
 }
 
 export enum NewsCategoryOptions {
@@ -405,12 +451,14 @@ export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> &
 export type AccommodationRecordsResponse<Texpand = unknown> = Required<AccommodationRecordsRecord> & BaseSystemFields<Texpand>
 export type AccommodationUnitsResponse<Texpand = unknown> = Required<AccommodationUnitsRecord> & BaseSystemFields<Texpand>
 export type ActivitiesResponse<Texternal_links = unknown, Texpand = unknown> = Required<ActivitiesRecord<Texternal_links>> & BaseSystemFields<Texpand>
+export type ActivityParticipationsResponse<Texpand = unknown> = Required<ActivityParticipationsRecord> & BaseSystemFields<Texpand>
 export type ArticlesResponse<Texpand = unknown> = Required<ArticlesRecord> & BaseSystemFields<Texpand>
 export type BeneficiariesResponse<Tfamily_members = unknown, Texpand = unknown> = Required<BeneficiariesRecord<Tfamily_members>> & BaseSystemFields<Texpand>
 export type BeneficiaryDocumentsResponse<Texpand = unknown> = Required<BeneficiaryDocumentsRecord> & BaseSystemFields<Texpand>
 export type BeneficiaryMediaResponse<Texpand = unknown> = Required<BeneficiaryMediaRecord> & BaseSystemFields<Texpand>
 export type FamilyMembersResponse<Texpand = unknown> = Required<FamilyMembersRecord> & BaseSystemFields<Texpand>
 export type MediaResponse<Texpand = unknown> = Required<MediaRecord> & BaseSystemFields<Texpand>
+export type MedicalLogsResponse<Texpand = unknown> = Required<MedicalLogsRecord> & BaseSystemFields<Texpand>
 export type NewsResponse<Texpand = unknown> = Required<NewsRecord> & BaseSystemFields<Texpand>
 export type ServiceConsultationsResponse<Texpand = unknown> = Required<ServiceConsultationsRecord> & BaseSystemFields<Texpand>
 export type ServicesResponse<Texpand = unknown> = Required<ServicesRecord> & BaseSystemFields<Texpand>
@@ -430,12 +478,14 @@ export type CollectionRecords = {
 	accommodation_records: AccommodationRecordsRecord
 	accommodation_units: AccommodationUnitsRecord
 	activities: ActivitiesRecord
+	activity_participations: ActivityParticipationsRecord
 	articles: ArticlesRecord
 	beneficiaries: BeneficiariesRecord
 	beneficiary_documents: BeneficiaryDocumentsRecord
 	beneficiary_media: BeneficiaryMediaRecord
 	family_members: FamilyMembersRecord
 	media: MediaRecord
+	medical_logs: MedicalLogsRecord
 	news: NewsRecord
 	service_consultations: ServiceConsultationsRecord
 	services: ServicesRecord
@@ -454,12 +504,14 @@ export type CollectionResponses = {
 	accommodation_records: AccommodationRecordsResponse
 	accommodation_units: AccommodationUnitsResponse
 	activities: ActivitiesResponse
+	activity_participations: ActivityParticipationsResponse
 	articles: ArticlesResponse
 	beneficiaries: BeneficiariesResponse
 	beneficiary_documents: BeneficiaryDocumentsResponse
 	beneficiary_media: BeneficiaryMediaResponse
 	family_members: FamilyMembersResponse
 	media: MediaResponse
+	medical_logs: MedicalLogsResponse
 	news: NewsResponse
 	service_consultations: ServiceConsultationsResponse
 	services: ServicesResponse

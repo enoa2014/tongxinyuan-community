@@ -32,10 +32,13 @@ import { BeneficiaryDocument } from "@/types/document"
 import { AccommodationHistory } from "@/components/admin/accommodation/accommodation-history"
 import { AccommodationForm } from "@/components/admin/accommodation/accommodation-form"
 import { AccommodationRecord } from "@/types/accommodation"
+import { MedicalTimeline } from "@/components/admin/medical/medical-timeline"
+import { MedicalLogForm } from "@/components/admin/medical/medical-log-form"
 
-// import PhotoWall from "@/components/admin/beneficiary/photo-wall"
-// import DocumentManager from "@/components/admin/beneficiary/document-manager"
-// import AccommodationHistory from "@/components/admin/beneficiary/accommodation-history"
+import { MedicalLogsResponse, ActivityParticipationsResponse, ActivitiesResponse } from "@/types/pocketbase-types"
+import { ActivityHistory } from "@/components/admin/activities/activity-history"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
 
 const pb = new PocketBase(process.env.NEXT_PUBLIC_PB_URL)
 
@@ -59,10 +62,18 @@ export default function BeneficiaryDetailPage() {
     const [documentItems, setDocumentItems] = useState<BeneficiaryDocument[]>([])
     const [isDocsDialogOpen, setIsDocsDialogOpen] = useState(false)
 
+
+    // Medical Logs State
+    const [medicalLogs, setMedicalLogs] = useState<MedicalLogsResponse[]>([])
+    const [isMedicalDialogOpen, setIsMedicalDialogOpen] = useState(false)
+
     // Accommodation State
     const [accommodationItems, setAccommodationItems] = useState<AccommodationRecord[]>([])
     const [isAccommodationDialogOpen, setIsAccommodationDialogOpen] = useState(false)
     const [editingAccommodation, setEditingAccommodation] = useState<AccommodationRecord | undefined>(undefined)
+
+    // Activity State
+    const [activityItems, setActivityItems] = useState<ActivityParticipationsResponse<ActivitiesResponse>[]>([])
 
     useEffect(() => {
         if (isNew) {
@@ -74,6 +85,9 @@ export default function BeneficiaryDetailPage() {
         fetchMedia()
         fetchDocuments()
         fetchAccommodation()
+
+        fetchMedicalLogs()
+        fetchActivityHistory()
     }, [id])
 
     async function fetchData() {
@@ -121,7 +135,7 @@ export default function BeneficiaryDetailPage() {
         if (isNew) return
         try {
             const records = await pb.collection("beneficiary_documents").getList<BeneficiaryDocument>(1, 50, {
-                filter: `beneficiary_id='${id}'`, // Changed from beneficiary to beneficiary_id to match backend behavior
+                filter: `beneficiary="${id}"`, // Changed from beneficiary_id to match standard relation naming
             })
             setDocumentItems(records.items)
         } catch (e) {
@@ -149,6 +163,45 @@ export default function BeneficiaryDetailPage() {
                     setAccommodationItems(records.items)
                 } catch (err) { console.error("Fallback fetch failed", err) }
             }
+        }
+    }
+
+    async function fetchMedicalLogs() {
+        if (isNew) return
+        try {
+            const records = await pb.collection("medical_logs").getList<MedicalLogsResponse>(1, 50, {
+                filter: `beneficiary="${id}"`,
+                sort: '-date',
+            })
+            setMedicalLogs(records.items)
+        } catch (e) {
+            console.error("Failed to fetch medical logs", e)
+        }
+    }
+
+    async function fetchActivityHistory() {
+        if (isNew) return
+        try {
+            const records = await pb.collection("activity_participations").getList<ActivityParticipationsResponse<ActivitiesResponse>>(1, 50, {
+                filter: `beneficiary="${id}"`,
+                sort: '-created',
+                expand: 'activity' // Expand related activity details
+            })
+            setActivityItems(records.items)
+        } catch (e) {
+            console.error("Failed to fetch activity history", e)
+        }
+    }
+
+    async function togglePrivacyConsent(checked: boolean) {
+        try {
+            await pb.collection("beneficiaries").update(id, {
+                photo_usage_consent: checked
+            })
+            setData({ ...data, photo_usage_consent: checked })
+            toast({ title: "Updated", description: "Privacy consent updated." })
+        } catch (e) {
+            toast({ title: "Error", description: "Failed to update consent.", variant: "destructive" })
         }
     }
 
@@ -195,6 +248,7 @@ export default function BeneficiaryDetailPage() {
                     <TabsTrigger value="family" disabled={isNew}>家庭网络</TabsTrigger>
                     <TabsTrigger value="media" disabled={isNew}>影像/隐私</TabsTrigger>
                     <TabsTrigger value="files" disabled={isNew}>文档附件</TabsTrigger>
+                    <TabsTrigger value="medical" disabled={isNew}>医疗日志</TabsTrigger>
                     <TabsTrigger value="accommodation" disabled={isNew}>住宿记录</TabsTrigger>
                     <TabsTrigger value="activity" disabled={isNew}>活动轨迹</TabsTrigger>
                 </TabsList>
@@ -211,6 +265,40 @@ export default function BeneficiaryDetailPage() {
                             <BeneficiaryProfileForm initialData={data} />
                         </CardContent>
                     </Card>
+                </TabsContent>
+
+                <TabsContent value="medical" className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h3 className="text-lg font-medium">医疗日志 Medical Logs</h3>
+                            <p className="text-sm text-muted-foreground">记录就诊、检查、诊断与治疗过程。</p>
+                        </div>
+                        <Dialog open={isMedicalDialogOpen} onOpenChange={setIsMedicalDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button size="sm">
+                                    <Plus className="h-4 w-4 mr-2" /> 添加记录 Add Log
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                                <DialogHeader>
+                                    <DialogTitle>添加医疗日志 Add Medical Log</DialogTitle>
+                                    <DialogDescription>
+                                        请详细记录就诊信息，有助于社工后续跟进。
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <MedicalLogForm
+                                    beneficiaryId={id}
+                                    onSuccess={() => {
+                                        setIsMedicalDialogOpen(false)
+                                        fetchMedicalLogs()
+                                    }}
+                                    onCancel={() => setIsMedicalDialogOpen(false)}
+                                />
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+
+                    <MedicalTimeline logs={medicalLogs} />
                 </TabsContent>
 
                 <TabsContent value="family" className="space-y-4">
@@ -294,29 +382,42 @@ export default function BeneficiaryDetailPage() {
                         <div>
                             <h3 className="text-lg font-medium">影像资料 Photo Wall</h3>
                             <p className="text-sm text-muted-foreground">管理受助人的照片与证明材料。</p>
+
                         </div>
-                        <Dialog open={isMediaDialogOpen} onOpenChange={setIsMediaDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button size="sm">
-                                    <Plus className="h-4 w-4 mr-2" /> 上传照片 Upload
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>上传照片 Upload Photo</DialogTitle>
-                                    <DialogDescription>
-                                        支持最大 5MB 的图片文件。若包含敏感信息，请勿设置为“公开”。
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <MediaUpload
-                                    beneficiaryId={id}
-                                    onSuccess={() => {
-                                        setIsMediaDialogOpen(false)
-                                        fetchMedia()
-                                    }}
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 border px-3 py-2 rounded-md bg-muted/20">
+                                <Switch
+                                    id="privacy-toggle"
+                                    checked={data?.photo_usage_consent || false}
+                                    onCheckedChange={togglePrivacyConsent}
                                 />
-                            </DialogContent>
-                        </Dialog>
+                                <Label htmlFor="privacy-toggle" className="cursor-pointer">
+                                    肖像权授权 (Photo Consent)
+                                </Label>
+                            </div>
+                            <Dialog open={isMediaDialogOpen} onOpenChange={setIsMediaDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button size="sm">
+                                        <Plus className="h-4 w-4 mr-2" /> 上传照片 Upload
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>上传照片 Upload Photo</DialogTitle>
+                                        <DialogDescription>
+                                            支持最大 5MB 的图片文件。若包含敏感信息，请勿设置为“公开”。
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <MediaUpload
+                                        beneficiaryId={id}
+                                        onSuccess={() => {
+                                            setIsMediaDialogOpen(false)
+                                            fetchMedia()
+                                        }}
+                                    />
+                                </DialogContent>
+                            </Dialog>
+                        </div>
                     </div>
 
                     <MediaGallery items={mediaItems} onRefresh={fetchMedia} />
@@ -401,12 +502,16 @@ export default function BeneficiaryDetailPage() {
                 </TabsContent>
 
                 <TabsContent value="activity" className="space-y-4">
-                    <div className="p-4 border border-dashed rounded text-center text-muted-foreground">
-                        Activity Timeline Placeholder
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h3 className="text-lg font-medium">活动轨迹 Activity History</h3>
+                            <p className="text-sm text-muted-foreground">受助人参与社区活动的记录。</p>
+                        </div>
                     </div>
+                    <ActivityHistory items={activityItems} />
                 </TabsContent>
 
             </Tabs>
-        </div>
+        </div >
     )
 }
