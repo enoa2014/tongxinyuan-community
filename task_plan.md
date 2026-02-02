@@ -171,12 +171,15 @@ Phase 9: Deployment & Handover
     - [x] **Inventory View**: Room status board
     - [x] **Check-in/Check-out Workflow**: Dialogs & Logic
     - [x] **[Verified]** Sidebar & Full Workflow (Fixed Sort 400 error)
-    - [ ] **Finance**: Fee tracking & Waiver option
-    - [ ] **[Dev Environment]** Optimization (2026-02-01) <!-- id: 12 -->
+    - [x] **Finance**: Fee tracking & Waiver option
+        - [x] Schema Update (`fee`, `is_waived`, `waiver_reason`)
+        - [x] UI Update (CheckOutDialog)
+    - [x] **[Dev Environment]** Optimization (2026-02-01) <!-- id: 12 -->
         - [x] **[TypeGen]** Install & Configure `pocketbase-typegen`
         - [x] **[Fix]** Resolve Port 8090 Conflict (Migrated to 8091)
         - [x] **[Logs]** Implement global error interceptor in `pocketbase.ts`
         - [x] **[Fix]** Resolve Hydration Mismatch (Layout Update)
+        - [x] **[Fix]** Inventory UI Hierarchy Bug (Direct Rooms)
 
 ### Phase 9: Deployment & Handover
 <!--

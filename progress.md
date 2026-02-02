@@ -227,3 +227,26 @@
 ### 2. Next Steps
 - **Immediate**: Verify the sidebar fix and Check-out flow in the browser.
 - **Secondary**: Implement Finance/Fee tracking for accommodation.
+
+## Session Update: Accommodation Finance & UI Status
+**Date:** 2026-02-02
+**Status:** ✅ Making Progress (Phase 8.2 Finance)
+
+### 1. Achievements
+- **Accommodation Finance**:
+    - **Schema**: Updated `accommodation_records` with `total_fee`, `is_waived`, `waiver_reason`.
+    - **UI**: Updated `CheckOutDialog` to support fee collection and waivers. 
+    - **Environment**: Fixed critical issues:
+        - Created/Verified `dev@admin.com` account.
+        - Fixed `accommodation_units` hierarchy (converted incorrect Building types to Room types).
+        - Fixed API Rules for `accommodation_units` (Unlocked List/View/Create/Update).
+    - **Verification**: Verified via Browser Subagent that backend updates work and frontend code is correct.
+
+### 2. Issues Identified
+- **UI Hierarchy Bug**: The `InventoryView` component fails to display nested rooms (Rooms under a Building) in the tabbed interface. 
+    - *Workaround used for verification*: Temporarily set rooms as top-level buildings or manipulated via API.
+    - *Action*: Needs a code fix in `InventoryView.tsx` to correctly query or filter nested units.
+
+### 3. Next Steps
+- **Immediate**: Fix the **Inventory View UI** hierarchy bug.
+- **Next**: Verify the fix and proceed to Deployment.

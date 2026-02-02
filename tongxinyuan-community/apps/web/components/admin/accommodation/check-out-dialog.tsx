@@ -33,6 +33,9 @@ const pb = new PocketBase(process.env.NEXT_PUBLIC_PB_URL)
 
 const formSchema = z.object({
     end_date: z.string().min(1, "End date is required"),
+    total_fee: z.number().optional(),
+    is_waived: z.boolean().default(false),
+    waiver_reason: z.string().optional(),
     notes: z.string().optional(),
 })
 
@@ -53,23 +56,34 @@ export function CheckOutDialog({ open, onOpenChange, unit, onSuccess }: CheckOut
         resolver: zodResolver(formSchema),
         defaultValues: {
             end_date: format(new Date(), "yyyy-MM-dd"),
+            total_fee: 0,
+            is_waived: false,
+            waiver_reason: "",
             notes: "",
         },
     })
 
+    const isWaived = form.watch("is_waived")
+
     useEffect(() => {
         if (open && unit) {
             fetchActiveRecord(unit.id)
+            form.reset({
+                end_date: format(new Date(), "yyyy-MM-dd"),
+                total_fee: 0,
+                is_waived: false,
+                waiver_reason: "",
+                notes: "",
+            })
         }
     }, [open, unit])
 
     async function fetchActiveRecord(unitId: string) {
         setFetchingRecord(true)
         try {
-            // Find the most recent Check-in record for this unit
             const records = await pb.collection("accommodation_records").getList<AccommodationRecordsRecord>(1, 1, {
                 filter: `unit = "${unitId}" && record_type = "Check-in"`,
-                sort: '-start_date', // Latest one (Note: -created fails on this collection for unknown reasons)
+                sort: '-start_date',
                 expand: 'beneficiary'
             })
 
@@ -92,13 +106,15 @@ export function CheckOutDialog({ open, onOpenChange, unit, onSuccess }: CheckOut
 
         setLoading(true)
         try {
-            // 1. Update the existing record with actual end_date and notes
             await pb.collection("accommodation_records").update(activeRecord.id, {
+                record_type: "Check-out",
                 end_date: values.end_date,
-                notes: activeRecord.notes ? activeRecord.notes + "\n" + values.notes : values.notes
+                notes: activeRecord.notes ? activeRecord.notes + "\n" + values.notes : values.notes,
+                total_fee: values.total_fee,
+                is_waived: values.is_waived,
+                waiver_reason: values.waiver_reason
             })
 
-            // 2. Set unit status back to active
             await pb.collection("accommodation_units").update(unit.id, {
                 status: "active"
             })
@@ -142,19 +158,78 @@ export function CheckOutDialog({ open, onOpenChange, unit, onSuccess }: CheckOut
                                 </div>
                             )}
 
+                            <div className="grid grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="end_date"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>退房日期 End Date</FormLabel>
+                                            <FormControl>
+                                                <Input type="date" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="total_fee"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>费用 Total Fee (¥)</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    {...field}
+                                                    disabled={isWaived}
+                                                    onChange={e => field.onChange(parseFloat(e.target.value))}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
                             <FormField
                                 control={form.control}
-                                name="end_date"
+                                name="is_waived"
                                 render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>退房日期 End Date</FormLabel>
+                                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 p-2 border rounded-md">
                                         <FormControl>
-                                            <Input type="date" {...field} />
+                                            <input
+                                                type="checkbox"
+                                                checked={field.value}
+                                                onChange={field.onChange}
+                                                className="w-4 h-4"
+                                            />
                                         </FormControl>
-                                        <FormMessage />
+                                        <div className="space-y-1 leading-none">
+                                            <FormLabel>
+                                                减免费用 Waive Fee
+                                            </FormLabel>
+                                        </div>
                                     </FormItem>
                                 )}
                             />
+
+                            {isWaived && (
+                                <FormField
+                                    control={form.control}
+                                    name="waiver_reason"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>减免原因 Waiver Reason</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="e.g. Low income family" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
 
                             <FormField
                                 control={form.control}
