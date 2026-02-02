@@ -39,6 +39,7 @@
 ### System Stabilization (2026-02-03)
 - [Summary of Fixes](../04-implementation/system-stabilization/01_summary.md)
 - [Database Schema & API](../04-implementation/system-stabilization/02_database_schema.md)
+- [Test Data & Credentials](../04-implementation/system-stabilization/03_test_data_and_credentials.md)
 
 
 ## 04-Process

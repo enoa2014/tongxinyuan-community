@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 import { pb } from "@/lib/pocketbase"
+import { DataSeederCard } from "@/components/admin/system/data-seeder-card"
 
 const settingsFormSchema = z.object({
     site_name: z.string().min(2, {
@@ -214,6 +215,8 @@ export default function SettingsPage() {
                     </Button>
                 </form>
             </Form>
-        </div>
+
+            <DataSeederCard />
+        </div >
     )
 }
