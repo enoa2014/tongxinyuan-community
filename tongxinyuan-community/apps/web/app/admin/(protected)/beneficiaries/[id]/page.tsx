@@ -110,7 +110,6 @@ export default function BeneficiaryDetailPage() {
         try {
             const records = await pb.collection("family_members").getList<FamilyMember>(1, 50, {
                 filter: `beneficiary="${id}"`,
-                sort: '-created'
             })
             setFamilyMembers(records.items)
         } catch (e) {
@@ -123,7 +122,6 @@ export default function BeneficiaryDetailPage() {
         try {
             const records = await pb.collection("beneficiary_media").getList<BeneficiaryMedia>(1, 50, {
                 filter: `beneficiary="${id}"`,
-                sort: '-created'
             })
             setMediaItems(records.items)
         } catch (e) {
@@ -184,7 +182,6 @@ export default function BeneficiaryDetailPage() {
         try {
             const records = await pb.collection("activity_participations").getList<ActivityParticipationsResponse<ActivitiesResponse>>(1, 50, {
                 filter: `beneficiary="${id}"`,
-                sort: '-created',
                 expand: 'activity' // Expand related activity details
             })
             setActivityItems(records.items)
