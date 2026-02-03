@@ -32,13 +32,15 @@ const pb = new PocketBase(process.env.NEXT_PUBLIC_PB_URL)
 
 const formSchema = z.object({
     name: z.string().min(1, "姓名不能为空"),
-    relation: z.enum(["Father", "Mother", "Brother", "Sister", "Grandparent", "Other"]),
+    name: z.string().min(1, "姓名不能为空"),
+    relation: z.string().min(1, "请选择关系"),
     // Accept string or number from input. Transform empty string to null.
     age: z.union([z.string(), z.number()]).optional().transform((val) => (val === "" ? null : Number(val))),
     health_status: z.string().optional(),
     occupation: z.string().optional(),
     income_contribution: z.boolean().default(false),
     is_caregiver: z.boolean().default(false),
+    is_guardian: z.boolean().default(false),
     notes: z.string().optional(),
 })
 
@@ -57,12 +59,13 @@ export function FamilyMemberForm({ beneficiaryId, initialData, onSuccess, onCanc
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: initialData?.name || "",
-            relation: (initialData?.relation as any) || "Father",
+            relation: initialData?.relation || "父亲",
             age: initialData?.age ?? "", // Use empty string for undefined to verify valid input state
             health_status: initialData?.health_status || "",
             occupation: initialData?.occupation || "",
             income_contribution: initialData?.income_contribution || false,
             is_caregiver: initialData?.is_caregiver || false,
+            is_guardian: initialData?.is_guardian || false,
             notes: initialData?.notes || "",
         },
     })
@@ -133,12 +136,22 @@ export function FamilyMemberForm({ beneficiaryId, initialData, onSuccess, onCanc
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        <SelectItem value="Father">父亲 Father</SelectItem>
-                                        <SelectItem value="Mother">母亲 Mother</SelectItem>
-                                        <SelectItem value="Brother">兄弟 Brother</SelectItem>
-                                        <SelectItem value="Sister">姐妹 Sister</SelectItem>
-                                        <SelectItem value="Grandparent">祖辈 Grandparent</SelectItem>
-                                        <SelectItem value="Other">其他 Other</SelectItem>
+                                        <SelectItem value="父亲">父亲 (Father)</SelectItem>
+                                        <SelectItem value="母亲">母亲 (Mother)</SelectItem>
+                                        <SelectItem value="兄弟">兄弟 (Brother)</SelectItem>
+                                        <SelectItem value="姐妹">姐妹 (Sister)</SelectItem>
+                                        <SelectItem value="爷爷">爷爷 (Grandfather)</SelectItem>
+                                        <SelectItem value="奶奶">奶奶 (Grandmother)</SelectItem>
+                                        <SelectItem value="祖父">祖父 (Grandfather)</SelectItem>
+                                        <SelectItem value="祖母">祖母 (Grandmother)</SelectItem>
+                                        <SelectItem value="外祖父">外祖父 (Grandfather)</SelectItem>
+                                        <SelectItem value="外祖母">外祖母 (Grandmother)</SelectItem>
+                                        <SelectItem value="叔叔">叔叔 (Uncle)</SelectItem>
+                                        <SelectItem value="姑姑">姑姑 (Aunt)</SelectItem>
+                                        <SelectItem value="舅舅">舅舅 (Uncle)</SelectItem>
+                                        <SelectItem value="姨妈">姨妈 (Aunt)</SelectItem>
+                                        <SelectItem value="监护人">监护人 (Guardian)</SelectItem>
+                                        <SelectItem value="其他">其他 (Other)</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />

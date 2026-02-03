@@ -21,7 +21,11 @@ A tool is available to quickly populate the database with dummy records for test
 
 ### Features
 *   **Generate 10 Users**:
-    *   Creates 10 `Beneficiaries` (Name: `[Test] Beneficiary X`).
+    *   Creates 10 `Beneficiaries` (Name: `[Test] Beneficiary X` or Realistic Names like `[Test] 林雨桐`).
+    *   **Features Enhanced (Phase 8.2)**:
+        *   **Realistic Profiles**: Generates gender, birth date, hometown, and beneficiary type (`illness_child`/`girl_student`).
+        *   **Family Network**: Automatically creates 2-4 family members per beneficiary (Parents, Grandparents), assigning roles like "Primary Caregiver" or "Income Contributor".
+        *   **Medical History**: Generates 3-5 medical logs (Diagnosis, Chemotherapy records) for each beneficiary.
     *   Creates 5 `Volunteers` (Name: `[Test] Volunteer X`).
 *   **Clear Test Data**:
     *   Permanently deletes **ALL** records where the name starts with `[Test]`.

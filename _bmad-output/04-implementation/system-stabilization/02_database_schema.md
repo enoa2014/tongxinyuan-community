@@ -98,7 +98,36 @@ Patient families and service recipients.
 | `name` | text | Yes | |
 | `phone` | text | No | |
 | `id_card` | text | No | |
+| `type` | select | No | `[illness_child, girl_student]` (Added Phase 8.2) |
 | `status` | select | No | `[active, archived]` |
+
+> **Note**: `cascadeDelete` is enabled for all child collections (`family_members`, `medical_logs`, `accommodation_records`, etc.) pointing to `beneficiaries`. Deleting a beneficiary will automatically remove all associated records.
+
+#### `family_members`
+- **Access**: Staff Only.
+- **Frontend Interface**: `FamilyMember`
+
+| Field | Type | Options |
+| :--- | :--- | :--- |
+| `beneficiary` | relation | `cascadeDelete: true` |
+| `name` | text | |
+| `relation` | select | `[父亲, 母亲, 爷爷, 奶奶...]` |
+| `is_caregiver` | bool | Default: false |
+| `is_guardian` | bool | Default: false |
+| `income_contribution` | bool | Default: false |
+
+#### `medical_logs`
+- **Access**: Staff Only.
+- **Frontend Interface**: `MedicalLogsResponse`
+
+| Field | Type | Options |
+| :--- | :--- | :--- |
+| `beneficiary` | relation | `cascadeDelete: true` |
+| `hospital` | text | |
+| `department` | text | |
+| `date` | date | |
+| `diagnosis` | text | |
+| `treatment` | text | |
 
 #### `volunteer_applications`
 Online signup forms.

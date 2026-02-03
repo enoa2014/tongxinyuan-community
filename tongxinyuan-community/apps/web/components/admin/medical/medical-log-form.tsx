@@ -49,11 +49,12 @@ const formSchema = z.object({
 
 interface MedicalLogFormProps {
     beneficiaryId: string
+    initialData?: any // Dictionary of the log data
     onSuccess?: () => void
     onCancel?: () => void
 }
 
-export function MedicalLogForm({ beneficiaryId, onSuccess, onCancel }: MedicalLogFormProps) {
+export function MedicalLogForm({ beneficiaryId, initialData, onSuccess, onCancel }: MedicalLogFormProps) {
     const { toast } = useToast()
     const [loading, setLoading] = useState(false)
     const [files, setFiles] = useState<FileList | null>(null)
@@ -61,9 +62,14 @@ export function MedicalLogForm({ beneficiaryId, onSuccess, onCancel }: MedicalLo
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            hospital: "北京儿童医院", // Suggestion
-            department: "血液科",
-            date: new Date(),
+            hospital: initialData?.hospital || "北京儿童医院",
+            department: initialData?.department || "血液科",
+            doctor: initialData?.doctor || "",
+            diagnosis: initialData?.diagnosis || "",
+            treatment: initialData?.treatment || "",
+            cost: initialData?.cost ? String(initialData.cost) : "",
+            notes: initialData?.notes || "",
+            date: initialData?.date ? new Date(initialData.date) : new Date(),
         },
     })
 
@@ -81,15 +87,22 @@ export function MedicalLogForm({ beneficiaryId, onSuccess, onCancel }: MedicalLo
             if (values.cost) formData.append("cost", values.cost)
             if (values.notes) formData.append("notes", values.notes)
 
+            // For update, we might want to keep existing images if no new ones are uploaded?
+            // PocketBase handles file updates by appending if I recall, but usually strict replace needs care.
+            // For now, let's just append new files if provided.
             if (files && files.length > 0) {
                 for (let i = 0; i < files.length; i++) {
                     formData.append("images", files[i])
                 }
             }
 
-            await pb.collection("medical_logs").create(formData)
-
-            toast({ title: "创建成功", description: "医疗日志已添加" })
+            if (initialData?.id) {
+                await pb.collection("medical_logs").update(initialData.id, formData)
+                toast({ title: "更新成功", description: "医疗日志已更新" })
+            } else {
+                await pb.collection("medical_logs").create(formData)
+                toast({ title: "创建成功", description: "医疗日志已添加" })
+            }
             onSuccess?.()
         } catch (e: any) {
             console.error("Submission error:", e)

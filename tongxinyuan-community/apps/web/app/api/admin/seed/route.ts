@@ -97,6 +97,7 @@ export async function POST(request: Request) {
             const lastName = rand(LAST_NAMES);
             const name = genName(gender, lastName);
             const disease = rand(DISEASES);
+            const type = Math.random() > 0.8 ? 'girl_student' : 'illness_child';
             const hometown = rand(HOMETOWNS);
             const age = randInt(2, 16);
 
@@ -113,6 +114,7 @@ export async function POST(request: Request) {
 
             const payload = {
                 name: name,
+                type: type,
                 phone: guardianPhone, // Use guardian phone as main contact
                 id_card: `440${randInt(1000, 9999)}${birthDate.getFullYear()}${String(birthDate.getMonth() + 1).padStart(2, '0')}${String(birthDate.getDate()).padStart(2, '0')}${randInt(1, 9)}${randInt(0, 9)}XXXX`,
                 status: Math.random() > 0.8 ? 'archived' : 'active',
@@ -142,18 +144,25 @@ export async function POST(request: Request) {
             subOperations.push(pb.collection('family_members').create({
                 beneficiary: b.id,
                 name: b.guardian_name,
-                relation: "监护人",
+                relation: b.guardian_relation, // Fix: Use the relation name generated earlier
                 age: randInt(30, 50),
                 health_status: "健康",
                 occupation: rand(OCCUPATIONS),
-                phone: b.guardian_phone
+                phone: b.guardian_phone,
+                is_guardian: true,
+                is_caregiver: true,
+                income_contribution: true
             }));
 
-            // Family Members (0-2 additional)
-            const numFamily = randInt(0, 2);
+            // Family Members (2-4 additional)
+            const numFamily = randInt(2, 4);
             for (let j = 0; j < numFamily; j++) {
                 const rel = rand(RELATIONS);
+                // Avoid duplicating primary guardian relation if possible, but keep simple
                 const memName = rel.key === 'F' || rel.key === 'G' ? genName('M', surname) : genName('F');
+
+                const isCaregiver = Math.random() > 0.7;
+                const isEarner = Math.random() > 0.7;
 
                 subOperations.push(pb.collection('family_members').create({
                     beneficiary: b.id,
@@ -162,13 +171,16 @@ export async function POST(request: Request) {
                     age: randInt(rel.ageMin, rel.ageMax),
                     health_status: Math.random() > 0.9 ? "患有慢性病" : "健康",
                     occupation: rand(OCCUPATIONS),
-                    phone: genPhone()
+                    phone: genPhone(),
+                    is_guardian: false,
+                    is_caregiver: isCaregiver,
+                    income_contribution: isEarner
                 }));
             }
 
-            // Medical Logs (1-5 per person)
+            // Medical Logs (3-5 per person)
             if (b.status === 'active') {
-                const numLogs = randInt(1, 5);
+                const numLogs = randInt(3, 5);
                 for (let k = 0; k < numLogs; k++) {
                     const date = new Date();
                     date.setDate(date.getDate() - randInt(1, 180));

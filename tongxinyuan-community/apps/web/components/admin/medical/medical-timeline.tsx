@@ -7,21 +7,55 @@ import { MedicalLogsResponse } from "@/types/pocketbase-types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { ImageIcon, FileText, Stethoscope, Building2, User } from "lucide-react"
+import { ImageIcon, FileText, Stethoscope, Building2, User, Edit, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Button } from "@/components/ui/button"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import PocketBase from "pocketbase"
+import { useToast } from "@/components/ui/use-toast"
+import { MedicalLogForm } from "./medical-log-form"
+
+const pb = new PocketBase(process.env.NEXT_PUBLIC_PB_URL)
 
 interface MedicalTimelineProps {
     logs: MedicalLogsResponse[]
+    onRefresh: () => void
 }
 
 const getFileUrl = (record: MedicalLogsResponse, filename: string) => {
     return `${process.env.NEXT_PUBLIC_PB_URL}/api/files/${record.collectionId}/${record.id}/${filename}`
 }
 
-export function MedicalTimeline({ logs }: MedicalTimelineProps) {
+export function MedicalTimeline({ logs, onRefresh }: MedicalTimelineProps) {
+    const { toast } = useToast()
+    const [editingLog, setEditingLog] = useState<MedicalLogsResponse | null>(null)
+    const [deletingId, setDeletingId] = useState<string | null>(null)
+
+    const handleDelete = async () => {
+        if (!deletingId) return
+        try {
+            await pb.collection("medical_logs").delete(deletingId)
+            toast({ title: "Deleted", description: "Record deleted successfully" })
+            onRefresh()
+        } catch (e) {
+            console.error(e)
+            toast({ title: "Error", description: "Failed to delete", variant: "destructive" })
+        } finally {
+            setDeletingId(null)
+        }
+    }
     if (!logs || logs.length === 0) {
         return (
             <div className="text-center py-10 text-muted-foreground border-2 border-dashed rounded-lg">
@@ -61,16 +95,57 @@ export function MedicalTimeline({ logs }: MedicalTimelineProps) {
 
                     <div className="md:ml-[180px] space-y-6">
                         {monthLogs.map((log) => (
-                            <TimelineItem key={log.id} log={log} />
+                            <TimelineItem
+                                key={log.id}
+                                log={log}
+                                onEdit={() => setEditingLog(log)}
+                                onDelete={() => setDeletingId(log.id)}
+                            />
                         ))}
                     </div>
                 </div>
             ))}
+
+            <AlertDialog open={!!deletingId} onOpenChange={(open) => !open && setDeletingId(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>确认删除此记录？</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            此操作不可逆。确认删除该医疗日志吗？
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>取消</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            删除
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <Dialog open={!!editingLog} onOpenChange={(open) => !open && setEditingLog(null)}>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>编辑医疗日志 Edit Log</DialogTitle>
+                    </DialogHeader>
+                    {editingLog && (
+                        <MedicalLogForm
+                            beneficiaryId={editingLog.beneficiary}
+                            initialData={editingLog}
+                            onSuccess={() => {
+                                setEditingLog(null)
+                                onRefresh()
+                            }}
+                            onCancel={() => setEditingLog(null)}
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }
 
-function TimelineItem({ log }: { log: MedicalLogsResponse }) {
+function TimelineItem({ log, onEdit, onDelete }: { log: MedicalLogsResponse, onEdit: () => void, onDelete: () => void }) {
     // Process images: The type might be string (single) or string[] (multiple) or undefined?
     // Based on pocketbase-types.ts, it says `images?: string`.
     // But we set it to multiple in PB.
@@ -83,7 +158,7 @@ function TimelineItem({ log }: { log: MedicalLogsResponse }) {
         : (typeof log.images === 'string' && log.images.length > 0 ? [log.images] : [])
 
     return (
-        <Card className="relative hover:shadow-md transition-shadow">
+        <Card className="relative hover:shadow-md transition-shadow group">
             <div className="absolute -left-[39px] top-6 w-5 h-5 rounded-full border-4 border-background bg-primary hidden md:block" />
             <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
@@ -111,6 +186,14 @@ function TimelineItem({ log }: { log: MedicalLogsResponse }) {
                             <div className="text-xs text-muted-foreground">自费金额</div>
                         </div>
                     )}
+                </div>
+                <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 p-1 rounded-md">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={onEdit}>
+                        <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={onDelete}>
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
                 </div>
             </CardHeader>
             <CardContent>

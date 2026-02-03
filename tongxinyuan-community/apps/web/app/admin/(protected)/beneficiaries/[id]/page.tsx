@@ -295,7 +295,7 @@ export default function BeneficiaryDetailPage() {
                         </Dialog>
                     </div>
 
-                    <MedicalTimeline logs={medicalLogs} />
+                    <MedicalTimeline logs={medicalLogs} onRefresh={fetchMedicalLogs} />
                 </TabsContent>
 
                 <TabsContent value="family" className="space-y-4">
