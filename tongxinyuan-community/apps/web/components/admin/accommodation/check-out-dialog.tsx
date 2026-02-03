@@ -159,6 +159,16 @@ export function CheckOutDialog({ open, onOpenChange, unit, onSuccess }: CheckOut
                             )}
 
                             <div className="grid grid-cols-2 gap-4">
+                                <FormItem>
+                                    <FormLabel>入住日期 Start Date</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            value={activeRecord ? format(new Date(activeRecord.start_date), "yyyy-MM-dd") : ""}
+                                            disabled
+                                        />
+                                    </FormControl>
+                                </FormItem>
+
                                 <FormField
                                     control={form.control}
                                     name="end_date"

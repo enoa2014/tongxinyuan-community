@@ -1,10 +1,9 @@
-
 "use client"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import * as React from "react"
-import { LayoutDashboard, Users, MessageSquareText, FileText, Settings, LogOut, Calendar, HeartHandshake, Home } from "lucide-react"
+import { LayoutDashboard, Users, MessageSquareText, FileText, Settings, LogOut, Calendar, HeartHandshake, Home, Gift } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -55,6 +54,12 @@ const sidebarItems = [
         roles: ['social_worker', 'web_admin', 'manager'],
     },
     {
+        title: "捐赠公示 (Donations)",
+        href: "/admin/donations/create",
+        icon: Gift,
+        roles: ['web_admin', 'manager'],
+    },
+    {
         title: "住宿管理",
         href: "/admin/accommodation",
         icon: Home, // Make sure Home is imported
@@ -73,6 +78,7 @@ export function AdminSidebar() {
     const router = useRouter()
     const [userRole, setUserRole] = React.useState<string>(() => {
         const model = pb.authStore.model;
+        if (model?.collectionName === '_superusers') return 'superuser';
         if (model?.email === 'dev@admin.com') return 'web_admin';
         return (model?.role as string) || '';
     });
@@ -84,13 +90,19 @@ export function AdminSidebar() {
         const refreshAuth = async () => {
             try {
                 if (pb.authStore.isValid) {
-                    await pb.collection('staff').authRefresh();
-                    const model = pb.authStore.model;
-                    // Fallback for dev admin if role is missing
-                    if (model?.email === 'dev@admin.com') {
-                        setUserRole('web_admin');
+                    const collectionName = pb.authStore.model?.collectionName;
+                    if (collectionName === '_superusers') {
+                        await pb.collection('_superusers').authRefresh();
+                        setUserRole('superuser');
                     } else {
-                        setUserRole((model?.role as string) || '');
+                        await pb.collection('staff').authRefresh();
+                        const model = pb.authStore.model;
+                        // Fallback for dev admin if role is missing
+                        if (model?.email === 'dev@admin.com') {
+                            setUserRole('web_admin');
+                        } else {
+                            setUserRole((model?.role as string) || '');
+                        }
                     }
                 }
             } catch (e) {
@@ -108,7 +120,10 @@ export function AdminSidebar() {
         router.push("/admin/login")
     }
 
+    const isSuperUser = pb.authStore.model?.collectionName === '_superusers' || pb.authStore.model?.email === 'root@debug.com';
+
     const filteredItems = sidebarItems.filter(item => {
+        if (isSuperUser) return true; // Superusers see everything
         if (!item.roles) return true;
         return item.roles.includes(userRole);
     });

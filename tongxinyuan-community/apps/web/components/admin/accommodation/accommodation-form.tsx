@@ -22,10 +22,12 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import PocketBase from "pocketbase"
 import { useToast } from "@/components/ui/use-toast"
-import { AccommodationRecord } from "@/types/accommodation"
+import { AccommodationRecordsRecord, AccommodationUnitsRecord } from "@/types/pocketbase-types"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
 
 const pb = new PocketBase(process.env.NEXT_PUBLIC_PB_URL)
 
@@ -39,7 +41,7 @@ const formSchema = z.object({
 
 interface AccommodationFormProps {
     beneficiaryId: string
-    initialData?: AccommodationRecord
+    initialData?: AccommodationRecordsRecord
     onSuccess?: () => void
     onCancel?: () => void
 }
@@ -47,38 +49,94 @@ interface AccommodationFormProps {
 export function AccommodationForm({ beneficiaryId, initialData, onSuccess, onCancel }: AccommodationFormProps) {
     const { toast } = useToast()
     const [loading, setLoading] = useState(false)
+    const [isLinked, setIsLinked] = useState(true) // Default to linked for new records
+    const [availableUnits, setAvailableUnits] = useState<AccommodationUnitsRecord[]>([])
+    const [unitsLoading, setUnitsLoading] = useState(false)
+
+    // Load available units when 'isLinked' becomes true
+    useEffect(() => {
+        if (isLinked) {
+            setUnitsLoading(true)
+            pb.collection("accommodation_units").getList(1, 100, {
+                filter: 'status = "active" && (type = "bed" || type = "room")', // Only fetch available beds or rooms
+                sort: 'name'
+            }).then(res => {
+                setAvailableUnits(res.items)
+            }).catch(e => {
+                console.error("Failed to load units", e)
+            }).finally(() => {
+                setUnitsLoading(false)
+            })
+        }
+    }, [isLinked])
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            room_number: initialData?.room_number || "",
+            room_number: initialData?.room_number || "待分配", // Default placeholder
             record_type: initialData?.record_type || "Check-in",
-            // PocketBase returns UTC strings '2026-02-01 12:00:00.000Z', input date expects 'YYYY-MM-DD'
             start_date: initialData?.start_date ? initialData.start_date.split(' ')[0] : new Date().toISOString().split('T')[0],
             end_date: initialData?.end_date ? initialData.end_date.split(' ')[0] : "",
             notes: initialData?.notes || "",
         },
     })
 
+    // If editing an existing record that has a linked unit, keep it linked but maybe valid to strictly manual if unit is gone
+    useEffect(() => {
+        if (initialData?.unit) {
+            setIsLinked(true)
+        } else if (initialData && !initialData.unit) {
+            setIsLinked(false)
+        }
+    }, [initialData])
+
+    // State to track selected unit ID for submission (separate from typical form field if we want custom logic)
+    const [selectedUnitId, setSelectedUnitId] = useState(initialData?.unit || "")
+
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setLoading(true)
         try {
-            // PB date fields often require full datetime or proper formatting. 
-            // Appending time to ensure valid Date parsing just in case.
-            const payload = {
+            // Prepare payload
+            const payload: any = {
                 ...values,
                 start_date: values.start_date ? `${values.start_date} 00:00:00` : "",
                 end_date: values.end_date ? `${values.end_date} 00:00:00` : "",
                 beneficiary: beneficiaryId,
             }
 
-            if (initialData?.id) {
-                await pb.collection("accommodation_records").update(initialData.id, payload)
+            // Logic for Linked vs Manual
+            if (isLinked) {
+                if (!selectedUnitId) {
+                    throw new Error("请选择一个房源 (Please select a unit)")
+                }
+                payload.unit = selectedUnitId
+                // Snapshot the name
+                const unitName = availableUnits.find(u => u.id === selectedUnitId)?.name || initialData?.room_number || "Unknown"
+                payload.room_number = unitName
+            } else {
+                // Manual mode: remove unit link if it existed? Or just ignore? usually we assume no unit link.
+                // If we are editing and switching to manual, we might want to clear 'unit'.
+                payload.unit = null
+                // room_number is already in 'values' from the input
+            }
+
+            let recordId = initialData?.id
+
+            if (recordId) {
+                await pb.collection("accommodation_records").update(recordId, payload)
                 toast({ title: "已更新", description: "住宿记录已更新" })
             } else {
-                await pb.collection("accommodation_records").create(payload)
+                const rec = await pb.collection("accommodation_records").create(payload)
+                recordId = rec.id
                 toast({ title: "已创建", description: "新住宿记录已添加" })
             }
+
+            // Post-creation Side Effects: Update Unit Status
+            // Only update status if it's a NEW check-in and we have a linked unit
+            if (isLinked && selectedUnitId && (!initialData || !initialData.unit)) {
+                await pb.collection("accommodation_units").update(selectedUnitId, { status: "occupied" })
+            }
+
             onSuccess?.()
         } catch (e: any) {
             console.error(e)
@@ -95,20 +153,73 @@ export function AccommodationForm({ beneficiaryId, initialData, onSuccess, onCan
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                        control={form.control}
-                        name="room_number"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>房间号 Room No.</FormLabel>
-                                <FormControl>
-                                    <Input {...field} placeholder="e.g. 101" />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
+
+                {/* Mode Toggle */}
+                <div className="flex items-center space-x-2 bg-muted/20 p-3 rounded-md">
+                    <div className="flex-1">
+                        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            关联库存房源 (Link to Inventory)
+                        </label>
+                        <p className="text-xs text-muted-foreground mt-1">
+                            {isLinked ? "从现有空闲床位中选择，将自动更新房源状态。" : "仅作为历史记录手动输入，不占用当前库存。"}
+                        </p>
+                    </div>
+                    <input
+                        type="checkbox"
+                        className="toggle toggle-primary" // Assuming daisyUI or similar, replacing with simple checkbox or Switch if available
+                        checked={isLinked}
+                        onChange={(e) => setIsLinked(e.target.checked)}
+                        style={{ width: "2rem", height: "1rem" }} // Simple inline style fallback
                     />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    {isLinked ? (
+                        <FormItem>
+                            <FormLabel>选择房源 Select Unit</FormLabel>
+                            <Select
+                                value={selectedUnitId}
+                                onValueChange={(val) => {
+                                    setSelectedUnitId(val)
+                                    // Auto-fill room number for display/snapshot
+                                    const u = availableUnits.find(unit => unit.id === val)
+                                    if (u) form.setValue("room_number", u.name)
+                                }}
+                            >
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder={unitsLoading ? "加载中..." : "选择床位/房间..."} />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {availableUnits.map(u => (
+                                        <SelectItem key={u.id} value={u.id}>
+                                            {u.type === "bed" ? "🛏️" : "🏠"} {u.name}
+                                        </SelectItem>
+                                    ))}
+                                    {availableUnits.length === 0 && !unitsLoading && (
+                                        <div className="p-2 text-sm text-muted-foreground text-center">无可用房源</div>
+                                    )}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    ) : (
+                        <FormField
+                            control={form.control}
+                            name="room_number"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>房间号/床位名 (手动输入)</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} placeholder="e.g. 101, Bed A" />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    )}
+
                     <FormField
                         control={form.control}
                         name="record_type"

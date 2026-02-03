@@ -14,15 +14,15 @@ export function SiteFooter() {
                         <ul className="space-y-2 text-sm text-slate-500">
                             <li><a href="/services" className="hover:text-teal-600">服务介绍</a></li>
                             <li><a href="/about" className="hover:text-teal-600">团队介绍</a></li>
-                            <li><a href="/about" className="hover:text-teal-600">透明度报告</a></li>
+                            <li><a href="/transparency" className="hover:text-teal-600">公益透明</a></li>
                         </ul>
                     </div>
                     <div>
                         <h4 className="font-semibold text-slate-900 mb-4">参与</h4>
                         <ul className="space-y-2 text-sm text-slate-500">
+                            <li><a href="/activities" className="hover:text-teal-600">公益活动</a></li>
                             <li><a href="/get-involved" className="hover:text-teal-600">成为志愿者</a></li>
-                            <li><a href="/get-involved" className="hover:text-teal-600">合作伙伴</a></li>
-                            <li><a href="/get-involved" className="hover:text-teal-600">物资捐赠</a></li>
+                            <li><a href="/stories" className="hover:text-teal-600">社区故事</a></li>
                         </ul>
                     </div>
                     <div>

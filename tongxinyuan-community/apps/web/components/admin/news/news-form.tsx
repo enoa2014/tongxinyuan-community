@@ -40,7 +40,7 @@ const newsFormSchema = z.object({
     slug: z.string().min(2, "URL别名至少需要2个字符").regex(/^[a-z0-9-]+$/, "只能包含小写字母、数字和连字符"),
     description: z.string().max(200, "简介不能超过200字"),
     author: z.string().min(1, "请填写作者"),
-    category: z.enum(["news", "story", "notice", "activity"]),
+    category: z.enum(["news", "story_official", "story_volunteer", "media_report", "notice", "activity"]),
     content: z.string().min(10, "正文太短了"),
     published: z.boolean().default(false),
 })
@@ -65,7 +65,7 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
             slug: initialData?.slug || "",
             description: initialData?.description || "",
             author: initialData?.author || "同心源",
-            category: (initialData?.category as "news" | "story" | "notice" | "activity") || "news",
+            category: (initialData?.category as any) || "news",
             content: initialData?.content || "",
             published: initialData?.published || false,
         },
@@ -171,10 +171,11 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        <SelectItem value="news">新闻动态</SelectItem>
-                                        <SelectItem value="story">感人故事</SelectItem>
-                                        <SelectItem value="notice">官方公告</SelectItem>
-                                        <SelectItem value="activity">活动招募</SelectItem>
+                                        <SelectItem value="news">新闻动态 (News)</SelectItem>
+                                        <SelectItem value="story_official">暖心故事-官方 (Official Story)</SelectItem>
+                                        <SelectItem value="story_volunteer">暖心故事-志愿者 (Volunteer Story)</SelectItem>
+                                        <SelectItem value="media_report">媒体报道 (Media Report)</SelectItem>
+                                        <SelectItem value="notice">公告通知 (Notice)</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />

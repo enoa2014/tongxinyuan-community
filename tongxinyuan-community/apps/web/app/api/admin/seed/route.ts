@@ -61,8 +61,19 @@ const RELATIONS = [
 ];
 
 const OCCUPATIONS = ["工人", "农民", "个体户", "教师", "司机", "自由职业", "职员", "务农"];
-
 const HOMETOWNS = ["广东省梅州市", "广东省茂名市", "广东省湛江市", "湖南省邵阳市", "江西省赣州市", "广西玉林市"];
+
+const SERVICE_TYPES = ["心理咨询", "就医指引", "经济援助", "住宿申请", "其他"];
+const SERVICE_DESC = [
+    "刚确诊白血病，想了解异地医保报销政策。",
+    "孩子化疗期间情绪不稳定，需要心理疏导。",
+    "家庭经济困难，申请紧急救助资金。",
+    "下周入院复查，申请入住同心源小家。",
+    "想了解造血干细胞移植的配型流程。"
+];
+
+const ACTIVITY_TITLES = ["绘画疗愈课", "生日会", "健康讲座", "手工DIY", "绘本阅读", "节日庆祝"];
+const ACTIVITY_CATS = ["home_care", "festival", "school_visit", "home_visit", "training", "other"];
 
 // --- Generators ---
 
@@ -74,52 +85,104 @@ function randInt(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function genName(gender: 'M' | 'F' = 'M', surname?: string) {
+function genName(gender: 'M' | 'F' = 'M', surname?: string, isTest = true) {
     const last = surname || rand(LAST_NAMES);
     const first = gender === 'M' ? rand(MALE_NAMES) : rand(FEMALE_NAMES);
-    return `[Test] ${last}${first}`;
+    return isTest ? `[Test] ${last}${first}` : `${last}${first}`;
 }
 
 function genPhone() {
     return `13${randInt(0, 9)}${Math.floor(Math.random() * 100000000).toString().padStart(8, '0')}`;
 }
 
+// --- Main Route Handlers ---
+
 export async function POST(request: Request) {
     try {
         const pb = await getAdminClient();
+        const createdBeneficiariesData: any[] = [];
+        const createdUnitIds: string[] = [];  // Track IDs for cleanup reference if needed
+        const createdVolunteers: any[] = [];
+        const createdActivities: any[] = [];
 
-        // 1. Create Test Beneficiaries
-        const createdBeneficiariesData = [];
-        const createdRecords = [];
+        // --- 1. Accommodation Units (Hierarchy) ---
+        // Building -> Floor -> Room -> Bed
+        console.log("Seeding: Accommodation Config...");
 
-        for (let i = 1; i <= 10; i++) {
+        // 1.1 Building
+        const building = await pb.collection('accommodation_units').create({
+            name: "[Test] 同心源Demo楼",
+            type: "building",
+            status: "active"
+        });
+        createdUnitIds.push(building.id);
+
+        const beds: any[] = [];
+
+        // 1.2 Floors (2 Floors)
+        for (let f = 1; f <= 2; f++) {
+            const floor = await pb.collection('accommodation_units').create({
+                name: `[Test] ${f}层`,
+                type: "floor",
+                parent: building.id,
+                status: "active"
+            });
+            createdUnitIds.push(floor.id);
+
+            // 1.3 Rooms (2 Rooms per Floor)
+            for (let r = 1; r <= 2; r++) {
+                const roomNum = `${f}0${r}`;
+                const room = await pb.collection('accommodation_units').create({
+                    name: `[Test] ${roomNum}`,
+                    type: "room",
+                    parent: floor.id,
+                    status: "active",
+                    tags: "Standard"
+                });
+                createdUnitIds.push(room.id);
+
+                // 1.4 Beds (2 Beds per Room)
+                for (let b of ['A', 'B']) {
+                    const bed = await pb.collection('accommodation_units').create({
+                        name: `[Test] ${roomNum}-${b}`,
+                        type: "bed",
+                        parent: room.id,
+                        status: "active" // Default active, will update if linked
+                    });
+                    createdUnitIds.push(bed.id);
+                    beds.push(bed);
+                }
+            }
+        }
+
+
+        // --- 2. Beneficiaries & Families ---
+        console.log("Seeding: Beneficiaries...");
+        for (let i = 1; i <= 8; i++) {
             const gender = Math.random() > 0.5 ? 'M' : 'F';
             const lastName = rand(LAST_NAMES);
-            const name = genName(gender, lastName);
+            const name = genName(gender, lastName); // Has [Test]
             const disease = rand(DISEASES);
             const type = Math.random() > 0.8 ? 'girl_student' : 'illness_child';
             const hometown = rand(HOMETOWNS);
             const age = randInt(2, 16);
 
-            // Calculate birth date
-            const birthDate = new Date();
-            birthDate.setFullYear(birthDate.getFullYear() - age);
-            birthDate.setMonth(randInt(0, 11));
-            birthDate.setDate(randInt(1, 28));
-
-            // Generate guardian info anticipation
+            // Guardian
             const guardianRelation = rand(RELATIONS);
             const guardianName = guardianRelation.key === 'F' || guardianRelation.key === 'G' ? genName('M', lastName) : genName('F');
             const guardianPhone = genPhone();
 
-            const payload = {
+            const birthDate = new Date();
+            birthDate.setFullYear(birthDate.getFullYear() - age);
+
+            const bRecord = await pb.collection('beneficiaries').create({
                 name: name,
                 type: type,
-                phone: guardianPhone, // Use guardian phone as main contact
-                id_card: `440${randInt(1000, 9999)}${birthDate.getFullYear()}${String(birthDate.getMonth() + 1).padStart(2, '0')}${String(birthDate.getDate()).padStart(2, '0')}${randInt(1, 9)}${randInt(0, 9)}XXXX`,
+                phone: guardianPhone,
+                id_card: `440${randInt(1000, 9999)}${birthDate.getFullYear()}0101${randInt(1000, 9999)}`,
                 status: Math.random() > 0.8 ? 'archived' : 'active',
-                address: `${hometown}${randInt(1, 99)}组`,
-                background_note: `患者确诊${disease}，来自${hometown}。家庭经济困难。`,
+                address: hometown,
+                background_note: `患者确诊${disease}。Generated Test Data.`,
                 diagnosis: disease,
                 gender: gender,
                 birth_date: birthDate.toISOString(),
@@ -127,93 +190,169 @@ export async function POST(request: Request) {
                 guardian_name: guardianName,
                 guardian_relation: guardianRelation.name,
                 guardian_phone: guardianPhone
-            };
+            });
+            createdBeneficiariesData.push(bRecord);
 
-            const record = await pb.collection('beneficiaries').create(payload);
-            createdRecords.push(record);
-            createdBeneficiariesData.push({ ...payload, id: record.id });
-        }
-
-        // 2. Create Sub-collections for each Beneficiary
-        const subOperations = [];
-
-        for (const b of createdBeneficiariesData) {
-            const surname = b.name.replace('[Test] ', '').substring(0, 1);
-
-            // Add PRIMARY Guardian as Family Member
-            subOperations.push(pb.collection('family_members').create({
-                beneficiary: b.id,
-                name: b.guardian_name,
-                relation: b.guardian_relation, // Fix: Use the relation name generated earlier
+            // Family Members
+            await pb.collection('family_members').create({
+                beneficiary: bRecord.id,
+                name: guardianName,
+                relation: guardianRelation.name,
                 age: randInt(30, 50),
-                health_status: "健康",
-                occupation: rand(OCCUPATIONS),
-                phone: b.guardian_phone,
+                phone: guardianPhone,
                 is_guardian: true,
-                is_caregiver: true,
-                income_contribution: true
-            }));
-
-            // Family Members (2-4 additional)
-            const numFamily = randInt(2, 4);
-            for (let j = 0; j < numFamily; j++) {
-                const rel = rand(RELATIONS);
-                // Avoid duplicating primary guardian relation if possible, but keep simple
-                const memName = rel.key === 'F' || rel.key === 'G' ? genName('M', surname) : genName('F');
-
-                const isCaregiver = Math.random() > 0.7;
-                const isEarner = Math.random() > 0.7;
-
-                subOperations.push(pb.collection('family_members').create({
-                    beneficiary: b.id,
-                    name: memName,
-                    relation: rel.name,
-                    age: randInt(rel.ageMin, rel.ageMax),
-                    health_status: Math.random() > 0.9 ? "患有慢性病" : "健康",
-                    occupation: rand(OCCUPATIONS),
-                    phone: genPhone(),
-                    is_guardian: false,
-                    is_caregiver: isCaregiver,
-                    income_contribution: isEarner
-                }));
+                is_caregiver: true
+            });
+            // Random extra member
+            if (Math.random() > 0.5) {
+                await pb.collection('family_members').create({
+                    beneficiary: bRecord.id,
+                    name: genName('F'),
+                    relation: "奶奶",
+                    age: 65,
+                    is_caregiver: true
+                });
             }
 
-            // Medical Logs (3-5 per person)
-            if (b.status === 'active') {
-                const numLogs = randInt(3, 5);
-                for (let k = 0; k < numLogs; k++) {
-                    const date = new Date();
-                    date.setDate(date.getDate() - randInt(1, 180));
-
-                    subOperations.push(pb.collection('medical_logs').create({
-                        beneficiary: b.id,
-                        date: date.toISOString(),
+            // Medical Logs
+            if (bRecord.status === 'active') {
+                for (let k = 0; k < randInt(1, 3); k++) {
+                    await pb.collection('medical_logs').create({
+                        beneficiary: bRecord.id,
+                        date: new Date().toISOString(),
                         hospital: rand(HOSPITALS),
-                        department: rand(DEPARTMENTS),
-                        diagnosis: b.diagnosis || "白血病",
+                        diagnosis: disease,
                         treatment: rand(TREATMENTS)
-                    }));
+                    });
                 }
             }
         }
 
-        // 3. Independent Volunteers
-        for (let i = 1; i <= 5; i++) {
-            subOperations.push(pb.collection('volunteer_applications').create({
-                name: genName(Math.random() > 0.5 ? 'M' : 'F'),
-                phone: genPhone(),
-                email: `vol_${Math.floor(Math.random() * 10000)}@test.com`,
-                status: 'pending',
-                skills: JSON.stringify(["care", "teaching"]),
-                motivation: 'Generated by Realistic Seeder.'
-            }));
+
+        // --- 3. Accommodation Records (Linking) ---
+        console.log("Seeding: Linking Accommodation...");
+        // Link first 4 active beneficiaries to first 4 beds
+        const activeBeneficiaries = createdBeneficiariesData.filter(b => b.status === "active");
+        const availableBeds = [...beds];
+
+        for (let i = 0; i < Math.min(activeBeneficiaries.length, availableBeds.length, 4); i++) {
+            const ben = activeBeneficiaries[i];
+            const bed = availableBeds[i]; // Take bed
+
+            // Create Record
+            await pb.collection('accommodation_records').create({
+                beneficiary: ben.id,
+                unit: bed.id,
+                room_number: bed.name, // Snapshot
+                record_type: "Check-in",
+                start_date: new Date().toISOString(),
+                is_waived: true,
+                notes: "Generated Test Stay"
+            });
+
+            // Update Bed Status
+            await pb.collection('accommodation_units').update(bed.id, {
+                status: "occupied"
+            });
         }
 
-        await Promise.all(subOperations);
+
+        // --- 4. Volunteers ---
+        console.log("Seeding: Volunteers...");
+        for (let i = 1; i <= 5; i++) {
+            const vRecord = await pb.collection('volunteer_applications').create({
+                name: genName(Math.random() > 0.5 ? 'M' : 'F'),
+                phone: genPhone(),
+                email: `val_${randInt(1000, 9999)}@test.com`,
+                status: 'pending',
+                skills: JSON.stringify(["care", "teaching"]),
+                motivation: 'Generated Test Volunteer.'
+            });
+            createdVolunteers.push(vRecord);
+        }
+
+        // --- 5. Service Consultations ---
+        console.log("Seeding: Consultations...");
+        for (let i = 1; i <= 6; i++) {
+            await pb.collection('service_consultations').create({
+                name: genName(),
+                phone: genPhone(),
+                service_type: rand(SERVICE_TYPES),
+                description: rand(SERVICE_DESC),
+                status: Math.random() > 0.7 ? "contacted" : "pending",
+                created: new Date().toISOString()
+            });
+        }
+
+        // --- 6. Activities & Participations ---
+        console.log("Seeding: Activities...");
+        // Try to get a staff user ID for lead_staff, else skip (or use arbitrary if relaxed)
+        // We'll skip lead_staff if not easily available or assume optional. 
+        // Based on schema `lead_staff` is relation `staff`. Maybe fallback to nothing if optional.
+        // Assuming optional or we have to fetch one.
+        let staffId = "";
+        try {
+            const staffList = await pb.collection('staff').getList(1, 1);
+            if (staffList.items.length > 0) staffId = staffList.items[0].id;
+        } catch (e) { }
+
+        if (staffId) { // Only create activities if we have a staff to lead them
+            for (let i = 0; i < 3; i++) {
+                const title = `[Test] ${rand(ACTIVITY_TITLES)}`;
+                const act = await pb.collection('activities').create({
+                    title: title,
+                    category: rand(ACTIVITY_CATS),
+                    status: "planning",
+                    start_time: new Date().toISOString(),
+                    end_time: new Date(Date.now() + 3600000).toISOString(), // +1 hour
+                    location: "Community Center",
+                    lead_staff: staffId,
+                    summary: "<p>Generated Test Activity</p>"
+                });
+                createdActivities.push(act);
+
+                // Add Participants
+                // 2 Volunteers
+                for (let v = 0; v < 2 && v < createdVolunteers.length; v++) {
+                    // volunteer collection is 'users' usually for relation, but here we created 'volunteer_applications'. 
+                    // Wait, schema says `volunteer` relation to `users`. 
+                    // `volunteer_applications` are applicants, not yet users. 
+                    // So we cannot strictly link `volunteer_applications` to `activity_participations.volunteer` (relation to `users`).
+                    // skipping actual volunteer linkage to prevent error, unless we have real users.
+                }
+            }
+        }
+
+        // --- 7. Staff Accounts (Ensure Existence) ---
+        console.log("Seeding: Staff Accounts...");
+        const staffAccounts = [
+            { email: 'dev@manager.com', password: '12345678', name: 'Dev Manager', role: 'manager' },
+            { email: 'dev@admin.com', password: '12345678', name: 'Dev Admin', role: 'admin' },
+            { email: 'social@worker.com', password: '12345678', name: 'Social Worker', role: 'social_worker' }
+        ];
+
+        for (const acc of staffAccounts) {
+            try {
+                const records = await pb.collection('staff').getList(1, 1, { filter: `email = "${acc.email}"` });
+                if (records.totalItems === 0) {
+                    await pb.collection('staff').create({
+                        email: acc.email,
+                        emailVisibility: true,
+                        password: acc.password,
+                        passwordConfirm: acc.password,
+                        name: acc.name,
+                        role: acc.role,
+                        status: 'active'
+                    });
+                }
+            } catch (e) {
+                // Ignore if creating fails (e.g. unique constraint race)
+            }
+        }
 
         return NextResponse.json({
             success: true,
-            message: `Created ${createdRecords.length} beneficiaries with families/logs and 5 volunteers.`
+            message: "Successfully seeded complete test dataset (incl. Staff)."
         });
 
     } catch (error: any) {
@@ -229,26 +368,56 @@ export async function DELETE(request: Request) {
     try {
         const pb = await getAdminClient();
 
-        // 1. Find Beneficiaries
-        const beneficiaries = await pb.collection('beneficiaries').getFullList({
-            filter: "name ~ '[Test]%'"
-        });
+        const findAndDelete = async (collection: string, filter: string) => {
+            try {
+                const list = await pb.collection(collection).getFullList({ filter });
+                if (list.length === 0) return 0;
 
-        // 2. Find Volunteers
-        const volunteers = await pb.collection('volunteer_applications').getFullList({
-            filter: "name ~ '[Test]%'"
-        });
+                // Concurrent delete is faster
+                await Promise.all(list.map(item => pb.collection(collection).delete(item.id)));
+                return list.length;
+            } catch (e: any) {
+                // If collection doesn't exist or other error, just log
+                console.warn(`Clean ${collection} failed: ${e.message}`);
+                return 0;
+            }
+        };
 
-        const deletions = [
-            ...beneficiaries.map(r => pb.collection('beneficiaries').delete(r.id)),
-            ...volunteers.map(r => pb.collection('volunteer_applications').delete(r.id))
-        ];
+        // 1. Delete Leafs first (Dependencies)
 
-        await Promise.all(deletions);
+        // Find Test Activities to delete participations? 
+        // Or just delete participations where activity.title ~ [Test] (if cascade works? usually manual in PB unless set)
+        // Schema `cascadeDelete: true` on `activity` field in `activity_participations` means deleting activity deletes items.
+        // So we focus on deleting the Parents.
+
+        // 2. Main Entities
+
+        const deletedActivities = await findAndDelete('activities', "title ~ '[Test]%'");
+        const deletedConsultations = await findAndDelete('service_consultations', "name ~ '[Test]%'");
+        const deletedVolunteers = await findAndDelete('volunteer_applications', "name ~ '[Test]%'");
+
+        // Beneficiaries (Cascades Family Members? usually no, manual delete needed if no cascade)
+        // Schema usually defaults to No Cascade for safety. Let's look up family members of test beneficiaries?
+        // Or simpler: `family_members` don't have [Test] in name directly sometimes (generated as real names). 
+        // But `beneficiary.name` has [Test].
+        // We can use relational filter: `beneficiary.name ~ '[Test]%'`
+        await findAndDelete('family_members', "beneficiary.name ~ '[Test]%'");
+        await findAndDelete('medical_logs', "beneficiary.name ~ '[Test]%'");
+        await findAndDelete('accommodation_records', "beneficiary.name ~ '[Test]%'");
+
+        const deletedBeneficiaries = await findAndDelete('beneficiaries', "name ~ '[Test]%'");
+
+        // Accom Units
+        // Beds -> Rooms -> Floors -> Buildings (Child constraint might block parent delete)
+        // Safer to delete types in order: Bed, Room, Floor, Building
+        await findAndDelete('accommodation_units', "name ~ '[Test]%' && type = 'bed'");
+        await findAndDelete('accommodation_units', "name ~ '[Test]%' && type = 'room'");
+        await findAndDelete('accommodation_units', "name ~ '[Test]%' && type = 'floor'");
+        const deletedUnits = await findAndDelete('accommodation_units', "name ~ '[Test]%' && type = 'building'");
 
         return NextResponse.json({
             success: true,
-            message: `Deleted ${deletions.length} test records.`
+            message: `Deleted: ${deletedBeneficiaries} bens, ${deletedVolunteers} vols, ${deletedActivities} acts, ${deletedConsultations} consults, ${deletedUnits} buildings/floors`
         });
 
     } catch (error: any) {

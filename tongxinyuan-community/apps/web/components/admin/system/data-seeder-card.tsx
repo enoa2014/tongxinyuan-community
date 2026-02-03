@@ -29,10 +29,12 @@ export function DataSeederCard() {
     const [clearing, setClearing] = useState(false)
     const [showConfirm, setShowConfirm] = useState(false)
 
-    async function handleGenerate() {
+    const [targetClearUrl, setTargetClearUrl] = useState<string>("")
+
+    async function handleGenerate(url: string) {
         setLoading(true)
         try {
-            const res = await fetch("/api/admin/seed", { method: "POST" })
+            const res = await fetch(url, { method: "POST" })
             const data = await res.json()
 
             if (res.ok) {
@@ -54,11 +56,11 @@ export function DataSeederCard() {
         }
     }
 
-    async function handleClear() {
+    async function handleClear(url: string) {
         setClearing(true)
         setShowConfirm(false)
         try {
-            const res = await fetch("/api/admin/seed", { method: "DELETE" })
+            const res = await fetch(url, { method: "DELETE" })
             const data = await res.json()
 
             if (res.ok) {
@@ -77,7 +79,13 @@ export function DataSeederCard() {
             })
         } finally {
             setClearing(false)
+            setTargetClearUrl("")
         }
+    }
+
+    const handleConfirm = (url: string) => {
+        setTargetClearUrl(url)
+        setShowConfirm(true)
     }
 
     return (
@@ -107,29 +115,79 @@ export function DataSeederCard() {
                         </div>
                     </div>
                 </CardContent>
-                <CardFooter className="flex justify-between border-t p-6 bg-slate-50/50">
-                    <Button
-                        variant="outline"
-                        onClick={() => setShowConfirm(true)}
-                        disabled={loading || clearing}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                        {clearing ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                            <Trash2 className="mr-2 h-4 w-4" />
-                        )}
-                        清除测试数据
-                    </Button>
+                <CardFooter className="flex flex-col gap-4 border-t p-6 bg-slate-50/50">
+                    <div className="flex w-full justify-between items-center">
+                        <span className="text-sm font-medium text-slate-700">基础测试数据 (10人 + 住宿)</span>
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => handleConfirm("/api/admin/seed")}
+                                disabled={loading || clearing}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                size="sm"
+                            >
+                                {clearing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                                清除
+                            </Button>
+                            <Button
+                                onClick={() => handleGenerate("/api/admin/seed")}
+                                disabled={loading || clearing}
+                                className="bg-brand-green hover:bg-brand-green/90"
+                                size="sm"
+                            >
+                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                生成
+                            </Button>
+                        </div>
+                    </div>
 
-                    <Button
-                        onClick={handleGenerate}
-                        disabled={loading || clearing}
-                        className="bg-brand-green hover:bg-brand-green/90"
-                    >
-                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        生成 10 人测试数据
-                    </Button>
+                    <div className="flex w-full justify-between items-center border-t pt-4 border-slate-200">
+                        <span className="text-sm font-medium text-slate-700">公益透明 (捐赠公示)</span>
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => handleConfirm("/api/admin/seed/donations")}
+                                disabled={loading || clearing}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                size="sm"
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                清除
+                            </Button>
+                            <Button
+                                onClick={() => handleGenerate("/api/admin/seed/donations")}
+                                disabled={loading || clearing}
+                                className="bg-brand-green hover:bg-brand-green/90"
+                                size="sm"
+                            >
+                                生成 (20条)
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="flex w-full justify-between items-center border-t pt-4 border-slate-200">
+                        <span className="text-sm font-medium text-slate-700">公益活动 (招募/进行/往期)</span>
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => handleConfirm("/api/admin/seed/activities")}
+                                disabled={loading || clearing}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                size="sm"
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                清除
+                            </Button>
+                            <Button
+                                onClick={() => handleGenerate("/api/admin/seed/activities")}
+                                disabled={loading || clearing}
+                                className="bg-brand-green hover:bg-brand-green/90"
+                                size="sm"
+                            >
+                                生成 (8条)
+                            </Button>
+                        </div>
+                    </div>
                 </CardFooter>
             </Card>
 
@@ -138,13 +196,13 @@ export function DataSeederCard() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>确认清除测试数据？</AlertDialogTitle>
                         <AlertDialogDescription>
-                            此操作将从数据库中永久删除所有名称以 "[Test]" 开头的受助人档案和志愿者申请。此操作无法撤销。
+                            此操作将从数据库中永久删除所有名称以 "[Test]" 开头的记录。此操作无法撤销。
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>取消</AlertDialogCancel>
                         <AlertDialogAction
-                            onClick={(e) => { e.preventDefault(); handleClear(); }}
+                            onClick={(e) => { e.preventDefault(); handleClear(targetClearUrl); }}
                             className="bg-red-600 hover:bg-red-700"
                         >
                             确认清除

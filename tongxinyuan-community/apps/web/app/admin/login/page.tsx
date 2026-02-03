@@ -48,9 +48,16 @@ export default function AdminLoginPage() {
         setIsLoading(true)
 
         try {
-            // NEW: RBAC Login (Authenticate against 'staff' collection)
-            // Was: const authData = await pb.collection('_superusers').authWithPassword(values.email, values.password)
-            const authData = await pb.collection('staff').authWithPassword(values.email, values.password)
+            // NEW: RBAC Login (Dual Strategy)
+            // 1. Try 'staff' collection first (for regular operation)
+            // 2. Fallback to '_superusers' (for system admin)
+            try {
+                await pb.collection('staff').authWithPassword(values.email, values.password)
+            } catch (staffError) {
+                console.warn("Staff login failed, attempting superuser fallback...", staffError)
+                // Fallback to superuser
+                await pb.collection('_superusers').authWithPassword(values.email, values.password)
+            }
 
             // Set cookie for middleware (optional, PB SDK uses local storage by default but Next.js middleware can't see LS)
             // For now, we rely on PB client-side auth state for rendering, 

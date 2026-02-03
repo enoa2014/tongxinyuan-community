@@ -64,18 +64,32 @@ export function PublicNavbar() {
                         关于我们
                     </Link>
                     <Link
+                        href="/transparency"
+                        className={`text-sm font-medium transition-colors hover:opacity-80 ${isScrolled || !isHome ? "text-slate-700" : "text-white/90"
+                            }`}
+                    >
+                        公益透明
+                    </Link>
+                    <Link
+                        href="/activities"
+                        className={`text-sm font-medium transition-colors hover:opacity-80 ${isScrolled || !isHome ? "text-slate-700" : "text-white/90"
+                            }`}
+                    >
+                        公益活动
+                    </Link>
+                    <Link
+                        href="/stories"
+                        className={`text-sm font-medium transition-colors hover:opacity-80 ${isScrolled || !isHome ? "text-slate-700" : "text-white/90"
+                            }`}
+                    >
+                        社区故事
+                    </Link>
+                    <Link
                         href="/services"
                         className={`text-sm font-medium transition-colors hover:opacity-80 ${isScrolled || !isHome ? "text-slate-700" : "text-white/90"
                             }`}
                     >
                         服务中心
-                    </Link>
-                    <Link
-                        href="/news"
-                        className={`text-sm font-medium transition-colors hover:opacity-80 ${isScrolled || !isHome ? "text-slate-700" : "text-white/90"
-                            }`}
-                    >
-                        新闻动态
                     </Link>
                     <Link
                         href="/donate"
@@ -119,8 +133,10 @@ export function PublicNavbar() {
                         <div className="flex flex-col gap-6 mt-10">
                             <Link href="/" className="text-lg font-medium">首页</Link>
                             <Link href="/about" className="text-lg font-medium">关于我们</Link>
+                            <Link href="/transparency" className="text-lg font-medium">公益透明</Link>
+                            <Link href="/activities" className="text-lg font-medium">公益活动</Link>
+                            <Link href="/stories" className="text-lg font-medium">社区故事</Link>
                             <Link href="/services" className="text-lg font-medium">服务中心</Link>
-                            <Link href="/news" className="text-lg font-medium">新闻动态</Link>
                             <Link href="/donate" className="text-lg font-medium">支持我们</Link>
                             <div className="h-px bg-slate-100 my-2" />
                             <Link href="/login" className="text-lg font-medium text-slate-600">登录</Link>

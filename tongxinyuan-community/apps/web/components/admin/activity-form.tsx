@@ -30,6 +30,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/components/ui/use-toast"
 import { pb } from "@/lib/pocketbase"
 import { Activity } from "@/types"
+import { RichTextEditor } from "./news/rich-text-editor"
 
 const activitySchema = z.object({
     title: z.string().min(2, "标题至少 2 个字符"),
@@ -40,6 +41,8 @@ const activitySchema = z.object({
     location: z.string().optional(),
     summary: z.string().optional(),
     lead_staff: z.string().optional(),
+    registration_type: z.enum(["offline", "form", "external"]),
+    registration_url: z.string().optional(),
     external_links: z.array(z.object({
         title: z.string().min(1, "链接标题不能为空"),
         url: z.string().url("请输入有效的 URL")
@@ -69,6 +72,8 @@ export function ActivityForm({ initialData, staffList = [] }: ActivityFormProps)
             location: initialData?.location || "",
             summary: initialData?.summary || "",
             lead_staff: initialData?.lead_staff || (pb.authStore.model?.id),
+            registration_type: (initialData?.registration_type as "offline" | "form" | "external") || "offline",
+            registration_url: initialData?.registration_url || "",
             external_links: initialData?.external_links || []
         },
     })
@@ -78,9 +83,13 @@ export function ActivityForm({ initialData, staffList = [] }: ActivityFormProps)
         name: "external_links"
     })
 
+    const registrationType = form.watch("registration_type")
+
+
     const [photos, setPhotos] = useState<FileList | null>(null)
     const [documents, setDocuments] = useState<FileList | null>(null)
     const [videos, setVideos] = useState<FileList | null>(null)
+    const [qrcode, setQrcode] = useState<FileList | null>(null)
 
     async function onSubmit(values: z.infer<typeof activitySchema>) {
         setIsLoading(true)
@@ -94,7 +103,13 @@ export function ActivityForm({ initialData, staffList = [] }: ActivityFormProps)
             if (values.location) formData.append('location', values.location)
             if (values.summary) formData.append('summary', values.summary)
             if (values.lead_staff) formData.append('lead_staff', values.lead_staff)
+            formData.append('registration_type', values.registration_type)
+            if (values.registration_url) formData.append('registration_url', values.registration_url)
             formData.append('external_links', JSON.stringify(values.external_links))
+
+            if (qrcode) {
+                formData.append('qrcode', qrcode[0])
+            }
 
             if (photos) {
                 for (let i = 0; i < photos.length; i++) formData.append('photos', photos[i])
@@ -293,10 +308,10 @@ export function ActivityForm({ initialData, staffList = [] }: ActivityFormProps)
                                         <FormItem>
                                             <FormLabel>活动简介 / 总结</FormLabel>
                                             <FormControl>
-                                                <Textarea
+                                                <RichTextEditor
                                                     placeholder="请输入活动的主要内容、目标人群及注意事项..."
-                                                    className="min-h-[120px] resize-none"
-                                                    {...field}
+                                                    value={field.value || ""}
+                                                    onChange={field.onChange}
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -435,6 +450,68 @@ export function ActivityForm({ initialData, staffList = [] }: ActivityFormProps)
                                         </FormItem>
                                     )}
                                 />
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-base">报名设置</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <FormField
+                                    control={form.control}
+                                    name="registration_type"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>报名方式</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="选择报名方式" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="offline">线下直接参与</SelectItem>
+                                                    <SelectItem value="form">填写报名表 (平台内)</SelectItem>
+                                                    <SelectItem value="external">外部链接报名</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                {registrationType === "external" && (
+                                    <FormField
+                                        control={form.control}
+                                        name="registration_url"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>外部报名链接</FormLabel>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <LinkIcon className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                                                        <Input placeholder="https://..." className="pl-9" {...field} />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                )}
+
+                                <div className="pt-2">
+                                    <FormLabel className="mb-2 block">活动群 / 报名二维码</FormLabel>
+                                    <FileUploadInput
+                                        icon={ImageIcon}
+                                        label="上传二维码"
+                                        description="JPG, PNG (Max 1)"
+                                        accept="image/*"
+                                        onChange={setQrcode}
+                                        files={qrcode}
+                                        existingFiles={initialData?.qrcode ? [initialData.qrcode] : undefined}
+                                    />
+                                </div>
                             </CardContent>
                         </Card>
 
