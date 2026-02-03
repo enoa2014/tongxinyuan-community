@@ -1,32 +1,39 @@
-# Test Data & Credentials
+# 测试数据与账号凭证
 
-## 1. Test Accounts (Staff Login)
+## 1. 测试账号 (员工登录)
 
-Use these accounts to log in to the Admin Dashboard (`/admin/login`).
+使用以下账号登录管理后台 (`/admin/login`)。
 
-| Role | Email | Password | Permissions |
+| 角色 | 邮箱 | 密码 | 权限 |
 | :--- | :--- | :--- | :--- |
-| **Manager** | `dev@manager.com` | `12345678` | **Full Access**. Can delete records. Can manage staff. |
-| **Web Admin** | `dev@admin.com` | `12345678` | **Content Management** (News, Services). Cannot see sensitive housing/beneficiary data. |
-| **Social Worker** | `social@worker.com` | `12345678` | **Operational Access**. Beneficiaries, Activities, Accommodation. Cannot delete records. |
+| **系统管理员 (System Admin)** | `root@debug.com` | `Tongxinyuan2026!` | **超级用户 (Superuser)**。拥有最高系统权限。不受员工 RBAC 限制。 |
+| **经理 (Manager)** | `dev@manager.com` | `12345678` | **完全访问**。可以删除记录。可以管理员工。（如果已生成） |
+| **网络管理员 (Web Admin)** | `dev@admin.com` | `12345678` | **内容管理** (新闻, 服务)。无法查看敏感的住宿/受助人数据。 |
+| **社工 (Social Worker)** | `social@worker.com` | `12345678` | **操作访问**。受助人、活动、住宿管理。无法删除记录。 |
 
-## 2. Data Seeder (Bulk Test Data)
+## 2. 数据生成器 (批量测试数据)
 
-A tool is available to quickly populate the database with dummy records for testing.
+提供了一个快速填充数据库假数据以供测试的工具。
 
-### How to Use
-1.  Log in as **Manager**.
-2.  Navigate to **System Settings** (`/admin/settings`).
-3.  Scroll to the bottom card: **"测试数据管理" (Test Data Management)**.
+### 如何使用
+1.  以 **经理 (Manager)** 或 **系统管理员** 身份登录。
+2.  导航至 **系统设置** (`/admin/settings`)。
+3.  滚动至底部卡片：**"测试数据管理" (Test Data Management)**。
 
-### Features
-*   **Generate 10 Users**:
-    *   Creates 10 `Beneficiaries` (Name: `[Test] Beneficiary X` or Realistic Names like `[Test] 林雨桐`).
-    *   **Features Enhanced (Phase 8.2)**:
-        *   **Realistic Profiles**: Generates gender, birth date, hometown, and beneficiary type (`illness_child`/`girl_student`).
-        *   **Family Network**: Automatically creates 2-4 family members per beneficiary (Parents, Grandparents), assigning roles like "Primary Caregiver" or "Income Contributor".
-        *   **Medical History**: Generates 3-5 medical logs (Diagnosis, Chemotherapy records) for each beneficiary.
-    *   Creates 5 `Volunteers` (Name: `[Test] Volunteer X`).
-*   **Clear Test Data**:
-    *   Permanently deletes **ALL** records where the name starts with `[Test]`.
-    *   Safe for production as it only targets clearly marked test data.
+### 功能特性
+*   **生成 10 人份测试数据 (Generate 10 Users)**:
+    *   创建 10 个 `受助人 (Beneficiaries)` (姓名: `[Test] Beneficiary X` 或真实姓名如 `[Test] 林雨桐`)。
+    *   **功能增强 (Phase 8.2)**:
+        *   **真实画像**: 生成性别、出生日期、籍贯和受助人类型 (`大病患儿`/`困境女童`)。
+        *   **家庭网络**: 为每个受助人自动创建 2-4 名家庭成员 (父母, 祖父母)，分配 "主要照护人" 或 "经济支柱" 等角色。
+        *   **医疗病史**: 为每个受助人生成 3-5 条医疗日志 (诊断, 化疗记录)。
+    *   创建 5 个 `志愿者 (Volunteers)` (姓名: `[Test] Volunteer X`)。
+    *   **关联数据**:
+        *   **住宿**: 生成测试楼层/房间，并自动将部分受助人关联至床位（状态变为“已入住”）。
+        *   **活动/咨询**: 生成少量测试活动和咨询记录。
+*   **生成公益透明数据 (Phase 8.4)**:
+    *   **捐赠公示**: 自动生成 20 条模拟捐赠记录（支持个人/企业混合，附带 "[Test]" 前缀）。
+    *   **公益活动**: 自动生成 8 条不同状态（正在进行/往期）的活动记录。
+*   **清除测试数据 (Clear Test Data)**:
+    *   永久删除 **所有** 名字以 `[Test]` 开头的记录。
+    *   生产环境安全，因为它只针对明确标记的测试数据。

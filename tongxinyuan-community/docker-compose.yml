@@ -24,11 +24,11 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://localhost:8090 # Browser facing URL
-      - PB_URL=http://pocketbase:8090 # Server facing URL
+      - NEXT_PUBLIC_API_URL=http://localhost:8090 # User Browser -> Host (8090) -> PB Container
+      - PB_URL=http://txy_pocketbase:8090 # Server Side -> Service Name (8090)
     depends_on:
       pocketbase:
         condition: service_healthy

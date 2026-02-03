@@ -114,3 +114,40 @@ AFTER 3 FAILURES: Escalate to User
 ---
 
 **This pattern is why Manus went from launch to $2B acquisition in 8 months.**
+
+---
+
+## Case Study: Tongxinyuan Dual-Site Deployment (2026-02)
+
+### Context
+The user required a complex deployment:
+1. **Legacy Site**: Retain PHP system on Port 80/443.
+2. **New Site**: Deploy Next.js system on Port 3000.
+3. **Constraint**: Both accessible via SSL `tongxy.xyz` (Port 443) and `tongxy.xyz:3000`.
+
+### Challenges Encountered
+- **Nginx Config Loss**: `sed` command broke bind mounts; container saw old config while host had new config.
+- **Port Conflict**: New App bound to 3000, preventing Nginx from binding 3000 for SSL.
+- **Tool Failures**: Browser verification crashed multiple times; SSH commands failed due to connection drops.
+
+### How `task.md` Saved the Session
+The agent maintained a `task.md` throughout Phase 10 (Deployment).
+
+1. **Crash Recovery**:
+   - When the Browser Agent crashed verifying Port 80, the agent didn't restart from zero.
+   - It read `task.md`, saw `[x] Configured Remote Server Alias`, and resumed at "Verify Port 80".
+
+2. **State Tracking vs Memory**:
+   - Agent "forgot" (context window limit) that Nginx was in Host Mode.
+   - `task.md` recorded `[x] Updated Nginx Config on Host (Disabled Port 3000)`, preventing unnecessary research steps.
+
+3. **Error Log**:
+   - Recorded `Proxy Sort 400 Error` logic in `Decisions Made` section.
+   - Recorded `TypeGen Auth 400` fix (Use root@debug.com).
+   - This prevented trying the same failed auth strategy twice.
+
+### Artifact Ecosystem
+The synergy of three files proved critical:
+1. **`task.md`**: The detailed checklist. kept the agent "honest" about what was *actually* done vs *planned*.
+2. **`implementation_plan.md`**: The technical architecture. Defined *before* touching Nginx. When Nginx failed, we checked against the Plan.
+3. **`walkthrough.md`**: The proof. Stored screenshots of "Pink Site" vs "Blue Site", allowing the user to trust the verification even when they couldn't access the internal ports.
