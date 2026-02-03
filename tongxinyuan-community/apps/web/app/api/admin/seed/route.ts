@@ -18,7 +18,8 @@ async function getAdminClient() {
 
 const LAST_NAMES = [
     "李", "王", "张", "刘", "陈", "杨", "赵", "黄", "周", "吴",
-    "徐", "孙", "胡", "朱", "高", "林", "何", "郭", "马", "罗"
+    "徐", "孙", "胡", "朱", "高", "林", "何", "郭", "马", "罗",
+    "梁", "宋", "郑", "谢", "韩", "唐", "冯", "于", "董", "萧"
 ];
 
 const MALE_NAMES = [
@@ -99,19 +100,35 @@ export async function POST(request: Request) {
             const hometown = rand(HOMETOWNS);
             const age = randInt(2, 16);
 
+            // Calculate birth date
+            const birthDate = new Date();
+            birthDate.setFullYear(birthDate.getFullYear() - age);
+            birthDate.setMonth(randInt(0, 11));
+            birthDate.setDate(randInt(1, 28));
+
+            // Generate guardian info anticipation
+            const guardianRelation = rand(RELATIONS);
+            const guardianName = guardianRelation.key === 'F' || guardianRelation.key === 'G' ? genName('M', lastName) : genName('F');
+            const guardianPhone = genPhone();
+
             const payload = {
                 name: name,
-                phone: genPhone(),
-                id_card: `440${randInt(1000, 9999)}20${2024 - age}0${randInt(1, 9)}${randInt(0, 9)}XXXX`, // Fake ID
+                phone: guardianPhone, // Use guardian phone as main contact
+                id_card: `440${randInt(1000, 9999)}${birthDate.getFullYear()}${String(birthDate.getMonth() + 1).padStart(2, '0')}${String(birthDate.getDate()).padStart(2, '0')}${randInt(1, 9)}${randInt(0, 9)}XXXX`,
                 status: Math.random() > 0.8 ? 'archived' : 'active',
                 address: `${hometown}${randInt(1, 99)}组`,
                 background_note: `患者确诊${disease}，来自${hometown}。家庭经济困难。`,
-                diagnosis: disease // Will only be saved if schema has it, but we use payload for logic below
+                diagnosis: disease,
+                gender: gender,
+                birth_date: birthDate.toISOString(),
+                native_place: hometown,
+                guardian_name: guardianName,
+                guardian_relation: guardianRelation.name,
+                guardian_phone: guardianPhone
             };
 
             const record = await pb.collection('beneficiaries').create(payload);
             createdRecords.push(record);
-            // Save local copy with ID for sub-record generation to avoid 'undefined' errors if schema missing fields
             createdBeneficiariesData.push({ ...payload, id: record.id });
         }
 
@@ -121,8 +138,19 @@ export async function POST(request: Request) {
         for (const b of createdBeneficiariesData) {
             const surname = b.name.replace('[Test] ', '').substring(0, 1);
 
-            // Family Members (1-3 per person)
-            const numFamily = randInt(1, 4);
+            // Add PRIMARY Guardian as Family Member
+            subOperations.push(pb.collection('family_members').create({
+                beneficiary: b.id,
+                name: b.guardian_name,
+                relation: "监护人",
+                age: randInt(30, 50),
+                health_status: "健康",
+                occupation: rand(OCCUPATIONS),
+                phone: b.guardian_phone
+            }));
+
+            // Family Members (0-2 additional)
+            const numFamily = randInt(0, 2);
             for (let j = 0; j < numFamily; j++) {
                 const rel = rand(RELATIONS);
                 const memName = rel.key === 'F' || rel.key === 'G' ? genName('M', surname) : genName('F');
@@ -150,7 +178,7 @@ export async function POST(request: Request) {
                         date: date.toISOString(),
                         hospital: rand(HOSPITALS),
                         department: rand(DEPARTMENTS),
-                        diagnosis: b.diagnosis || "白血病", // Fallback if undefined
+                        diagnosis: b.diagnosis || "白血病",
                         treatment: rand(TREATMENTS)
                     }));
                 }

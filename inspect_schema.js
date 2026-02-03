@@ -11,7 +11,7 @@ const pb = new PocketBase(PB_URL);
 async function main() {
     await pb.admins.authWithPassword(ADMIN_EMAIL, ADMIN_PASS);
 
-    const col = await pb.collections.getOne('family_members');
+    const col = await pb.collections.getOne('beneficiaries');
     console.log(JSON.stringify(col, null, 2));
 
     // Also check medical_logs for comparison

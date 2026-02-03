@@ -39,7 +39,8 @@ const profileSchema = z.object({
     gender: z.string().optional(),
     birth_date: z.date().optional(),
     id_card: z.string().optional(),
-    hometown: z.string().optional(),
+    native_place: z.string().optional(),
+    address: z.string().optional(),
     phone: z.string().optional(),
 
     diagnosis: z.string().optional(),
@@ -66,7 +67,8 @@ export default function BeneficiaryProfileForm({ initialData }: { initialData?: 
             gender: initialData?.gender || "",
             birth_date: initialData?.birth_date ? new Date(initialData.birth_date) : undefined,
             id_card: initialData?.id_card || "",
-            hometown: initialData?.hometown || "",
+            native_place: initialData?.native_place || "",
+            address: initialData?.address || "",
             phone: initialData?.phone || "",
 
             diagnosis: initialData?.diagnosis || "",
@@ -154,8 +156,8 @@ export default function BeneficiaryProfileForm({ initialData }: { initialData?: 
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="男">男</SelectItem>
-                                            <SelectItem value="女">女</SelectItem>
+                                            <SelectItem value="M">男</SelectItem>
+                                            <SelectItem value="F">女</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -201,12 +203,25 @@ export default function BeneficiaryProfileForm({ initialData }: { initialData?: 
                         />
                         <FormField
                             control={form.control}
-                            name="hometown"
+                            name="native_place"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>籍贯</FormLabel>
                                     <FormControl>
                                         <Input placeholder="省/市" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="address"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>家庭住址</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="详细地址" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
