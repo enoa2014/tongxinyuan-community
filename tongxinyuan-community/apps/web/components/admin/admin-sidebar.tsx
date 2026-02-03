@@ -55,7 +55,7 @@ const sidebarItems = [
     },
     {
         title: "捐赠公示 (Donations)",
-        href: "/admin/donations/create",
+        href: "/admin/donations",
         icon: Gift,
         roles: ['web_admin', 'manager'],
     },
