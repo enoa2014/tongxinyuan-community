@@ -4,6 +4,7 @@ import { BankCard } from "@/components/donation/bank-card";
 import { FaqAccordion } from "@/components/faq/faq-accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ShieldAlert, Heart, Truck } from "lucide-react";
+import { DonationWall } from "@/components/public/transparency/donation-wall";
 
 export default function DonatePage() {
     return (
@@ -78,6 +79,10 @@ export default function DonatePage() {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div className="mt-24">
+                    <DonationWall />
                 </div>
 
                 {/* FAQs Section */}

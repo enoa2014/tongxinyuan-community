@@ -6,9 +6,10 @@ interface InnerPageWrapperProps {
     title?: string
     subtitle?: string
     imageUrl?: string
+    heroAction?: React.ReactNode
 }
 
-export function InnerPageWrapper({ children, className, title, subtitle, imageUrl }: InnerPageWrapperProps) {
+export function InnerPageWrapper({ children, className, title, subtitle, imageUrl, heroAction }: InnerPageWrapperProps) {
     return (
         <div className="min-h-screen bg-slate-50">
             {/* Optional Hero Section */}
@@ -30,9 +31,14 @@ export function InnerPageWrapper({ children, className, title, subtitle, imageUr
                             {title}
                         </h1>
                         {subtitle && (
-                            <p className="text-lg md:text-xl text-slate-200 max-w-2xl leading-relaxed drop-shadow-sm">
+                            <p className="text-lg md:text-xl text-slate-200 max-w-2xl leading-relaxed drop-shadow-sm mb-8">
                                 {subtitle}
                             </p>
+                        )}
+                        {heroAction && (
+                            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                {heroAction}
+                            </div>
                         )}
                     </div>
                 </div>
