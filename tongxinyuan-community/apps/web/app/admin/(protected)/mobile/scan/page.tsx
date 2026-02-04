@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useToast } from "@/components/ui/use-toast"
 import { pb } from "@/lib/pocketbase"
 
@@ -19,13 +19,28 @@ export default function ScanPage() {
         // Prevent simple duplicates if needed, but here we just update state
         setResult(decodedText)
 
-        // Mock Check-in / Processing UI
+        // 1. Try to route if it's a Resident ID
+        // Assumption: QR code is just the ID or prefixed
+        let residentId = decodedText
+        if (decodedText.startsWith("RESIDENT:")) {
+            residentId = decodedText.split(":")[1]
+        }
+
+        // Basic ID format check (PocketBase IDs are 15 chars)
+        if (residentId.length === 15) {
+            toast({ title: "🔍 识别到居民", description: "正在跳转..." })
+            router.push(`/admin/mobile/residents/${residentId}`)
+            return
+        }
+
+        // Mock Check-in / Processing UI for generic codes
         toast({
             title: "✅ 扫描成功",
             description: `内容: ${decodedText}`,
         })
 
-        // Save to History (Drafts)
+        // Save to History (Drafts) -> Only for non-resident codes? 
+        // Or maybe we still log it? Let's log generic scans.
         try {
             const userId = pb.authStore.model?.id
             if (userId) {
@@ -42,10 +57,15 @@ export default function ScanPage() {
         }
     }
 
-    // Debug helper for development without camera
-    const handleSimulateScan = () => {
-        handleScanSuccess(`USER:${Math.floor(Math.random() * 10000)}`)
-    }
+    // Debug helper removed for production
+    // useEffect(() => {
+    //     // @ts-ignore
+    //     window.simulateScan = handleScanSuccess
+    // }, [router])
+
+    // const handleSimulateScan = () => {
+    //     handleScanSuccess(`USER:${Math.floor(Math.random() * 10000)}`)
+    // }
 
     return (
         <div className="flex flex-col h-full space-y-4">

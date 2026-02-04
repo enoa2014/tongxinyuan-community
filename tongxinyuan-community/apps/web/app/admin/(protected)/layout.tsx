@@ -9,6 +9,8 @@ import { Loader2 } from "lucide-react"
 import { AdminHeader } from "@/components/admin/admin-header"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
 import { MobileHeader } from "@/components/admin/mobile-header"
+import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app-sidebar"
 
 export default function AdminLayout({
     children,
@@ -37,28 +39,29 @@ export default function AdminLayout({
     }
 
     return (
-        <div className="flex min-h-screen bg-slate-50 flex-col md:flex-row">
-            {/* Mobile Header - Visible only on Mobile */}
-            <div className="md:hidden sticky top-0 z-30 w-full">
-                <MobileHeader />
-            </div>
+        <SidebarProvider>
+            {/* Desktop Sidebar */}
+            <AppSidebar />
 
-            {/* Sidebar - Desktop Only */}
-            <div className="hidden md:block sticky top-0 h-screen w-64 flex-none z-30">
-                <AdminSidebar />
-            </div>
-
-            <div className="flex flex-1 flex-col min-w-0">
-                {/* Desktop Header - Visible only on Desktop */}
-                <div className="hidden md:block">
-                    <AdminHeader />
+            <SidebarInset>
+                {/* Mobile Header - Visible only on Mobile */}
+                <div className="md:hidden sticky top-0 z-30 w-full">
+                    <MobileHeader />
                 </div>
 
-                {/* Main Content Area */}
-                <main className="flex-1 p-4 md:p-8">
-                    {children}
-                </main>
-            </div>
-        </div>
+                <div className="flex flex-col flex-1 h-screen overflow-hidden">
+                    {/* Desktop Header with trigger */}
+                    <div className="hidden md:flex items-center p-4 border-b bg-white gap-4">
+                        <SidebarTrigger />
+                        <AdminHeader />
+                    </div>
+
+                    {/* Main Content Area */}
+                    <main className="flex-1 overflow-auto p-4 md:p-8 bg-slate-50">
+                        {children}
+                    </main>
+                </div>
+            </SidebarInset>
+        </SidebarProvider>
     )
 }

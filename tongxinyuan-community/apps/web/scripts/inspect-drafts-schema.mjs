@@ -6,14 +6,12 @@ const ADMIN_PASS = 'Tongxinyuan2026!';
 
 async function main() {
     const pb = new PocketBase(PB_URL);
-    await pb.admins.authWithPassword(ADMIN_EMAIL, ADMIN_PASS);
-
     try {
-        const collection = await pb.collections.getOne('beneficiaries');
-        console.log("Fields:", JSON.stringify(collection.fields, null, 2));
+        await pb.admins.authWithPassword(ADMIN_EMAIL, ADMIN_PASS);
+        const col = await pb.collections.getOne('drafts');
+        console.log(JSON.stringify(col.fields.find(f => f.name === 'status'), null, 2));
     } catch (e) {
-        console.error("Fetch failed:", e);
+        console.error(e);
     }
 }
-
 main();

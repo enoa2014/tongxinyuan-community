@@ -19,11 +19,13 @@ export enum Collections {
 	Beneficiaries = "beneficiaries",
 	BeneficiaryDocuments = "beneficiary_documents",
 	BeneficiaryMedia = "beneficiary_media",
+	CaseNotes = "case_notes",
 	Drafts = "drafts",
 	FamilyMembers = "family_members",
 	MedicalLogs = "medical_logs",
 	News = "news",
 	PublicDonations = "public_donations",
+	Residents = "residents",
 	ServiceConsultations = "service_consultations",
 	Services = "services",
 	SiteSettings = "site_settings",
@@ -277,8 +279,40 @@ export type BeneficiaryMediaRecord = {
 	title?: string
 }
 
-export type DraftsRecord = {
+export enum CaseNotesTypeOptions {
+	"上门探访" = "上门探访",
+	"电话慰问" = "电话慰问",
+	"资源配送" = "资源配送",
+	"心理疏导" = "心理疏导",
+}
+export type CaseNotesRecord = {
+	attachments?: FileNameString[]
+	content?: HTMLString
+	date: IsoDateString
 	id: string
+	resident: RecordIdString
+	source_draft?: RecordIdString
+	staff: RecordIdString
+	type?: CaseNotesTypeOptions
+}
+
+export enum DraftsTypeOptions {
+	"text" = "text",
+	"audio" = "audio",
+	"photo" = "photo",
+}
+
+export enum DraftsStatusOptions {
+	"pending" = "pending",
+	"processed" = "processed",
+}
+export type DraftsRecord = {
+	content?: string
+	file?: FileNameString
+	id: string
+	staff: RecordIdString
+	status?: DraftsStatusOptions
+	type?: DraftsTypeOptions
 }
 
 export type FamilyMembersRecord = {
@@ -334,6 +368,29 @@ export type PublicDonationsRecord = {
 	images?: FileNameString[]
 	project_name: string
 	status?: PublicDonationsStatusOptions
+}
+
+export enum ResidentsTagsOptions {
+	"独居" = "独居",
+	"重病" = "重病",
+	"低保" = "低保",
+	"残疾" = "残疾",
+	"高龄" = "高龄",
+}
+
+export enum ResidentsStatusOptions {
+	"active" = "active",
+	"inactive" = "inactive",
+}
+export type ResidentsRecord = {
+	address?: string
+	id: string
+	id_card?: string
+	name: string
+	phone?: string
+	qr_code?: string
+	status?: ResidentsStatusOptions
+	tags?: ResidentsTagsOptions[]
 }
 
 export enum ServiceConsultationsStatusOptions {
@@ -445,11 +502,13 @@ export type ArticlesResponse<Texpand = unknown> = Required<ArticlesRecord> & Bas
 export type BeneficiariesResponse<Texpand = unknown> = Required<BeneficiariesRecord> & BaseSystemFields<Texpand>
 export type BeneficiaryDocumentsResponse<Texpand = unknown> = Required<BeneficiaryDocumentsRecord> & BaseSystemFields<Texpand>
 export type BeneficiaryMediaResponse<Texpand = unknown> = Required<BeneficiaryMediaRecord> & BaseSystemFields<Texpand>
+export type CaseNotesResponse<Texpand = unknown> = Required<CaseNotesRecord> & BaseSystemFields<Texpand>
 export type DraftsResponse<Texpand = unknown> = Required<DraftsRecord> & BaseSystemFields<Texpand>
 export type FamilyMembersResponse<Texpand = unknown> = Required<FamilyMembersRecord> & BaseSystemFields<Texpand>
 export type MedicalLogsResponse<Texpand = unknown> = Required<MedicalLogsRecord> & BaseSystemFields<Texpand>
 export type NewsResponse<Texpand = unknown> = Required<NewsRecord> & BaseSystemFields<Texpand>
 export type PublicDonationsResponse<Texpand = unknown> = Required<PublicDonationsRecord> & BaseSystemFields<Texpand>
+export type ResidentsResponse<Texpand = unknown> = Required<ResidentsRecord> & BaseSystemFields<Texpand>
 export type ServiceConsultationsResponse<Texpand = unknown> = Required<ServiceConsultationsRecord> & BaseSystemFields<Texpand>
 export type ServicesResponse<Texpand = unknown> = Required<ServicesRecord> & BaseSystemFields<Texpand>
 export type SiteSettingsResponse<Texpand = unknown> = Required<SiteSettingsRecord> & BaseSystemFields<Texpand>
@@ -473,11 +532,13 @@ export type CollectionRecords = {
 	beneficiaries: BeneficiariesRecord
 	beneficiary_documents: BeneficiaryDocumentsRecord
 	beneficiary_media: BeneficiaryMediaRecord
+	case_notes: CaseNotesRecord
 	drafts: DraftsRecord
 	family_members: FamilyMembersRecord
 	medical_logs: MedicalLogsRecord
 	news: NewsRecord
 	public_donations: PublicDonationsRecord
+	residents: ResidentsRecord
 	service_consultations: ServiceConsultationsRecord
 	services: ServicesRecord
 	site_settings: SiteSettingsRecord
@@ -500,11 +561,13 @@ export type CollectionResponses = {
 	beneficiaries: BeneficiariesResponse
 	beneficiary_documents: BeneficiaryDocumentsResponse
 	beneficiary_media: BeneficiaryMediaResponse
+	case_notes: CaseNotesResponse
 	drafts: DraftsResponse
 	family_members: FamilyMembersResponse
 	medical_logs: MedicalLogsResponse
 	news: NewsResponse
 	public_donations: PublicDonationsResponse
+	residents: ResidentsResponse
 	service_consultations: ServiceConsultationsResponse
 	services: ServicesResponse
 	site_settings: SiteSettingsResponse

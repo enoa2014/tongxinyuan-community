@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/toaster";
+import { InstallPrompt } from "@/components/pwa/install-prompt";
 // import { Figtree, Noto_Sans_SC } from "next/font/google";
 import "./globals.css";
 
@@ -41,6 +42,7 @@ export default function RootLayout({
       >
         {children}
         <Toaster />
+        <InstallPrompt />
       </body>
     </html>
   );
