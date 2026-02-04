@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react"
 
 import { AdminHeader } from "@/components/admin/admin-header"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
+import { MobileHeader } from "@/components/admin/mobile-header"
 
 export default function AdminLayout({
     children,
@@ -36,18 +37,25 @@ export default function AdminLayout({
     }
 
     return (
-        <div className="flex min-h-screen bg-slate-50">
-            {/* Sidebar - Now Sticky */}
-            <div className="sticky top-0 h-screen w-64 flex-none z-30">
+        <div className="flex min-h-screen bg-slate-50 flex-col md:flex-row">
+            {/* Mobile Header - Visible only on Mobile */}
+            <div className="md:hidden sticky top-0 z-30 w-full">
+                <MobileHeader />
+            </div>
+
+            {/* Sidebar - Desktop Only */}
+            <div className="hidden md:block sticky top-0 h-screen w-64 flex-none z-30">
                 <AdminSidebar />
             </div>
 
             <div className="flex flex-1 flex-col min-w-0">
-                {/* Header */}
-                <AdminHeader />
+                {/* Desktop Header - Visible only on Desktop */}
+                <div className="hidden md:block">
+                    <AdminHeader />
+                </div>
 
                 {/* Main Content Area */}
-                <main className="flex-1 p-8">
+                <main className="flex-1 p-4 md:p-8">
                     {children}
                 </main>
             </div>

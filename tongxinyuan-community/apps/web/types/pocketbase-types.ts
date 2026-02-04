@@ -19,6 +19,7 @@ export enum Collections {
 	Beneficiaries = "beneficiaries",
 	BeneficiaryDocuments = "beneficiary_documents",
 	BeneficiaryMedia = "beneficiary_media",
+	Drafts = "drafts",
 	FamilyMembers = "family_members",
 	MedicalLogs = "medical_logs",
 	News = "news",
@@ -276,6 +277,10 @@ export type BeneficiaryMediaRecord = {
 	title?: string
 }
 
+export type DraftsRecord = {
+	id: string
+}
+
 export type FamilyMembersRecord = {
 	age?: number
 	beneficiary: RecordIdString
@@ -440,6 +445,7 @@ export type ArticlesResponse<Texpand = unknown> = Required<ArticlesRecord> & Bas
 export type BeneficiariesResponse<Texpand = unknown> = Required<BeneficiariesRecord> & BaseSystemFields<Texpand>
 export type BeneficiaryDocumentsResponse<Texpand = unknown> = Required<BeneficiaryDocumentsRecord> & BaseSystemFields<Texpand>
 export type BeneficiaryMediaResponse<Texpand = unknown> = Required<BeneficiaryMediaRecord> & BaseSystemFields<Texpand>
+export type DraftsResponse<Texpand = unknown> = Required<DraftsRecord> & BaseSystemFields<Texpand>
 export type FamilyMembersResponse<Texpand = unknown> = Required<FamilyMembersRecord> & BaseSystemFields<Texpand>
 export type MedicalLogsResponse<Texpand = unknown> = Required<MedicalLogsRecord> & BaseSystemFields<Texpand>
 export type NewsResponse<Texpand = unknown> = Required<NewsRecord> & BaseSystemFields<Texpand>
@@ -467,6 +473,7 @@ export type CollectionRecords = {
 	beneficiaries: BeneficiariesRecord
 	beneficiary_documents: BeneficiaryDocumentsRecord
 	beneficiary_media: BeneficiaryMediaRecord
+	drafts: DraftsRecord
 	family_members: FamilyMembersRecord
 	medical_logs: MedicalLogsRecord
 	news: NewsRecord
@@ -493,6 +500,7 @@ export type CollectionResponses = {
 	beneficiaries: BeneficiariesResponse
 	beneficiary_documents: BeneficiaryDocumentsResponse
 	beneficiary_media: BeneficiaryMediaResponse
+	drafts: DraftsResponse
 	family_members: FamilyMembersResponse
 	medical_logs: MedicalLogsResponse
 	news: NewsResponse

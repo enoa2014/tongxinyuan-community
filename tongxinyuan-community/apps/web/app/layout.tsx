@@ -18,6 +18,14 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "同心源社区 | 关爱异地大病求医儿童家庭",
   description: "关爱大病儿童家庭，提供住宿、饮食与政策支持",
+  manifest: "/manifest.json",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false, // Prevent zooming for app-like feel
+  },
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
