@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
 import { SortableServiceList } from "@/components/admin/services/sortable-service-list"
+import type { ServicesResponse } from "@/types/pocketbase-types"
 
 // Reusing the map for display
 const ICON_MAP: Record<string, any> = {
@@ -38,8 +39,13 @@ const ICON_MAP: Record<string, any> = {
 import { ServiceFormDialog } from "@/components/admin/services/service-form-dialog"
 import { ServiceDeleteAlert } from "@/components/admin/services/service-delete-alert"
 
+type ServiceItem = ServicesResponse & {
+    created?: string
+    updated?: string
+}
+
 export default function ServicesAdminPage() {
-    const [services, setServices] = useState<any[]>([])
+    const [services, setServices] = useState<ServiceItem[]>([])
     const [loading, setLoading] = useState(true)
 
     // Dialog States
@@ -56,12 +62,12 @@ export default function ServicesAdminPage() {
         try {
             setLoading(true)
             // Disable cache to see updates immediately
-            const records = await pb.collection('services').getList(1, 50)
+            const records = await pb.collection('services').getList<ServiceItem>(1, 50)
             // Sort client-side by order desc, then created desc
             const sortedItems = records.items.sort((a, b) => {
                 const orderDiff = (b.order || 0) - (a.order || 0);
                 if (orderDiff !== 0) return orderDiff;
-                return new Date(b.created).getTime() - new Date(a.created).getTime();
+                return new Date(b.created || 0).getTime() - new Date(a.created || 0).getTime();
             })
             setServices(sortedItems)
         } catch (e: any) {
@@ -72,17 +78,17 @@ export default function ServicesAdminPage() {
         }
     }
 
-    const handleEdit = (service: any) => {
+    const handleEdit = (service: ServiceItem) => {
         setSelectedService(service)
         setIsEditOpen(true)
     }
 
-    const handleDelete = (service: any) => {
+    const handleDelete = (service: ServiceItem) => {
         setSelectedService(service)
         setIsDeleteOpen(true)
     }
 
-    const handleReorder = async (newItems: any[]) => {
+    const handleReorder = async (newItems: ServiceItem[]) => {
         // 1. Assign new order values to the items based on their new position
         const total = newItems.length
         const updatedItems = newItems.map((item, index) => ({

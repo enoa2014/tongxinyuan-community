@@ -6,6 +6,7 @@ import Image from "next/image";
 import { InnerPageWrapper } from "@/components/layout/inner-page-wrapper";
 import { ServiceInquiryDialog } from "@/components/services/service-inquiry-dialog";
 import { pb } from "@/lib/pocketbase";
+import type { ServicesResponse } from "@/types/pocketbase-types";
 
 // Map db icon strings to React components
 const ICON_MAP: Record<string, any> = {
@@ -31,16 +32,21 @@ const COLOR_MAP: Record<string, string> = {
   slate: "bg-slate-50 border-slate-200"
 };
 
+type ServiceItem = ServicesResponse & {
+  created?: string;
+  updated?: string;
+};
+
 export const revalidate = 60; // ISR: Revalidate every 60 seconds
 
 async function getServices() {
   try {
-    const records = await pb.collection('services').getList(1, 100);
+    const records = await pb.collection('services').getList<ServiceItem>(1, 100);
     // Sort logic: Order desc, then Created desc
     const sortedItems = records.items.sort((a, b) => {
       const orderDiff = (b.order || 0) - (a.order || 0);
       if (orderDiff !== 0) return orderDiff;
-      return new Date(b.created).getTime() - new Date(a.created).getTime();
+      return new Date(b.created || 0).getTime() - new Date(a.created || 0).getTime();
     });
     return sortedItems;
   } catch (e) {

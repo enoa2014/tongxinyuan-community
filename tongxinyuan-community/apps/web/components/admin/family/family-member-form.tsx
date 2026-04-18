@@ -33,14 +33,16 @@ const pb = new PocketBase(process.env.NEXT_PUBLIC_PB_URL)
 const formSchema = z.object({
     name: z.string().min(1, "姓名不能为空"),
     relation: z.enum(["Father", "Mother", "Brother", "Sister", "Grandparent", "Other"]),
-    // Accept string or number from input. Transform empty string to null.
-    age: z.union([z.string(), z.number()]).optional().transform((val) => (val === "" ? null : Number(val))),
+    age: z.string().optional(),
     health_status: z.string().optional(),
     occupation: z.string().optional(),
     income_contribution: z.boolean().default(false),
     is_caregiver: z.boolean().default(false),
     notes: z.string().optional(),
 })
+
+type FamilyMemberFormInput = z.input<typeof formSchema>
+type FamilyMemberFormValues = z.output<typeof formSchema>
 
 interface FamilyMemberFormProps {
     beneficiaryId: string
@@ -53,12 +55,12 @@ export function FamilyMemberForm({ beneficiaryId, initialData, onSuccess, onCanc
     const { toast } = useToast()
     const [loading, setLoading] = useState(false)
 
-    const form = useForm<z.infer<typeof formSchema>>({
+    const form = useForm<FamilyMemberFormInput, unknown, FamilyMemberFormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: initialData?.name || "",
-            relation: (initialData?.relation as any) || "Father",
-            age: initialData?.age ?? "", // Use empty string for undefined to verify valid input state
+            relation: initialData?.relation || "Father",
+            age: initialData?.age != null ? String(initialData.age) : "",
             health_status: initialData?.health_status || "",
             occupation: initialData?.occupation || "",
             income_contribution: initialData?.income_contribution || false,
@@ -67,19 +69,15 @@ export function FamilyMemberForm({ beneficiaryId, initialData, onSuccess, onCanc
         },
     })
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: FamilyMemberFormValues) {
         setLoading(true)
         try {
-            // Clean payload: remove nulls if necessary, or let PB handle it. 
-            // PB expects fields to be presents. Logic: null is okay if field is nullable. 
-            // Better to pass properly typed data.
+            const parsedAge = values.age?.trim()
             const payload = {
                 ...values,
-                age: values.age === null ? undefined : values.age, // Verify if PB allows null or expects omission
+                age: parsedAge ? Number(parsedAge) : undefined,
                 beneficiary: beneficiaryId,
             }
-
-            console.log("Submitting payload:", payload) // Debug log
 
             if (initialData?.id) {
                 await pb.collection("family_members").update(initialData.id, payload)
@@ -89,10 +87,14 @@ export function FamilyMemberForm({ beneficiaryId, initialData, onSuccess, onCanc
                 toast({ title: "Created", description: "New family member added" })
             }
             onSuccess?.()
-        } catch (e: any) {
-            console.error("Submission error:", e)
-            // Log precise error from PB
-            const errDetails = e?.data?.data ? JSON.stringify(e.data.data) : e.message
+        } catch (error: unknown) {
+            console.error("Submission error:", error)
+            const errDetails =
+                typeof error === "object" && error !== null && "data" in error
+                    ? JSON.stringify((error as { data?: { data?: unknown } }).data?.data ?? {})
+                    : error instanceof Error
+                        ? error.message
+                        : "Unknown error"
             toast({
                 title: "Error",
                 description: `Failed to save: ${errDetails}`,

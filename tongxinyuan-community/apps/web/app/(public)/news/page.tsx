@@ -7,12 +7,13 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { InnerPageWrapper } from "@/components/layout/inner-page-wrapper"
 import { ArrowRight, Calendar, User } from "lucide-react"
+import type { NewsResponse } from "@/types/pocketbase-types"
 
 export const revalidate = 60 // Revalidate every minute
 
 async function getNews() {
     try {
-        const records = await pb.collection('news').getList(1, 50, {
+        const records = await pb.collection('news').getList<NewsResponse>(1, 50, {
             sort: '-created',
             filter: 'published = true',
         });

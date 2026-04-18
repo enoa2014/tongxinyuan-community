@@ -26,6 +26,12 @@ export type ServiceConsultation = {
     description: string
     status: "pending" | "contacted" | "resolved"
     created: string
+    history?: Array<{
+        action: string
+        date: string
+        operator: string
+        prevStatus?: string
+    }>
 }
 
 const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" | "success" }> = {

@@ -6,9 +6,19 @@ interface InnerPageWrapperProps {
     title?: string
     subtitle?: string
     imageUrl?: string
+    backgroundImage?: string
 }
 
-export function InnerPageWrapper({ children, className, title, subtitle, imageUrl }: InnerPageWrapperProps) {
+export function InnerPageWrapper({
+    children,
+    className,
+    title,
+    subtitle,
+    imageUrl,
+    backgroundImage,
+}: InnerPageWrapperProps) {
+    const heroImage = imageUrl || backgroundImage
+
     return (
         <div className="min-h-screen bg-slate-50">
             {/* Optional Hero Section */}
@@ -16,9 +26,9 @@ export function InnerPageWrapper({ children, className, title, subtitle, imageUr
                 <div className="bg-slate-900 pt-32 pb-16 md:pt-40 md:pb-20 relative overflow-hidden">
                     {/* Background Overlay or Image */}
                     <div className="absolute inset-0 z-0">
-                        {imageUrl ? (
+                        {heroImage ? (
                             // In a real app we would use Next/Image here but for flexibility with generic URLs we use img or div bg
-                            <div className="w-full h-full bg-cover bg-center opacity-80" style={{ backgroundImage: `url('${imageUrl}')` }}></div>
+                            <div className="w-full h-full bg-cover bg-center opacity-80" style={{ backgroundImage: `url('${heroImage}')` }}></div>
                         ) : (
                             <div className="w-full h-full bg-gradient-to-br from-brand-green/30 to-blue-900/30"></div>
                         )}

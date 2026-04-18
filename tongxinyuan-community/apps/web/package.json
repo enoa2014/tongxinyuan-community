@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint app components lib types proxy.ts next.config.ts tailwind.config.ts",
+    "type-check": "tsc --noEmit",
     "typegen": "pocketbase-typegen --url http://127.0.0.1:8091 --out types/pocketbase-types.ts --email dev@admin.com --password dev123456"
   },
   "dependencies": {

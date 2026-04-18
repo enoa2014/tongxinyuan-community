@@ -29,6 +29,8 @@ interface RichTextEditorProps {
 }
 
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
+    const fileInputRef = React.useRef<HTMLInputElement>(null)
+
     if (!editor) {
         return null
     }
@@ -47,14 +49,6 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         }
 
         editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
-    }
-
-    const addImage = () => {
-        const url = window.prompt('URL')
-
-        if (url) {
-            editor.chain().focus().setImage({ src: url }).run()
-        }
     }
 
     const insertTemplate = (type: 'activity' | 'notice' | 'story') => {
@@ -97,8 +91,6 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
         // Insert content at cursor
         editor.chain().focus().insertContent(content).run()
     }
-
-    const fileInputRef = React.useRef<HTMLInputElement>(null)
 
     const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]

@@ -26,7 +26,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/use-toast"
-import { AccommodationUnitsRecord, AccommodationRecordsRecord } from "@/types/pocketbase-types"
+import { AccommodationUnitsRecord, AccommodationRecordsResponse, BeneficiariesResponse } from "@/types/pocketbase-types"
 import { Loader2 } from "lucide-react"
 
 const pb = new PocketBase(process.env.NEXT_PUBLIC_PB_URL)
@@ -43,10 +43,14 @@ interface CheckOutDialogProps {
     onSuccess: () => void
 }
 
+type AccommodationRecordWithBeneficiary = AccommodationRecordsResponse<{
+    beneficiary?: BeneficiariesResponse
+}>
+
 export function CheckOutDialog({ open, onOpenChange, unit, onSuccess }: CheckOutDialogProps) {
     const { toast } = useToast()
     const [loading, setLoading] = useState(false)
-    const [activeRecord, setActiveRecord] = useState<AccommodationRecordsRecord | null>(null)
+    const [activeRecord, setActiveRecord] = useState<AccommodationRecordWithBeneficiary | null>(null)
     const [fetchingRecord, setFetchingRecord] = useState(false)
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -67,7 +71,7 @@ export function CheckOutDialog({ open, onOpenChange, unit, onSuccess }: CheckOut
         setFetchingRecord(true)
         try {
             // Find the most recent Check-in record for this unit
-            const records = await pb.collection("accommodation_records").getList<AccommodationRecordsRecord>(1, 1, {
+            const records = await pb.collection("accommodation_records").getList<AccommodationRecordWithBeneficiary>(1, 1, {
                 filter: `unit = "${unitId}" && record_type = "Check-in"`,
                 sort: '-start_date', // Latest one (Note: -created fails on this collection for unknown reasons)
                 expand: 'beneficiary'
@@ -134,7 +138,6 @@ export function CheckOutDialog({ open, onOpenChange, unit, onSuccess }: CheckOut
                             {activeRecord?.expand?.beneficiary && (
                                 <div className="bg-muted p-3 rounded-md text-sm">
                                     <span className="font-semibold block mb-1">Current Occupant:</span>
-                                    {/* @ts-ignore */}
                                     {activeRecord.expand.beneficiary.name}
                                     <span className="text-muted-foreground ml-2 text-xs">
                                         (Since {new Date(activeRecord.start_date).toLocaleDateString()})

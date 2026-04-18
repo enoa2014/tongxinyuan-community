@@ -23,6 +23,7 @@ services:
       dockerfile: Dockerfile.prod
       args:
         NEXT_PUBLIC_API_URL: http://tongxy.xyz:8090
+        NEXT_PUBLIC_PB_URL: http://tongxy.xyz:8090
     container_name: txy_web
     restart: always
     ports:
@@ -30,6 +31,7 @@ services:
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_API_URL=http://tongxy.xyz:8090
+      - NEXT_PUBLIC_PB_URL=http://tongxy.xyz:8090
       - PB_URL=http://pocketbase:8090
     depends_on:
       pocketbase:

@@ -49,6 +49,9 @@ const formSchema = z.object({
     captured_date: z.string().optional(), // Date input returns string
 })
 
+type MediaUploadInput = z.input<typeof formSchema>
+type MediaUploadValues = z.output<typeof formSchema>
+
 interface MediaUploadProps {
     beneficiaryId: string
     onSuccess: () => void
@@ -58,7 +61,7 @@ export function MediaUpload({ beneficiaryId, onSuccess }: MediaUploadProps) {
     const { toast } = useToast()
     const [loading, setLoading] = useState(false)
 
-    const form = useForm<z.infer<typeof formSchema>>({
+    const form = useForm<MediaUploadInput, unknown, MediaUploadValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             category: "Life",
@@ -67,7 +70,7 @@ export function MediaUpload({ beneficiaryId, onSuccess }: MediaUploadProps) {
         },
     })
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: MediaUploadValues) {
         setLoading(true)
         try {
             const formData = new FormData()

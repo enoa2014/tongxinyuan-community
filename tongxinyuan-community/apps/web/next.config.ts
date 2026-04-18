@@ -4,9 +4,6 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "standalone",
   reactStrictMode: false,
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   images: {
     remotePatterns: [
       {
@@ -19,6 +16,18 @@ const nextConfig: NextConfig = {
         protocol: 'http',
         hostname: 'localhost',
         port: '8091',
+        pathname: '/api/files/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'tongxy.xyz',
+        port: '8091',
+        pathname: '/api/files/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'tongxy.xyz',
+        port: '8090',
         pathname: '/api/files/**',
       },
     ],

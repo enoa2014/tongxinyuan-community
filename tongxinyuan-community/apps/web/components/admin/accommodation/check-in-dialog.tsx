@@ -33,7 +33,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
-import { AccommodationUnitsRecord, BeneficiariesRecord } from "@/types/pocketbase-types"
+import { AccommodationUnitsRecord, BeneficiariesResponse } from "@/types/pocketbase-types"
 import { Loader2 } from "lucide-react"
 
 const pb = new PocketBase(process.env.NEXT_PUBLIC_PB_URL)
@@ -56,8 +56,7 @@ interface CheckInDialogProps {
 export function CheckInDialog({ open, onOpenChange, initialUnit, onSuccess }: CheckInDialogProps) {
     const { toast } = useToast()
     const [loading, setLoading] = useState(false)
-    const [beneficiaries, setBeneficiaries] = useState<BeneficiariesRecord[]>([])
-    const [searching, setSearching] = useState(false)
+    const [beneficiaries, setBeneficiaries] = useState<BeneficiariesResponse[]>([])
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -84,7 +83,7 @@ export function CheckInDialog({ open, onOpenChange, initialUnit, onSuccess }: Ch
 
     async function loadBeneficiaries() {
         try {
-            const result = await pb.collection("beneficiaries").getList(1, 100, {
+            const result = await pb.collection("beneficiaries").getList<BeneficiariesResponse>(1, 100, {
                 filter: 'status = "active"',
                 sort: 'name',
                 fields: 'id,name,id_card'
@@ -117,9 +116,10 @@ export function CheckInDialog({ open, onOpenChange, initialUnit, onSuccess }: Ch
             toast({ title: "Success", description: "Beneficiary checked in successfully" })
             onSuccess()
             onOpenChange(false)
-        } catch (e: any) {
-            console.error(e)
-            toast({ title: "Error", description: e.message, variant: "destructive" })
+        } catch (error: unknown) {
+            console.error(error)
+            const message = error instanceof Error ? error.message : "Unknown error"
+            toast({ title: "Error", description: message, variant: "destructive" })
         } finally {
             setLoading(false)
         }

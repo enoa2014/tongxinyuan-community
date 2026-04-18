@@ -51,7 +51,7 @@ interface ActivityFormProps {
     staffList?: any[]
 }
 
-const NEXT_PUBLIC_PB_URL = process.env.NEXT_PUBLIC_PB_URL || "http://127.0.0.1:8090"
+const NEXT_PUBLIC_PB_URL = process.env.NEXT_PUBLIC_PB_URL || process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8091"
 
 export function ActivityForm({ initialData, staffList = [] }: ActivityFormProps) {
     const { toast } = useToast()

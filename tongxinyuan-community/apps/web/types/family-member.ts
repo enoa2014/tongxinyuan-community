@@ -7,6 +7,7 @@ export interface FamilyMember {
     health_status?: string
     occupation?: string
     income_contribution?: boolean
+    is_caregiver?: boolean
     notes?: string
     beneficiary: string
     created: string

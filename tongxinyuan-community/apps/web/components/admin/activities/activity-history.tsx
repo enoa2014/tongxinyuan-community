@@ -8,8 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ActivityParticipationsResponse, ActivitiesResponse } from "@/types/pocketbase-types"
 import { cn } from "@/lib/utils"
 
+type ActivityParticipationWithActivity = ActivityParticipationsResponse<{
+    activity?: ActivitiesResponse
+}>
+
 interface ActivityHistoryProps {
-    items: ActivityParticipationsResponse<ActivitiesResponse>[]
+    items: ActivityParticipationWithActivity[]
 }
 
 export function ActivityHistory({ items }: ActivityHistoryProps) {

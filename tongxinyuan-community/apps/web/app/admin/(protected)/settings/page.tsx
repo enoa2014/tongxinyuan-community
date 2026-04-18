@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 import { pb } from "@/lib/pocketbase"
+import type { SiteSettingsResponse } from "@/types/pocketbase-types"
 
 const settingsFormSchema = z.object({
     site_name: z.string().min(2, {
@@ -32,6 +33,14 @@ const settingsFormSchema = z.object({
 })
 
 type SettingsFormValues = z.infer<typeof settingsFormSchema>
+
+type SiteSettingsModel = SiteSettingsResponse & {
+    site_name?: string
+    description?: string
+    contact_phone?: string
+    contact_email?: string
+    announcement?: string
+}
 
 export default function SettingsPage() {
     const [isLoading, setIsLoading] = useState(true)
@@ -52,7 +61,7 @@ export default function SettingsPage() {
         async function loadSettings() {
             try {
                 // Fetch the first (and only) settings record
-                const result = await pb.collection('site_settings').getList(1, 1)
+                const result = await pb.collection('site_settings').getList<SiteSettingsModel>(1, 1)
 
                 if (result.items.length > 0) {
                     const settings = result.items[0]

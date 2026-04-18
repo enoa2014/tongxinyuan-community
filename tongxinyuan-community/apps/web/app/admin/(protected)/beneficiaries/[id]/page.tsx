@@ -42,6 +42,10 @@ import { Label } from "@/components/ui/label"
 
 const pb = new PocketBase(process.env.NEXT_PUBLIC_PB_URL)
 
+type ActivityParticipationWithActivity = ActivityParticipationsResponse<{
+    activity?: ActivitiesResponse
+}>
+
 export default function BeneficiaryDetailPage() {
     const params = useParams()
     const router = useRouter()
@@ -73,7 +77,7 @@ export default function BeneficiaryDetailPage() {
     const [editingAccommodation, setEditingAccommodation] = useState<AccommodationRecord | undefined>(undefined)
 
     // Activity State
-    const [activityItems, setActivityItems] = useState<ActivityParticipationsResponse<ActivitiesResponse>[]>([])
+    const [activityItems, setActivityItems] = useState<ActivityParticipationWithActivity[]>([])
 
     useEffect(() => {
         if (isNew) {
@@ -182,7 +186,7 @@ export default function BeneficiaryDetailPage() {
     async function fetchActivityHistory() {
         if (isNew) return
         try {
-            const records = await pb.collection("activity_participations").getList<ActivityParticipationsResponse<ActivitiesResponse>>(1, 50, {
+            const records = await pb.collection("activity_participations").getList<ActivityParticipationWithActivity>(1, 50, {
                 filter: `beneficiary="${id}"`,
                 sort: '-created',
                 expand: 'activity' // Expand related activity details

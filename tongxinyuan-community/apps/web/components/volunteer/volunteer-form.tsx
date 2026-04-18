@@ -36,17 +36,17 @@ import { useToast } from "@/components/ui/use-toast"
 
 const formSchema = z.object({
     name: z.string().min(2, {
-        message: "姓名至少需要 2 个字符",
+        message: "姓名至少需要 2 个字符。",
     }),
     phone: z.string().regex(/^1[3-9]\d{9}$/, {
-        message: "请输入有效的中国大陆手机号",
+        message: "请输入有效的中国大陆手机号。",
     }),
-    level: z.string({
-        required_error: "请选择志愿者类型",
+    level: z.string().min(1, {
+        message: "请选择志愿者类型。",
     }),
     availability: z.string().optional(),
     reason: z.string().min(10, {
-        message: "申请理由至少需要 10 个字符",
+        message: "申请理由至少需要 10 个字符。",
     }).optional(),
 })
 
@@ -81,8 +81,8 @@ export function VolunteerForm() {
             })
 
             toast({
-                title: "✅ 申请提交成功！",
-                description: "感谢您的爱心。我们的社工将在 3 个工作日内联系您。",
+                title: "申请提交成功",
+                description: "感谢您的爱心，我们会尽快联系您。",
             })
             setOpen(false)
             form.reset()
@@ -91,7 +91,7 @@ export function VolunteerForm() {
             toast({
                 variant: "destructive",
                 title: "提交失败",
-                description: "网络连接异常，请稍后重试或直接联系我们。",
+                description: "网络连接异常，请稍后重试。",
             })
         } finally {
             setIsLoading(false)
@@ -109,7 +109,7 @@ export function VolunteerForm() {
                 <DialogHeader>
                     <DialogTitle>加入同心源志愿者大家庭</DialogTitle>
                     <DialogDescription>
-                        请填写您的基本信息，我们将根据您的技能为您匹配合适的服务岗位。
+                        请填写您的基本信息，我们会根据您的技能匹配合适的服务岗位。
                     </DialogDescription>
                 </DialogHeader>
 
@@ -135,7 +135,7 @@ export function VolunteerForm() {
                                 name="phone"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>手机号码</FormLabel>
+                                        <FormLabel>手机号</FormLabel>
                                         <FormControl>
                                             <Input placeholder="13800000000" {...field} />
                                         </FormControl>
@@ -158,9 +158,9 @@ export function VolunteerForm() {
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="level1">Level 1: 普适型 (后勤、清洁)</SelectItem>
-                                            <SelectItem value="level2">Level 2: 康乐型 (陪伴、游戏)</SelectItem>
-                                            <SelectItem value="level3">Level 3: 专业型 (医护、法律、心理)</SelectItem>
+                                            <SelectItem value="level1">Level 1: 普适型</SelectItem>
+                                            <SelectItem value="level2">Level 2: 陪伴型</SelectItem>
+                                            <SelectItem value="level3">Level 3: 专业型</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -173,10 +173,10 @@ export function VolunteerForm() {
                             name="reason"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>为什么想加入我们？(简述)</FormLabel>
+                                    <FormLabel>为什么想加入我们</FormLabel>
                                     <FormControl>
                                         <Textarea
-                                            placeholder="例如：我有幼教经验，希望能陪伴大病患儿阅读..."
+                                            placeholder="例如：我有幼教经验，希望陪伴大病患儿阅读和游戏。"
                                             className="resize-none"
                                             {...field}
                                         />

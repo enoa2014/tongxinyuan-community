@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic"; // Don't cache this
 
-const TARGET_BASE = process.env.PB_URL || "http://127.0.0.1:8090";
+const TARGET_BASE = process.env.PB_URL || "http://127.0.0.1:8091";
 
 async function proxy(request: NextRequest, props: { params: Promise<{ path: string[] }> }) {
     // 1. Construct Target URL
