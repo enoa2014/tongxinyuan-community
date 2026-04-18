@@ -1,7 +1,6 @@
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Users2, Star, ShieldCheck, Gem } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Users2, Star, ShieldCheck } from "lucide-react";
 import { InnerPageWrapper } from "@/components/layout/inner-page-wrapper";
 import { VolunteerForm } from "@/components/volunteer/volunteer-form";
 

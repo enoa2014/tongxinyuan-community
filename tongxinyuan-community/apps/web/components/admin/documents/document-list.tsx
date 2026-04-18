@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import PocketBase from "pocketbase"
 import { format } from "date-fns"
 import { FileText, Download, Trash, File, FileSpreadsheet, Image as ImageIcon } from "lucide-react"
@@ -42,7 +41,7 @@ export function DocumentList({ items, onRefresh }: DocumentListProps) {
             await pb.collection("beneficiary_documents").delete(id)
             toast({ title: "Deleted", description: "Document removed" })
             onRefresh()
-        } catch (e) {
+        } catch {
             toast({ title: "Error", description: "Failed to delete", variant: "destructive" })
         }
     }

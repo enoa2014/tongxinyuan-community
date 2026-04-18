@@ -1,12 +1,12 @@
 
 import { pb } from "@/lib/pocketbase"
-import { InnerPageWrapper } from "@/components/layout/inner-page-wrapper"
 import { format } from "date-fns"
 import { zhCN } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, User, Calendar } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { notFound } from "next/navigation"
 import { NewsActions } from "@/components/news/news-actions"
 
@@ -49,10 +49,13 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ id:
                     {/* Dark overlay */}
                     <div className="absolute inset-0 bg-slate-900/80 z-10" />
                     {item.cover && (
-                        <img
+                        <Image
                             src={`/api/pb/api/files/${item.collectionId}/${item.id}/${item.cover}`}
                             alt={item.title}
-                            className="w-full h-full object-cover blur-sm"
+                            fill
+                            unoptimized
+                            sizes="100vw"
+                            className="object-cover blur-sm"
                         />
                     )}
                 </div>

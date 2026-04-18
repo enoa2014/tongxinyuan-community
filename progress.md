@@ -264,3 +264,32 @@
 - Triage the remaining ESLint warnings and convert the highest-value ones from warning cleanup into code fixes.
 - Run regression checks for admin auth, public news/services pages, check-status, and accommodation check-in/check-out flows against a live PocketBase instance.
 - Continue Phase 8.2 finance work and complete Phase 9 deployment/handover deliverables.
+
+## Session Update: Warning Reduction Pass & Regression Verification
+**Date:** 2026-04-19
+**Status:** In Progress
+
+### 1. Achievements
+- **High-value warning cleanup**:
+    - Removed `setState`-inside-effect patterns from admin layout/header by deriving auth and user display state directly.
+    - Refactored the activities list refresh flow to avoid the previous effect dependency warning.
+    - Reduced public-page warnings by replacing local `<img>` usage with `next/image` in key news pages and the public navbar logo.
+    - Cleared a batch of low-risk unused imports and unused locals in public/admin components.
+- **Warning count reduction**:
+    - Lowered `apps/web` ESLint warnings from `137` to `104` without reintroducing type errors.
+
+### 2. Validation Status
+- `npm run type-check` passes.
+- `npm run lint` completes with `104` warnings and `0` errors.
+- `npm run build` passes after this warning-reduction pass.
+- Build output still logs `ECONNREFUSED 127.0.0.1:8091` for news/services data fetching when local PocketBase is offline, but static generation still completes.
+
+### 3. Remaining Risks / Gaps
+- Remaining ESLint warnings are now mostly historical `any`, unused imports/variables, and a few hook dependency warnings in larger admin pages.
+- Runtime regression against a live PocketBase backend is still pending.
+- Accommodation finance / waiver workflow and Phase 9 deployment/handover work remain unfinished.
+
+### 4. Next Steps
+- Continue reducing warnings in the larger admin surfaces (`beneficiaries`, `services`, `volunteers`, `news`) where the remaining warning density is highest.
+- Run browser-level regression for admin auth, check-status, accommodation flows, and public content pages with PocketBase online.
+- Resume business feature work on accommodation finance / waiver support after the warning baseline is in a more maintainable state.

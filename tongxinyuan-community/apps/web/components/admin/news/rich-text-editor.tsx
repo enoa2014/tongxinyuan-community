@@ -104,7 +104,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
             const url = pb.files.getURL(record, record.file)
             editor.chain().focus().setImage({ src: url }).run()
         } catch (error: any) {
-            console.error('Image upload failed (Full details):', JSON.stringify(error.data || error, null, 2))
+            console.error('Image upload failed (Full details):', JSON.stringify(error, null, 2))
             alert(`图片上传失败: ${error?.data?.message || error.message || '未知错误'}`)
         } finally {
             if (fileInputRef.current) {

@@ -1,7 +1,6 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Utensils, HeartHandshake, BookOpen, Sun, HelpCircle, Home, Smile, Users, Star, Gift } from "lucide-react";
-import Image from "next/image";
+import { Utensils, HeartHandshake, BookOpen, Sun, HelpCircle, Home, Smile, Users, Star, Gift, type LucideIcon } from "lucide-react";
 
 import { InnerPageWrapper } from "@/components/layout/inner-page-wrapper";
 import { ServiceInquiryDialog } from "@/components/services/service-inquiry-dialog";
@@ -9,7 +8,7 @@ import { pb } from "@/lib/pocketbase";
 import type { ServicesResponse } from "@/types/pocketbase-types";
 
 // Map db icon strings to React components
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<string, LucideIcon> = {
   utensils: Utensils,
   heart_handshake: HeartHandshake,
   book_open: BookOpen,

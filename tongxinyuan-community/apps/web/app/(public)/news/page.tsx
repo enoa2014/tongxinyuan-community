@@ -1,6 +1,7 @@
 
 import { pb } from "@/lib/pocketbase"
 import Link from "next/link"
+import Image from "next/image"
 import { format } from "date-fns"
 import { zhCN } from "date-fns/locale"
 import { Badge } from "@/components/ui/badge"
@@ -39,10 +40,13 @@ export default async function NewsPage() {
                         <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                             <div className="aspect-video w-full bg-slate-100 relative overflow-hidden">
                                 {item.cover ? (
-                                    <img
+                                    <Image
                                         src={`/api/pb/api/files/${item.collectionId}/${item.id}/${item.cover}`}
                                         alt={item.title}
-                                        className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+                                        fill
+                                        unoptimized
+                                        sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50">

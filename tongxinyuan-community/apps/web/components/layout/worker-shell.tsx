@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Users, Scan, FileText, Settings, LogOut, CheckSquare } from "lucide-react"
+import { LayoutDashboard, Users, Scan, FileText, LogOut, CheckSquare } from "lucide-react"
 
 export function WorkerShell({ children }: { children: React.ReactNode }) {
     const pathname = usePathname()

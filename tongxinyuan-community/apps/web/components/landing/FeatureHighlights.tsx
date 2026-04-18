@@ -1,5 +1,4 @@
-import { Home, Utensils, HeartHandshake, BookOpen } from "lucide-react"
-import Link from "next/link"
+import { Home, Utensils } from "lucide-react"
 
 export function FeatureHighlights() {
     const features = [

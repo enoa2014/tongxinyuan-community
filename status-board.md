@@ -50,3 +50,10 @@
 - `apps/web` production build now passes after migrating to `proxy.ts` and removing `ignoreBuildErrors`.
 - `apps/web` lint now completes with warnings only instead of blocking on legacy rule debt.
 - Public news/services build-time data fetch still logs `ECONNREFUSED 127.0.0.1:8091` when local PocketBase is offline, so runtime regression against a live backend is still required.
+
+## Verified Update (2026-04-19)
+
+- `apps/web` type-check still passes after an additional warning-reduction pass.
+- `apps/web` lint warnings were reduced from `137` to `104`.
+- `apps/web` production build still passes after the public-page image cleanup and admin layout/header refactor.
+- The main remaining engineering debt is concentrated in larger admin pages with historical `any`, unused locals, and hook dependency warnings.

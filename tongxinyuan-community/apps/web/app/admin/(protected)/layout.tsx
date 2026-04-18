@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { pb } from "@/lib/pocketbase"
 import { Loader2 } from "lucide-react"
@@ -15,16 +15,13 @@ export default function AdminLayout({
     children: React.ReactNode
 }) {
     const router = useRouter()
-    const [isAuthorized, setIsAuthorized] = useState(false)
+    const isAuthorized = pb.authStore.isValid
 
     useEffect(() => {
-        // Check if user is logged in
-        if (!pb.authStore.isValid) {
-            router.push("/admin/login")
-        } else {
-            setIsAuthorized(true)
+        if (!isAuthorized) {
+            router.replace("/admin/login")
         }
-    }, [router])
+    }, [isAuthorized, router])
 
     // Prevent flashing of protected content
     if (!isAuthorized) {

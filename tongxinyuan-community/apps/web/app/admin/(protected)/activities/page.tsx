@@ -10,37 +10,54 @@ import { DataTable } from "@/components/admin/data-table"
 import { getColumns } from "./columns"
 import { Activity } from "@/types"
 
+async function loadActivities(statusFilter: string, categoryFilter: string) {
+    const filters = []
+    if (statusFilter !== "all") filters.push(`status = "${statusFilter}"`)
+    if (categoryFilter !== "all") filters.push(`category = "${categoryFilter}"`)
+
+    const filterString = filters.length > 0 ? filters.join(" && ") : ""
+    const records = await pb.collection("activities").getList<Activity>(1, 50, {
+        sort: "-created",
+        expand: "lead_staff",
+        filter: filterString
+    })
+
+    return records.items
+}
+
 export default function ActivitiesPage() {
     const router = useRouter()
     const [data, setData] = useState<Activity[]>([])
-    const [loading, setLoading] = useState(true)
     const [statusFilter, setStatusFilter] = useState("all")
     const [categoryFilter, setCategoryFilter] = useState("all")
 
-    const fetchData = async () => {
-        setLoading(true)
+    const refreshData = async () => {
         try {
-            const filters = []
-            if (statusFilter !== "all") filters.push(`status = "${statusFilter}"`)
-            if (categoryFilter !== "all") filters.push(`category = "${categoryFilter}"`)
-
-            const filterString = filters.length > 0 ? filters.join(" && ") : ""
-
-            const records = await pb.collection("activities").getList<Activity>(1, 50, {
-                sort: "-created",
-                expand: "lead_staff",
-                filter: filterString
-            })
-            setData(records.items)
+            setData(await loadActivities(statusFilter, categoryFilter))
         } catch (error) {
             console.error("Failed to fetch activities:", error)
-        } finally {
-            setLoading(false)
         }
     }
 
     useEffect(() => {
-        fetchData()
+        let active = true
+
+        const fetchData = async () => {
+            try {
+                const items = await loadActivities(statusFilter, categoryFilter)
+                if (active) {
+                    setData(items)
+                }
+            } catch (error) {
+                console.error("Failed to fetch activities:", error)
+            }
+        }
+
+        void fetchData()
+
+        return () => {
+            active = false
+        }
     }, [statusFilter, categoryFilter]) // Re-fetch on filter change
 
     const handleCreate = () => {
@@ -99,7 +116,7 @@ export default function ActivitiesPage() {
             </div>
 
             <DataTable
-                columns={getColumns(() => fetchData())}
+                columns={getColumns(() => void refreshData())}
                 data={data}
                 searchKey="title"
                 searchPlaceholder="搜索活动标题..."

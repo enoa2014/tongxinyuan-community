@@ -2,8 +2,9 @@
 
 import * as React from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Heart, Menu } from "lucide-react"
+import { Menu } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -35,10 +36,12 @@ export function PublicNavbar() {
                 <Link href="/" className="flex items-center gap-3 group">
                     <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-white/10 backdrop-blur-sm p-1">
                         {/* Fallback to text/icon if image fails, but here we use the image */}
-                        <img
+                        <Image
                             src="/logo.png"
                             alt="同心源 Logo"
-                            className="h-full w-full object-contain"
+                            fill
+                            sizes="40px"
+                            className="object-contain p-1"
                         />
                     </div>
                     <span className={`text-xl font-heading font-bold tracking-tight transition-colors duration-300 ${isScrolled || !isHome ? "text-slate-900" : "text-white text-shadow-sm"

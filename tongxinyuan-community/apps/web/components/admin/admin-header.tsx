@@ -2,17 +2,13 @@
 "use client"
 
 import { pb } from "@/lib/pocketbase"
-import { useEffect, useState } from "react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export function AdminHeader() {
-    const [userEmail, setUserEmail] = useState("")
-
-    useEffect(() => {
-        if (pb.authStore.isValid && pb.authStore.model) {
-            setUserEmail(pb.authStore.model.email || "Admin")
-        }
-    }, [])
+    const userEmail =
+        pb.authStore.isValid && pb.authStore.model && "email" in pb.authStore.model
+            ? (pb.authStore.model.email as string | undefined) || "Admin"
+            : "Admin"
 
     return (
         <header className="flex h-16 items-center justify-between border-b bg-white px-6 shadow-sm">

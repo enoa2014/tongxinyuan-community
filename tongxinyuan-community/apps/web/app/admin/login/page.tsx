@@ -3,7 +3,6 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import Image from "next/image"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -50,7 +49,7 @@ export default function AdminLoginPage() {
         try {
             // NEW: RBAC Login (Authenticate against 'staff' collection)
             // Was: const authData = await pb.collection('_superusers').authWithPassword(values.email, values.password)
-            const authData = await pb.collection('staff').authWithPassword(values.email, values.password)
+            await pb.collection('staff').authWithPassword(values.email, values.password)
 
             // Set cookie for middleware (optional, PB SDK uses local storage by default but Next.js middleware can't see LS)
             // For now, we rely on PB client-side auth state for rendering, 

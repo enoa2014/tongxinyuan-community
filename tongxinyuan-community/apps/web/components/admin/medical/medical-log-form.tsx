@@ -30,10 +30,6 @@ import {
 
 const pb = new PocketBase(process.env.NEXT_PUBLIC_PB_URL)
 
-// Validate file type and size on client side roughly
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-
 const formSchema = z.object({
     date: z.date(),
     hospital: z.string().optional(),
@@ -91,11 +87,11 @@ export function MedicalLogForm({ beneficiaryId, onSuccess, onCancel }: MedicalLo
 
             toast({ title: "创建成功", description: "医疗日志已添加" })
             onSuccess?.()
-        } catch (e: any) {
-            console.error("Submission error:", e)
+        } catch (error: unknown) {
+            console.error("Submission error:", error)
             toast({
                 title: "Error",
-                description: `Failed to save: ${e.message}`,
+                description: `Failed to save: ${error instanceof Error ? error.message : "Unknown error"}`,
                 variant: "destructive"
             })
         } finally {

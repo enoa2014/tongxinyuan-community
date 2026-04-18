@@ -2,9 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart3, Calendar, FileText, Heart, Home, LayoutDashboard, Settings, User, Users } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
+import { Calendar, FileText, Heart, Home, LayoutDashboard, Settings, User, Users } from "lucide-react"
 
 export function DashboardSidebar() {
     const pathname = usePathname()

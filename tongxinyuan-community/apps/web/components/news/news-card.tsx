@@ -1,6 +1,5 @@
 
 import Link from "next/link"
-import Image from "next/image"
 import { Calendar, ArrowRight } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"

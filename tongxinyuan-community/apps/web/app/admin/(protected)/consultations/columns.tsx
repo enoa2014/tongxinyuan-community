@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
-import { MoreHorizontal, Check, Edit2, MessageSquare } from "lucide-react"
+import { MoreHorizontal, Check, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -34,7 +34,7 @@ export type ServiceConsultation = {
     }>
 }
 
-const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" | "success" }> = {
+const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" | "success"; className?: string }> = {
     pending: { label: "待处理", variant: "secondary" }, // Yellow-ish usually or gray
     contacted: { label: "已跟进", variant: "default" },    // Blue
     resolved: { label: "已解决", variant: "success" },   // Green
@@ -54,7 +54,7 @@ const ServiceActions = ({ consultation, refreshData }: { consultation: ServiceCo
             })
             refreshData()
             router.refresh()
-        } catch (error) {
+        } catch {
             toast({
                 title: "更新失败",
                 description: "请重试或联系管理员",
@@ -163,7 +163,6 @@ export const getColumns = (refreshData: () => void): ColumnDef<ServiceConsultati
             const status = row.getValue("status") as string
             const config = statusMap[status] || { label: status, variant: "outline" }
             return (
-                // @ts-ignore - variant success might be custom, fallback to outline if needed
                 <Badge variant={config.variant === 'success' ? 'default' : config.variant} className={config.variant === 'success' ? 'bg-green-600 hover:bg-green-700' : ''}>
                     {config.label}
                 </Badge>
