@@ -1,12 +1,13 @@
-
 "use client"
 
 import { useState } from "react"
+
 import { InventoryView } from "@/components/admin/accommodation/inventory-view"
 import { CheckInDialog } from "@/components/admin/accommodation/check-in-dialog"
 import { CheckOutDialog } from "@/components/admin/accommodation/check-out-dialog"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { AccommodationRecordsView } from "@/components/admin/accommodation/records-view"
 import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AccommodationUnitsRecord } from "@/types/pocketbase-types"
 
 export default function AccommodationPage() {
@@ -17,15 +18,19 @@ export default function AccommodationPage() {
 
     const handleSelectUnit = (unit: AccommodationUnitsRecord) => {
         setSelectedUnit(unit)
+
         if (unit.status === "active") {
             setIsCheckInOpen(true)
-        } else if (unit.status === "occupied") {
+            return
+        }
+
+        if (unit.status === "occupied") {
             setIsCheckOutOpen(true)
         }
     }
 
     const handleSuccess = () => {
-        setRefreshTrigger(prev => prev + 1)
+        setRefreshTrigger((previousValue) => previousValue + 1)
         setIsCheckInOpen(false)
         setIsCheckOutOpen(false)
         setSelectedUnit(undefined)
@@ -36,7 +41,7 @@ export default function AccommodationPage() {
             <div className="flex flex-col gap-2">
                 <h1 className="text-3xl font-bold tracking-tight">住宿管理 Accommodation System</h1>
                 <p className="text-muted-foreground">
-                    管理小家房源库存与入住记录。 Inventory & Occupancy Management.
+                    管理房源库存、入住记录和住宿费用状态。
                 </p>
             </div>
 
@@ -53,9 +58,7 @@ export default function AccommodationPage() {
                 </TabsContent>
 
                 <TabsContent value="records">
-                    <div className="flex items-center justify-center p-8 border border-dashed rounded-lg bg-muted/10 text-muted-foreground">
-                        入住记录列表 (In Progress)
-                    </div>
+                    <AccommodationRecordsView refreshKey={refreshTrigger} />
                 </TabsContent>
             </Tabs>
 

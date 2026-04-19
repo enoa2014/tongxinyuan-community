@@ -5,13 +5,12 @@ import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, useFieldArray } from "react-hook-form"
 import * as z from "zod"
-import { Loader2, Plus, Trash, X, UploadCloud, FileText, Image as ImageIcon, Video, Link as LinkIcon, Calendar, MapPin } from "lucide-react"
+import { type LucideIcon, Loader2, Plus, X, UploadCloud, FileText, Image as ImageIcon, Video, Link as LinkIcon, Calendar, MapPin } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -30,6 +29,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/components/ui/use-toast"
 import { pb } from "@/lib/pocketbase"
 import { Activity } from "@/types"
+import type { StaffResponse } from "@/types/pocketbase-types"
 
 const activitySchema = z.object({
     title: z.string().min(2, "标题至少 2 个字符"),
@@ -48,7 +48,17 @@ const activitySchema = z.object({
 
 interface ActivityFormProps {
     initialData?: Activity
-    staffList?: any[]
+    staffList?: StaffResponse[]
+}
+
+interface FileUploadInputProps {
+    icon: LucideIcon
+    label: string
+    description: string
+    accept: string
+    onChange: (files: FileList | null) => void
+    files: FileList | null
+    existingFiles?: string[]
 }
 
 const NEXT_PUBLIC_PB_URL = process.env.NEXT_PUBLIC_PB_URL || process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8091"
@@ -142,7 +152,7 @@ export function ActivityForm({ initialData, staffList = [] }: ActivityFormProps)
         onChange,
         files,
         existingFiles
-    }: any) => (
+    }: FileUploadInputProps) => (
         <div className="border-2 border-dashed rounded-lg p-6 hover:bg-muted/50 transition-colors text-center relative group">
             <input
                 type="file"

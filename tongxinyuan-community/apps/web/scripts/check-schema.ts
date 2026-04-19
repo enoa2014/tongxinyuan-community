@@ -68,16 +68,40 @@ async function checkAndCreateSchemas() {
             // In v0.23+, schema is moved to fields
             const fields = collection.fields || collection.schema || [];
             const unitField = fields.find((f: any) => f.name === 'unit');
+            const feeField = fields.find((f: any) => f.name === 'fee_amount');
+            const paymentStatusField = fields.find((f: any) => f.name === 'payment_status');
+            const waiverReasonField = fields.find((f: any) => f.name === 'waiver_reason');
+            const missingFields = [];
+
             if (!unitField) {
                 console.log("⚠️ Field 'unit' missing in 'accommodation_records'. Adding...");
                 const units = await pb.collections.getOne('accommodation_units');
+                missingFields.push({ name: 'unit', type: 'relation', required: true, collectionId: units.id, maxSelect: 1, cascadeDelete: false });
+            }
+
+            if (!feeField) {
+                console.log("⚠️ Field 'fee_amount' missing in 'accommodation_records'. Adding...");
+                missingFields.push({ name: 'fee_amount', type: 'number' });
+            }
+
+            if (!paymentStatusField) {
+                console.log("⚠️ Field 'payment_status' missing in 'accommodation_records'. Adding...");
+                missingFields.push({ name: 'payment_status', type: 'select', values: ["pending", "paid", "waived"] });
+            }
+
+            if (!waiverReasonField) {
+                console.log("⚠️ Field 'waiver_reason' missing in 'accommodation_records'. Adding...");
+                missingFields.push({ name: 'waiver_reason', type: 'text' });
+            }
+
+            if (missingFields.length > 0) {
                 await pb.collections.update(collection.id, {
                     fields: [
                         ...fields,
-                        { name: 'unit', type: 'relation', required: true, collectionId: units.id, maxSelect: 1, cascadeDelete: false }
+                        ...missingFields,
                     ]
                 });
-                console.log("✅ Field 'unit' added to 'accommodation_records'.");
+                console.log("✅ Missing finance fields added to 'accommodation_records'.");
             }
 
         } catch (e: any) {
@@ -96,6 +120,9 @@ async function checkAndCreateSchemas() {
                         { name: 'end_date', type: 'date' },
                         { name: 'record_type', type: 'select', values: ["Check-in", "Extension", "Check-out", "Transfer"], required: true },
                         { name: 'room_number', type: 'text' }, // Verify deprecation or keep for snapshot
+                        { name: 'fee_amount', type: 'number' },
+                        { name: 'payment_status', type: 'select', values: ["pending", "paid", "waived"] },
+                        { name: 'waiver_reason', type: 'text' },
                         { name: 'notes', type: 'text' }
                     ]
                 });

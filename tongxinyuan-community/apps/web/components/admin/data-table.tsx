@@ -49,6 +49,7 @@ export function DataTable<TData, TValue>({
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [rowSelection, setRowSelection] = React.useState({})
 
+    // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table intentionally returns a mutable instance here.
     const table = useReactTable({
         data,
         columns,

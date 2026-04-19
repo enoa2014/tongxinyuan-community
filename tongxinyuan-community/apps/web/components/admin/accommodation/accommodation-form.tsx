@@ -1,9 +1,11 @@
-
 "use client"
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
+import { useState } from "react"
+import PocketBase from "pocketbase"
+
 import { Button } from "@/components/ui/button"
 import {
     Form,
@@ -22,18 +24,19 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { useState } from "react"
-import PocketBase from "pocketbase"
 import { useToast } from "@/components/ui/use-toast"
 import { AccommodationRecord } from "@/types/accommodation"
 
 const pb = new PocketBase(process.env.NEXT_PUBLIC_PB_URL)
 
 const formSchema = z.object({
-    room_number: z.string().min(1, "房间号必填"),
+    room_number: z.string().min(1, "Room number is required"),
     record_type: z.enum(["Check-in", "Extension", "Check-out", "Transfer"]),
-    start_date: z.string().min(1, "开始日期必填"),
+    start_date: z.string().min(1, "Start date is required"),
     end_date: z.string().optional(),
+    fee_amount: z.string().optional(),
+    payment_status: z.enum(["pending", "paid", "waived"]),
+    waiver_reason: z.string().optional(),
     notes: z.string().optional(),
 })
 
@@ -42,6 +45,10 @@ interface AccommodationFormProps {
     initialData?: AccommodationRecord
     onSuccess?: () => void
     onCancel?: () => void
+}
+
+function getErrorMessage(error: unknown) {
+    return error instanceof Error ? error.message : "Unable to save the accommodation record"
 }
 
 export function AccommodationForm({ beneficiaryId, initialData, onSuccess, onCancel }: AccommodationFormProps) {
@@ -53,39 +60,45 @@ export function AccommodationForm({ beneficiaryId, initialData, onSuccess, onCan
         defaultValues: {
             room_number: initialData?.room_number || "",
             record_type: initialData?.record_type || "Check-in",
-            // PocketBase returns UTC strings '2026-02-01 12:00:00.000Z', input date expects 'YYYY-MM-DD'
-            start_date: initialData?.start_date ? initialData.start_date.split(' ')[0] : new Date().toISOString().split('T')[0],
-            end_date: initialData?.end_date ? initialData.end_date.split(' ')[0] : "",
+            // PocketBase returns UTC strings like '2026-02-01 12:00:00.000Z', while the input expects 'YYYY-MM-DD'.
+            start_date: initialData?.start_date ? initialData.start_date.split(" ")[0] : new Date().toISOString().split("T")[0],
+            end_date: initialData?.end_date ? initialData.end_date.split(" ")[0] : "",
+            fee_amount: typeof initialData?.fee_amount === "number" ? String(initialData.fee_amount) : "",
+            payment_status: initialData?.payment_status || "pending",
+            waiver_reason: initialData?.waiver_reason || "",
             notes: initialData?.notes || "",
         },
     })
+    const paymentStatus = form.watch("payment_status")
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setLoading(true)
         try {
-            // PB date fields often require full datetime or proper formatting. 
-            // Appending time to ensure valid Date parsing just in case.
+            const parsedFeeAmount = values.fee_amount ? Number(values.fee_amount) : undefined
             const payload = {
                 ...values,
                 start_date: values.start_date ? `${values.start_date} 00:00:00` : "",
                 end_date: values.end_date ? `${values.end_date} 00:00:00` : "",
+                fee_amount: Number.isFinite(parsedFeeAmount) ? parsedFeeAmount : undefined,
+                waiver_reason: values.payment_status === "waived" ? values.waiver_reason : "",
                 beneficiary: beneficiaryId,
             }
 
             if (initialData?.id) {
                 await pb.collection("accommodation_records").update(initialData.id, payload)
-                toast({ title: "已更新", description: "住宿记录已更新" })
+                toast({ title: "Updated", description: "Accommodation record updated." })
             } else {
                 await pb.collection("accommodation_records").create(payload)
-                toast({ title: "已创建", description: "新住宿记录已添加" })
+                toast({ title: "Created", description: "Accommodation record added." })
             }
+
             onSuccess?.()
-        } catch (e: any) {
-            console.error(e)
+        } catch (error: unknown) {
+            console.error(error)
             toast({
-                title: "失败",
-                description: e.message || "无法保存记录",
-                variant: "destructive"
+                title: "Save failed",
+                description: getErrorMessage(error),
+                variant: "destructive",
             })
         } finally {
             setLoading(false)
@@ -101,7 +114,7 @@ export function AccommodationForm({ beneficiaryId, initialData, onSuccess, onCan
                         name="room_number"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>房间号 Room No.</FormLabel>
+                                <FormLabel>Room Number</FormLabel>
                                 <FormControl>
                                     <Input {...field} placeholder="e.g. 101" />
                                 </FormControl>
@@ -114,7 +127,7 @@ export function AccommodationForm({ beneficiaryId, initialData, onSuccess, onCan
                         name="record_type"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>类型 Type</FormLabel>
+                                <FormLabel>Record Type</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
                                         <SelectTrigger>
@@ -122,10 +135,10 @@ export function AccommodationForm({ beneficiaryId, initialData, onSuccess, onCan
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        <SelectItem value="Check-in">入住 Check-in</SelectItem>
-                                        <SelectItem value="Extension">续住 Extension</SelectItem>
-                                        <SelectItem value="Transfer">转房 Transfer</SelectItem>
-                                        <SelectItem value="Check-out">退房 Check-out</SelectItem>
+                                        <SelectItem value="Check-in">Check-in</SelectItem>
+                                        <SelectItem value="Extension">Extension</SelectItem>
+                                        <SelectItem value="Transfer">Transfer</SelectItem>
+                                        <SelectItem value="Check-out">Check-out</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -140,7 +153,7 @@ export function AccommodationForm({ beneficiaryId, initialData, onSuccess, onCan
                         name="start_date"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>开始日期 Start Date</FormLabel>
+                                <FormLabel>Start Date</FormLabel>
                                 <FormControl>
                                     <Input type="date" {...field} />
                                 </FormControl>
@@ -153,7 +166,7 @@ export function AccommodationForm({ beneficiaryId, initialData, onSuccess, onCan
                         name="end_date"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>结束日期 End Date</FormLabel>
+                                <FormLabel>End Date</FormLabel>
                                 <FormControl>
                                     <Input type="date" {...field} />
                                 </FormControl>
@@ -163,14 +176,69 @@ export function AccommodationForm({ beneficiaryId, initialData, onSuccess, onCan
                     />
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="fee_amount"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Fee Amount</FormLabel>
+                                <FormControl>
+                                    <Input type="number" min="0" step="0.01" placeholder="0.00" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="payment_status"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Payment Status</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="pending">Pending</SelectItem>
+                                        <SelectItem value="paid">Paid</SelectItem>
+                                        <SelectItem value="waived">Waived</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                {paymentStatus === "waived" && (
+                    <FormField
+                        control={form.control}
+                        name="waiver_reason"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Waiver Reason</FormLabel>
+                                <FormControl>
+                                    <Input {...field} placeholder="Reason for fee waiver..." />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                )}
+
                 <FormField
                     control={form.control}
                     name="notes"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>备注 Notes</FormLabel>
+                            <FormLabel>Notes</FormLabel>
                             <FormControl>
-                                <Textarea {...field} placeholder="其他说明..." />
+                                <Textarea {...field} placeholder="Additional notes..." />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -180,11 +248,11 @@ export function AccommodationForm({ beneficiaryId, initialData, onSuccess, onCan
                 <div className="flex justify-end gap-2 pt-2">
                     {onCancel && (
                         <Button type="button" variant="outline" onClick={onCancel}>
-                            取消
+                            Cancel
                         </Button>
                     )}
                     <Button type="submit" disabled={loading}>
-                        {loading ? "保存中..." : (initialData ? "更新" : "添加")}
+                        {loading ? "Saving..." : initialData ? "Update" : "Create"}
                     </Button>
                 </div>
             </form>

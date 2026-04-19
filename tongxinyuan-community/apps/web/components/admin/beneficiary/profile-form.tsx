@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -22,15 +21,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
 import { format } from "date-fns"
-import { cn } from "@/lib/utils"
 // import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 // import { Calendar } from "@/components/ui/calendar"
 import { useToast } from "@/components/ui/use-toast"
 import PocketBase from "pocketbase"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
+import type { BeneficiariesResponse } from "@/types/pocketbase-types"
 
 const pb = new PocketBase(process.env.NEXT_PUBLIC_PB_URL)
 
@@ -54,7 +52,9 @@ const profileSchema = z.object({
     status: z.string(),
 })
 
-export default function BeneficiaryProfileForm({ initialData }: { initialData?: any }) {
+type BeneficiaryFormData = Partial<BeneficiariesResponse>
+
+export default function BeneficiaryProfileForm({ initialData }: { initialData?: BeneficiaryFormData | null }) {
     const router = useRouter()
     const { toast } = useToast()
     const [loading, setLoading] = useState(false)

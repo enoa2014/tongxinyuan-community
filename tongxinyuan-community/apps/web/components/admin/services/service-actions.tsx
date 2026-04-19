@@ -14,6 +14,7 @@ import { useState } from "react"
 import { ServiceDetailDialog } from "./service-detail-dialog"
 import { pb } from "@/lib/pocketbase"
 import { toast } from "@/components/ui/use-toast"
+import type { ServiceConsultationHistoryEntry } from "./types"
 import {
     AlertDialog,
     AlertDialogAction,
@@ -53,7 +54,9 @@ export function ServiceActions({ consultation, onRefresh }: ServiceActionsProps)
                 prevStatus: consultation.status
             }
 
-            const currentHistory = Array.isArray(consultation.history) ? consultation.history : []
+            const currentHistory: ServiceConsultationHistoryEntry[] = Array.isArray(consultation.history)
+                ? consultation.history
+                : []
             const newHistory = [...currentHistory, historyEntry]
 
             await pb.collection('service_consultations').update(consultation.id, {
@@ -66,10 +69,10 @@ export function ServiceActions({ consultation, onRefresh }: ServiceActionsProps)
                 className: status === "resolved" ? "bg-green-50 border-green-200" : status === "contacted" ? "bg-blue-50 border-blue-200" : "bg-slate-50 border-slate-200"
             })
             onRefresh()
-        } catch (e: any) {
+        } catch (error: unknown) {
             toast({
                 title: "操作失败",
-                description: e.message,
+                description: error instanceof Error ? error.message : "Please try again later.",
                 variant: "destructive"
             })
         } finally {

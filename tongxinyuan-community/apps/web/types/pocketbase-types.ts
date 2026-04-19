@@ -115,15 +115,23 @@ export enum AccommodationRecordsRecordTypeOptions {
 	"Check-out" = "Check-out",
 	"Transfer" = "Transfer",
 }
+export enum AccommodationRecordsPaymentStatusOptions {
+	"pending" = "pending",
+	"paid" = "paid",
+	"waived" = "waived",
+}
 export type AccommodationRecordsRecord = {
 	beneficiary: RecordIdString
 	end_date?: IsoDateString
+	fee_amount?: number
 	id: string
 	notes?: string
+	payment_status?: AccommodationRecordsPaymentStatusOptions
 	record_type: AccommodationRecordsRecordTypeOptions
 	room_number: string
 	start_date: IsoDateString
 	unit: RecordIdString
+	waiver_reason?: string
 }
 
 export enum AccommodationUnitsTypeOptions {

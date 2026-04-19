@@ -93,16 +93,18 @@ export function DocumentUpload({ beneficiaryId, onSuccess }: DocumentUploadProps
                 <FormField
                     control={form.control}
                     name="file"
-                    render={({ field: { onChange, value, ...fieldProcess } }) => (
+                    render={({ field }) => (
                         <FormItem>
                             <FormLabel>File (PDF, Doc, Xls, etc.)</FormLabel>
                             <FormControl>
                                 <Input
-                                    {...fieldProcess}
                                     type="file"
+                                    name={field.name}
+                                    onBlur={field.onBlur}
+                                    ref={field.ref}
                                     accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.webp"
                                     onChange={(e) => {
-                                        onChange(e.target.files)
+                                        field.onChange(e.target.files)
                                         // Auto-fill title if empty
                                         if (e.target.files?.[0] && !form.getValues("title")) {
                                             const name = e.target.files[0].name.split('.').slice(0, -1).join('.')

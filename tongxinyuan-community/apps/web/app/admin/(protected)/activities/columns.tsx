@@ -1,10 +1,14 @@
 "use client"
 
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { ColumnDef } from "@tanstack/react-table"
-import { Badge } from "@/components/ui/badge"
+import { Edit, MoreHorizontal, Trash } from "lucide-react"
+
+import { pb } from "@/lib/pocketbase"
 import { Activity } from "@/types"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown, Edit, MoreHorizontal, Trash } from "lucide-react"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -22,10 +26,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { useRouter } from "next/navigation"
-import { pb } from "@/lib/pocketbase"
 import { useToast } from "@/components/ui/use-toast"
-import { useState } from "react"
 
 const ActivityActions = ({ activity, onRefresh }: { activity: Activity; onRefresh: () => void }) => {
     const router = useRouter()
@@ -40,9 +41,13 @@ const ActivityActions = ({ activity, onRefresh }: { activity: Activity; onRefres
             toast({ title: "已删除" })
             onRefresh()
             setOpen(false)
-        } catch (e) {
-            console.error(e)
-            toast({ title: "删除失败", variant: "destructive", description: "请确保您有删除权限" })
+        } catch (error) {
+            console.error(error)
+            toast({
+                title: "删除失败",
+                description: "请确认当前账号有删除权限。",
+                variant: "destructive",
+            })
         } finally {
             setLoading(false)
         }
@@ -53,17 +58,17 @@ const ActivityActions = ({ activity, onRefresh }: { activity: Activity; onRefres
             <AlertDialog open={open} onOpenChange={setOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>确认删除?</AlertDialogTitle>
+                        <AlertDialogTitle>确认删除？</AlertDialogTitle>
                         <AlertDialogDescription>
-                            此操作无法撤销。这将永久删除活动 "{activity.title}" 及其所有归档数据。
+                            此操作无法撤销。这将永久删除活动 &ldquo;{activity.title}&rdquo; 及其所有归档数据。
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel disabled={loading}>取消</AlertDialogCancel>
                         <AlertDialogAction
-                            onClick={(e) => {
-                                e.preventDefault() // prevent auto-close
-                                handleDelete()
+                            onClick={(event) => {
+                                event.preventDefault()
+                                void handleDelete()
                             }}
                             className="bg-red-600 hover:bg-red-700"
                             disabled={loading}
@@ -84,16 +89,18 @@ const ActivityActions = ({ activity, onRefresh }: { activity: Activity; onRefres
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>操作</DropdownMenuLabel>
                     <DropdownMenuItem onClick={() => router.push(`/admin/activities/edit/${activity.id}`)}>
-                        <Edit className="mr-2 h-4 w-4" /> 编辑
+                        <Edit className="mr-2 h-4 w-4" />
+                        编辑
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                        onSelect={(e) => {
-                            e.preventDefault()
+                        onSelect={(event) => {
+                            event.preventDefault()
                             setOpen(true)
                         }}
-                        className="text-red-600 focus:text-red-600 cursor-pointer"
+                        className="cursor-pointer text-red-600 focus:text-red-600"
                     >
-                        <Trash className="mr-2 h-4 w-4" /> 删除
+                        <Trash className="mr-2 h-4 w-4" />
+                        删除
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
@@ -120,15 +127,16 @@ export const getColumns = (onRefresh: () => void): ColumnDef<Activity>[] => [
                 training: "志愿者培训",
                 other: "其他",
             }
+
             return <Badge variant="outline">{map[category] || category}</Badge>
-        }
+        },
     },
     {
         accessorKey: "status",
         header: "状态",
         cell: ({ row }) => {
             const status = row.getValue("status") as string
-            const map: Record<string, { label: string, color: string }> = {
+            const map: Record<string, { label: string; color: string }> = {
                 planning: { label: "策划中", color: "bg-blue-100 text-blue-800" },
                 recruiting: { label: "招募中", color: "bg-brand-green/20 text-brand-green" },
                 ongoing: { label: "进行中", color: "bg-yellow-100 text-yellow-800" },
@@ -142,17 +150,20 @@ export const getColumns = (onRefresh: () => void): ColumnDef<Activity>[] => [
                     {config.label}
                 </div>
             )
-        }
+        },
     },
     {
         accessorKey: "start_time",
         header: "开始时间",
         cell: ({ row }) => {
             const dateStr = row.getValue("start_time") as string
-            if (!dateStr) return "-"
+            if (!dateStr) {
+                return "-"
+            }
+
             const date = new Date(dateStr)
-            return date.toLocaleDateString("zh-CN") + " " + date.toLocaleTimeString("zh-CN", { hour: '2-digit', minute: '2-digit' })
-        }
+            return `${date.toLocaleDateString("zh-CN")} ${date.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}`
+        },
     },
     {
         id: "lead_staff",
@@ -160,10 +171,10 @@ export const getColumns = (onRefresh: () => void): ColumnDef<Activity>[] => [
         cell: ({ row }) => {
             const staff = row.original.expand?.lead_staff
             return staff ? staff.name : "-"
-        }
+        },
     },
     {
         id: "actions",
-        cell: ({ row }) => <ActivityActions activity={row.original} onRefresh={onRefresh} />
+        cell: ({ row }) => <ActivityActions activity={row.original} onRefresh={onRefresh} />,
     },
 ]

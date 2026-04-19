@@ -46,7 +46,7 @@ export default function ConsultationsPage() {
                 })
             }
             fetchData()
-        } catch (error) {
+        } catch {
             toast({
                 title: "操作失败",
                 description: "部分记录可能未更新成功",

@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { Home, Utensils } from "lucide-react"
 
 export function FeatureHighlights() {
@@ -6,7 +7,7 @@ export function FeatureHighlights() {
             title: "爱心住宿",
             description: "为异地求医家庭提供免费或低偿的临时住所，设施齐全，通过审核即可拎包入住，解决就医期间最大的经济负担。",
             icon: Home,
-            image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=2069&auto=format&fit=crop", // Placeholder: Warm home interior
+            image: "/statics/home/img/about1.jpg",
             alt: "温馨的住宿环境",
             reverse: false
         },
@@ -14,7 +15,7 @@ export function FeatureHighlights() {
             title: "共享厨房",
             description: "提供全套厨具的爱心厨房，让孩子在异乡也能吃到家乡的味道。这里也是家长们交流抗癌经验、相互鼓励的社交中心。",
             icon: Utensils,
-            image: "https://images.unsplash.com/photo-1556910103-1c02745a30bf?q=80&w=2070&auto=format&fit=crop", // Placeholder: Kitchen cooking
+            image: "/images/kitchen.jpg",
             alt: "家长在做饭",
             reverse: true
         }
@@ -37,11 +38,15 @@ export function FeatureHighlights() {
                         <div key={index} className={`flex flex-col lg:flex-row gap-12 items-center ${feature.reverse ? 'lg:flex-row-reverse' : ''}`}>
                             <div className="flex-1 w-full relative group">
                                 <div className="absolute inset-0 bg-teal-200 rounded-3xl transform rotate-3 group-hover:rotate-6 transition-transform opacity-30"></div>
-                                <img
-                                    src={feature.image === "https://images.unsplash.com/photo-1556910103-1c02745a30bf?q=80&w=2070&auto=format&fit=crop" ? "/images/kitchen.jpg" : feature.image}
-                                    alt={feature.alt}
-                                    className="relative rounded-3xl shadow-xl w-full h-[400px] object-cover border-4 border-white z-10"
-                                />
+                                <div className="relative z-10 h-[400px] overflow-hidden rounded-3xl border-4 border-white shadow-xl">
+                                    <Image
+                                        src={feature.image}
+                                        alt={feature.alt}
+                                        fill
+                                        sizes="(min-width: 1024px) 50vw, 100vw"
+                                        className="object-cover"
+                                    />
+                                </div>
                             </div>
                             <div className="flex-1 space-y-6">
                                 <div className="inline-flex items-center justify-center p-3 bg-teal-100/50 rounded-xl">

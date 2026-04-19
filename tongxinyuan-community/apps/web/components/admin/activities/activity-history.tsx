@@ -69,7 +69,7 @@ export function ActivityHistory({ items }: ActivityHistoryProps) {
                                     </div>
                                     {item.feedback && (
                                         <div className="mt-2 text-sm bg-muted/50 p-2 rounded text-muted-foreground italic">
-                                            "{item.feedback}"
+                                            &ldquo;{item.feedback}&rdquo;
                                         </div>
                                     )}
                                 </div>

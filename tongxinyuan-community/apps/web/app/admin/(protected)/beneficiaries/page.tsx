@@ -48,28 +48,28 @@ export default function BeneficiariesPage() {
     const [search, setSearch] = useState("")
 
     useEffect(() => {
-        fetchData()
-    }, [filterType])
+        async function fetchData() {
+            setLoading(true)
+            try {
+                let filter = ""
+                if (filterType !== "all") {
+                    filter += `type = "${filterType}"`
+                }
 
-    async function fetchData() {
-        setLoading(true)
-        try {
-            let filter = ""
-            if (filterType !== "all") {
-                filter += `type = "${filterType}"`
+                const result = await pb.collection("beneficiaries").getList<Beneficiary>(1, 50, {
+                    sort: "-created",
+                    filter: filter,
+                })
+                setData(result.items)
+            } catch (error) {
+                console.error(error)
+            } finally {
+                setLoading(false)
             }
-
-            const result = await pb.collection("beneficiaries").getList<Beneficiary>(1, 50, {
-                sort: "-created",
-                filter: filter,
-            })
-            setData(result.items)
-        } catch (e) {
-            console.error(e)
-        } finally {
-            setLoading(false)
         }
-    }
+
+        void fetchData()
+    }, [filterType])
 
     // Client-side search for simplicity in this version
     const filteredData = data.filter(item =>

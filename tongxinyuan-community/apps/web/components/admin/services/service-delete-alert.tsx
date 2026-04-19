@@ -38,10 +38,10 @@ export function ServiceDeleteAlert({
             toast({ title: "服务已删除" })
             onSuccess()
             onOpenChange(false)
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast({
                 title: "删除失败",
-                description: error.message,
+                description: error instanceof Error ? error.message : "Please try again later.",
                 variant: "destructive",
             })
         } finally {

@@ -16,13 +16,14 @@ import {
     verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { SortableServiceItem } from "./sortable-service-item"
+import type { ServiceIconMap, ServiceItem } from "./types"
 
 interface SortableServiceListProps {
-    items: any[]
-    onReorder: (newItems: any[]) => void
-    onEdit: (service: any) => void
-    onDelete: (service: any) => void
-    iconMap: Record<string, any>
+    items: ServiceItem[]
+    onReorder: (newItems: ServiceItem[]) => void
+    onEdit: (service: ServiceItem) => void
+    onDelete: (service: ServiceItem) => void
+    iconMap: ServiceIconMap
 }
 
 export function SortableServiceList({ items, onReorder, onEdit, onDelete, iconMap }: SortableServiceListProps) {

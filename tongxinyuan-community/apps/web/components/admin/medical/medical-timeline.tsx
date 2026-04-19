@@ -6,12 +6,9 @@ import { zhCN } from "date-fns/locale"
 import { MedicalLogsResponse } from "@/types/pocketbase-types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { ImageIcon, FileText, Stethoscope, Building2, User } from "lucide-react"
+import { FileText, Stethoscope, User } from "lucide-react"
 import Image from "next/image"
-import { useState } from "react"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface MedicalTimelineProps {
     logs: MedicalLogsResponse[]

@@ -50,7 +50,7 @@ async function proxy(request: NextRequest, props: { params: Promise<{ path: stri
                             const decodedTwice = decodeURIComponent(token);
                             const parsed = JSON.parse(decodedTwice);
                             tokenValue = parsed.token;
-                        } catch (e) {
+                        } catch {
                             // Maybe it's just the raw token string? Unlikely with implicit export
                         }
                     }
@@ -59,8 +59,8 @@ async function proxy(request: NextRequest, props: { params: Promise<{ path: stri
                         headers.set("authorization", tokenValue);
                         console.log("[Proxy] Recovered Authorization from Cookie");
                     }
-                } catch (e) {
-                    console.log("[Proxy] Failed to parse/decode pb_auth cookie", e);
+                } catch (error) {
+                    console.log("[Proxy] Failed to parse/decode pb_auth cookie", error);
                 }
             }
         }

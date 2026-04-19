@@ -44,7 +44,7 @@ export default function VolunteersPage() {
                 description: `已${actionLabel} ${selected.length} 条记录`,
             })
             fetchData()
-        } catch (error) {
+        } catch {
             toast({
                 title: "操作失败",
                 description: "部分记录可能未更新成功",

@@ -30,6 +30,12 @@ interface VolunteerActionsProps {
     onRefresh: () => void
 }
 
+type VolunteerHistoryEntry = NonNullable<VolunteerApplication["history"]>[number]
+
+function getErrorMessage(error: unknown) {
+    return error instanceof Error ? error.message : "Please try again later."
+}
+
 export function VolunteerActions({ volunteer, onRefresh }: VolunteerActionsProps) {
     const [detailOpen, setDetailOpen] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -48,7 +54,7 @@ export function VolunteerActions({ volunteer, onRefresh }: VolunteerActionsProps
                 prevStatus: volunteer.status
             }
 
-            const currentHistory = Array.isArray(volunteer.history) ? volunteer.history : []
+            const currentHistory: VolunteerHistoryEntry[] = Array.isArray(volunteer.history) ? volunteer.history : []
             const newHistory = [...currentHistory, historyEntry]
 
             await pb.collection('volunteer_applications').update(volunteer.id, {
@@ -61,10 +67,10 @@ export function VolunteerActions({ volunteer, onRefresh }: VolunteerActionsProps
                 className: status === "approved" ? "bg-green-50 border-green-200" : status === "rejected" ? "bg-red-50 border-red-200" : "bg-slate-50 border-slate-200"
             })
             onRefresh()
-        } catch (e: any) {
+        } catch (error: unknown) {
             toast({
                 title: "操作失败",
-                description: e.message,
+                description: getErrorMessage(error),
                 variant: "destructive"
             })
         } finally {
@@ -105,10 +111,10 @@ export function VolunteerActions({ volunteer, onRefresh }: VolunteerActionsProps
                 description: "该志愿者申请已永久删除",
             })
             onRefresh()
-        } catch (e: any) {
+        } catch (error: unknown) {
             toast({
                 title: "删除失败",
-                description: e.message,
+                description: getErrorMessage(error),
                 variant: "destructive"
             })
         } finally {

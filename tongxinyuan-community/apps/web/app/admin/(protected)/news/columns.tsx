@@ -3,7 +3,7 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown, Eye, Edit, Trash } from "lucide-react"
+import { ArrowUpDown, Edit, Trash } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useState } from "react"
@@ -108,7 +108,7 @@ function PublishedToggle({ article }: { article: NewsArticle }) {
                 title: checked ? "已设为公开" : "已设为存档",
                 description: checked ? "文章将在网站可见" : "文章仅在后台可见"
             })
-        } catch (error) {
+        } catch {
             // Revert on failure
             setPublished(!checked)
             toast({ variant: "destructive", title: "更新失败", description: "请稍后重试" })
@@ -143,7 +143,7 @@ function DeleteAction({ article, onRefresh }: { article: NewsArticle, onRefresh:
             toast({ title: "删除成功", description: "文章已成功删除" })
             setOpen(false)
             onRefresh()
-        } catch (error) {
+        } catch {
             toast({ variant: "destructive", title: "删除失败", description: "请稍后重试" })
         } finally {
             setLoading(false)
@@ -168,7 +168,7 @@ function DeleteAction({ article, onRefresh }: { article: NewsArticle, onRefresh:
                     <AlertDialogHeader>
                         <AlertDialogTitle>确认删除？</AlertDialogTitle>
                         <AlertDialogDescription>
-                            此操作无法撤销。这将永久删除文章 "{article.title}"。
+                            此操作无法撤销。这将永久删除文章 &ldquo;{article.title}&rdquo;。
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

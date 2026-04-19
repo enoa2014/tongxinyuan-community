@@ -76,7 +76,6 @@ export function AdminSidebar() {
         if (model?.email === 'dev@admin.com') return 'web_admin';
         return (model?.role as string) || '';
     });
-    const [isLoading, setIsLoading] = React.useState(true);
 
     React.useEffect(() => {
         // Force refresh to get latest fields (e.g. role) if they were added after login
@@ -96,7 +95,7 @@ export function AdminSidebar() {
             } catch (e) {
                 console.error("Auth refresh failed", e);
             } finally {
-                setIsLoading(false);
+                // No loading UI in the sidebar; refresh is fire-and-forget.
             }
         };
         refreshAuth();

@@ -6,11 +6,12 @@ import { useParams } from "next/navigation"
 import { ActivityForm } from "@/components/admin/activity-form"
 import { pb } from "@/lib/pocketbase"
 import { Activity } from "@/types"
+import type { StaffResponse } from "@/types/pocketbase-types"
 
 export default function EditActivityPage() {
     const params = useParams()
     const [activity, setActivity] = useState<Activity | undefined>()
-    const [staffList, setStaffList] = useState<any[]>([])
+    const [staffList, setStaffList] = useState<StaffResponse[]>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {

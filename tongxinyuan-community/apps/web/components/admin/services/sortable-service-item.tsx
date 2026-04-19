@@ -6,13 +6,14 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { GripVertical, Pencil, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import type { ServiceIconMap, ServiceItem } from "./types"
 
 interface SortableServiceItemProps {
     id: string
-    service: any
-    onEdit: (service: any) => void
-    onDelete: (service: any) => void
-    iconMap: Record<string, any>
+    service: ServiceItem
+    onEdit: (service: ServiceItem) => void
+    onDelete: (service: ServiceItem) => void
+    iconMap: ServiceIconMap
 }
 
 export function SortableServiceItem({ id, service, onEdit, onDelete, iconMap }: SortableServiceItemProps) {

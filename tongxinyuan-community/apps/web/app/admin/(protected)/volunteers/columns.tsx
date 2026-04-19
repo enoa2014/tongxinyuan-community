@@ -7,17 +7,29 @@ import { VolunteerActions } from "@/components/admin/volunteers/volunteer-action
 import { Checkbox } from "@/components/ui/checkbox"
 
 // Type definition matching our PocketBase schema
+type VolunteerSkills = {
+    age?: number
+    level: string
+    skills?: string[] | string
+}
+
+type VolunteerHistoryItem = {
+    action: string
+    date: string
+    operator?: string
+}
+
 export type VolunteerApplication = {
     id: string
     name: string
     phone: string
-    skills: any // JSON
+    skills: VolunteerSkills
     motivation: string
     status: "pending" | "approved" | "rejected"
     created: string
     age?: number
     email?: string
-    history?: any[]
+    history?: VolunteerHistoryItem[]
 }
 
 export const getColumns = (onRefresh: () => void): ColumnDef<VolunteerApplication>[] => [
@@ -55,22 +67,22 @@ export const getColumns = (onRefresh: () => void): ColumnDef<VolunteerApplicatio
         accessorKey: "skills.level",
         header: "技能等级",
         cell: ({ row }) => {
-            let skills = row.original.skills
+            let skills: VolunteerSkills = typeof row.original.skills === "string" ? ({} as VolunteerSkills) : row.original.skills
             // Handle if skills is string (JSON string)
-            if (typeof skills === 'string') {
+            if (typeof row.original.skills === 'string') {
                 try {
-                    skills = JSON.parse(skills)
-                } catch (e) {
-                    skills = {}
+                    skills = JSON.parse(row.original.skills) as VolunteerSkills
+                } catch {
+                    skills = {} as VolunteerSkills
                 }
             }
-            const level = skills?.level
+            const level = skills.level
             const levelMap: Record<string, string> = {
                 level1: "Level 1: 普适型",
                 level2: "Level 2: 技能型",
                 level3: "Level 3: 专业型",
             }
-            return levelMap[level] || level || "-"
+            return level ? levelMap[level] || level : "-"
         }
     },
     {

@@ -1,6 +1,4 @@
 "use client"
-
-import { useState } from "react"
 import Image from "next/image"
 import PocketBase from "pocketbase"
 import { format } from "date-fns"
@@ -36,7 +34,6 @@ interface MediaGalleryProps {
 
 export function MediaGallery({ items, onRefresh }: MediaGalleryProps) {
     const { toast } = useToast()
-    const [selectedImage, setSelectedImage] = useState<BeneficiaryMedia | null>(null)
 
     async function handleDelete(id: string) {
         // Confirmation is handled by AlertDialog
@@ -44,7 +41,7 @@ export function MediaGallery({ items, onRefresh }: MediaGalleryProps) {
             await pb.collection("beneficiary_media").delete(id)
             toast({ title: "Deleted", description: "Photo removed" })
             onRefresh()
-        } catch (e) {
+        } catch {
             toast({ title: "Error", description: "Failed to delete", variant: "destructive" })
         }
     }

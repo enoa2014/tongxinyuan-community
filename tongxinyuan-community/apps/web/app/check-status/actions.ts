@@ -2,6 +2,14 @@
 
 import PocketBase from 'pocketbase';
 
+type PocketBaseErrorLike = {
+    status?: number
+}
+
+function isPocketBaseError(error: unknown): error is PocketBaseErrorLike {
+    return typeof error === "object" && error !== null && "status" in error
+}
+
 export async function checkApplicationStatus(phone: string) {
     const pb = new PocketBase(process.env.PB_URL || 'http://127.0.0.1:8091');
 
@@ -26,15 +34,15 @@ export async function checkApplicationStatus(phone: string) {
             }
         };
 
-    } catch (e: any) {
-        if (e.status === 404) {
+    } catch (error: unknown) {
+        if (isPocketBaseError(error) && error.status === 404) {
             return {
                 success: false,
                 error: "未找到该手机号的申请记录"
             };
         }
 
-        console.error("Check Status Error:", e);
+        console.error("Check Status Error:", error);
         return {
             success: false,
             error: "Status lookup is temporarily unavailable. Please try again later."

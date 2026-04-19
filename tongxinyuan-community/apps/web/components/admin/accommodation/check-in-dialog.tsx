@@ -43,6 +43,9 @@ const formSchema = z.object({
     unit: z.string().min(1, "Please select a unit"),
     start_date: z.string().min(1, "Start date is required"),
     expected_end_date: z.string().optional(),
+    fee_amount: z.string().optional(),
+    payment_status: z.enum(["pending", "paid", "waived"]),
+    waiver_reason: z.string().optional(),
     notes: z.string().optional(),
 })
 
@@ -63,9 +66,13 @@ export function CheckInDialog({ open, onOpenChange, initialUnit, onSuccess }: Ch
         defaultValues: {
             unit: initialUnit?.id || "",
             start_date: format(new Date(), "yyyy-MM-dd"),
+            fee_amount: "",
+            payment_status: "pending",
+            waiver_reason: "",
             notes: "",
         },
     })
+    const paymentStatus = form.watch("payment_status")
 
     // Reset form when initialUnit changes
     useEffect(() => {
@@ -97,6 +104,8 @@ export function CheckInDialog({ open, onOpenChange, initialUnit, onSuccess }: Ch
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setLoading(true)
         try {
+            const parsedFeeAmount = values.fee_amount ? Number(values.fee_amount) : undefined
+
             // 1. Create Accommodation Record
             await pb.collection("accommodation_records").create({
                 beneficiary: values.beneficiary,
@@ -105,6 +114,9 @@ export function CheckInDialog({ open, onOpenChange, initialUnit, onSuccess }: Ch
                 end_date: values.expected_end_date,
                 record_type: "Check-in",
                 room_number: initialUnit?.name || "Unknown", // Snapshot
+                fee_amount: Number.isFinite(parsedFeeAmount) ? parsedFeeAmount : undefined,
+                payment_status: values.payment_status,
+                waiver_reason: values.payment_status === "waived" ? values.waiver_reason : "",
                 notes: values.notes,
             })
 
@@ -192,6 +204,61 @@ export function CheckInDialog({ open, onOpenChange, initialUnit, onSuccess }: Ch
                                 )}
                             />
                         </div>
+
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <FormField
+                                control={form.control}
+                                name="fee_amount"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Accommodation Fee</FormLabel>
+                                        <FormControl>
+                                            <Input type="number" min="0" step="0.01" placeholder="0.00" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="payment_status"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Payment Status</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select payment status..." />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="pending">Pending</SelectItem>
+                                                <SelectItem value="paid">Paid</SelectItem>
+                                                <SelectItem value="waived">Waived</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
+                        {paymentStatus === "waived" && (
+                            <FormField
+                                control={form.control}
+                                name="waiver_reason"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Waiver Reason</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Reason for fee waiver..." {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        )}
 
                         <FormField
                             control={form.control}

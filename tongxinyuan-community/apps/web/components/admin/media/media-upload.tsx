@@ -86,9 +86,13 @@ export function MediaUpload({ beneficiaryId, onSuccess }: MediaUploadProps) {
             toast({ title: "Success", description: "Photo uploaded successfully" })
             form.reset()
             onSuccess()
-        } catch (e: any) {
-            console.error(e)
-            toast({ title: "Error", description: e.message || "Failed to upload photo", variant: "destructive" })
+        } catch (error: unknown) {
+            console.error(error)
+            toast({
+                title: "Error",
+                description: error instanceof Error ? error.message : "Failed to upload photo",
+                variant: "destructive"
+            })
         } finally {
             setLoading(false)
         }
@@ -100,7 +104,7 @@ export function MediaUpload({ beneficiaryId, onSuccess }: MediaUploadProps) {
                 <FormField
                     control={form.control}
                     name="file"
-                    render={({ field: { onChange, value, ...rest } }) => (
+                    render={({ field: { onChange, ...rest } }) => (
                         <FormItem>
                             <FormLabel>照片 Photo</FormLabel>
                             <FormControl>

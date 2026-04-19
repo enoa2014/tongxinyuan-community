@@ -57,3 +57,28 @@
 - `apps/web` lint warnings were reduced from `137` to `104`.
 - `apps/web` production build still passes after the public-page image cleanup and admin layout/header refactor.
 - The main remaining engineering debt is concentrated in larger admin pages with historical `any`, unused locals, and hook dependency warnings.
+
+## Verified Update (2026-04-19, Later Pass)
+
+- `apps/web` type-check still passes after the service-admin typing cleanup and another admin warning pass.
+- `apps/web` lint warnings were reduced further from `104` to `29`.
+- `apps/web` production build still passes after this cleanup pass.
+- The remaining warnings are now mostly concentrated in `beneficiaries`, `accommodation`, `news`, and a small number of quote/dependency warnings rather than being spread across the whole admin surface.
+- No new build regression was introduced during this pass, but browser regression with a live PocketBase backend is still outstanding.
+
+## Verified Update (2026-04-19, Validation Tightening Pass)
+
+- `apps/web` type-check passes after the latest admin cleanup.
+- `apps/web` production build passes after the form/dialog rewrites and remaining detail-page typing fixes.
+- `apps/web` lint warnings were reduced further from `29` to `2`.
+- Remaining warnings are now limited to one React Compiler / TanStack Table compatibility notice in `components/admin/data-table.tsx` and one legacy `any` in `components/admin/news/rich-text-editor.tsx`.
+- Build output still logs `ECONNREFUSED 127.0.0.1:8091` for public `news/services` fetches when local PocketBase is offline, so live-backend regression is still required before treating this as deployment-ready.
+
+## Verified Update (2026-04-19, Accommodation Finance Pass)
+
+- `apps/web` lint now passes cleanly with `0` warnings.
+- `apps/web` type-check still passes.
+- `apps/web` production build still passes after the accommodation finance changes.
+- The accommodation manager now includes a working `records` tab instead of a placeholder, and accommodation forms/dialogs now support fee tracking and waiver notes.
+- Local schema support was extended for `accommodation_records` finance fields: `fee_amount`, `payment_status`, and `waiver_reason`.
+- The remaining blocker for calling Phase 8.2 fully complete is environment rollout: the live PocketBase schema still needs to be patched and the accommodation finance workflow still needs browser-level regression against a real backend.

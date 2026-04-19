@@ -11,22 +11,26 @@ import { Button } from "@/components/ui/button"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
-    FormLabel,
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { checkApplicationStatus } from "./actions"
+
+type ApplicationStatusData = {
+    name: string
+    status: string
+    category: string
+}
 
 const formSchema = z.object({
     phone: z.string().min(11, "请输入11位手机号").max(11, "手机号格式不正确").regex(/^1[3-9]\d{9}$/, "请输入有效的手机号"),
 })
 
 export default function CheckStatusPage() {
-    const [result, setResult] = useState<any>(null)
+    const [result, setResult] = useState<ApplicationStatusData | null>(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
@@ -43,12 +47,12 @@ export default function CheckStatusPage() {
         setResult(null)
         try {
             const res = await checkApplicationStatus(values.phone)
-            if (res.success) {
+            if (res.success && res.data) {
                 setResult(res.data)
             } else {
                 setError(res.error || "查询失败")
             }
-        } catch (e) {
+        } catch {
             setError("网络错误，请稍后重试")
         } finally {
             setLoading(false)

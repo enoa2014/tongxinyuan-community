@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select"
 import { pb } from "@/lib/pocketbase"
 import { toast } from "@/components/ui/use-toast"
+import type { ServiceItem } from "./types"
 
 const formSchema = z.object({
     title: z.string().min(2, "标题至少需要2个字符"),
@@ -45,9 +46,12 @@ const formSchema = z.object({
 interface ServiceFormDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    service?: any // If present, edit mode
+    service?: ServiceItem | null
     onSuccess: () => void
 }
+
+type ServiceFormInput = z.input<typeof formSchema>
+type ServiceFormValues = z.output<typeof formSchema>
 
 export function ServiceFormDialog({
     open,
@@ -57,10 +61,8 @@ export function ServiceFormDialog({
 }: ServiceFormDialogProps) {
     const [loading, setLoading] = useState(false)
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        // Cast resolver to any to avoid strict type mismatch with z.coerce.number().default()
-        // and RHF's expectation of optional fields.
-        resolver: zodResolver(formSchema) as any,
+    const form = useForm<ServiceFormInput, unknown, ServiceFormValues>({
+        resolver: zodResolver(formSchema),
         defaultValues: {
             title: "",
             description: "",
@@ -93,7 +95,7 @@ export function ServiceFormDialog({
         }
     }, [open, service, form])
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: ServiceFormValues) {
         try {
             setLoading(true)
             if (service) {
@@ -107,10 +109,10 @@ export function ServiceFormDialog({
             }
             onSuccess()
             onOpenChange(false)
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast({
                 title: "操作失败",
-                description: error.message,
+                description: error instanceof Error ? error.message : "Please try again later.",
                 variant: "destructive",
             })
         } finally {
@@ -166,7 +168,14 @@ export function ServiceFormDialog({
                                 <FormItem>
                                     <FormLabel>排序权重 (数字越大越靠前)</FormLabel>
                                     <FormControl>
-                                        <Input type="number" {...field} />
+                                        <Input
+                                            type="number"
+                                            name={field.name}
+                                            value={typeof field.value === "number" ? field.value : 0}
+                                            onBlur={field.onBlur}
+                                            onChange={(event) => field.onChange(event.target.value)}
+                                            ref={field.ref}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

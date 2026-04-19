@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ServiceConsultation } from "@/app/admin/(protected)/consultations/columns"
+import type { ServiceConsultationHistoryEntry } from "./types"
 
 interface ServiceDetailDialogProps {
     consultation: ServiceConsultation | null
@@ -22,6 +23,9 @@ export function ServiceDetailDialog({
     onOpenChange,
 }: ServiceDetailDialogProps) {
     if (!consultation) return null
+    const history: ServiceConsultationHistoryEntry[] = Array.isArray(consultation.history)
+        ? consultation.history
+        : []
 
     const typeMap: Record<string, string> = {
         "medical-support": "就医协助",
@@ -83,11 +87,11 @@ export function ServiceDetailDialog({
                         </section>
 
                         {/* 操作日志 */}
-                        {consultation.history && consultation.history.length > 0 && (
+                        {history.length > 0 && (
                             <section className="space-y-3">
                                 <h3 className="font-semibold text-lg border-b pb-2">操作日志</h3>
                                 <div className="space-y-4 pl-2">
-                                    {consultation.history.map((item: any, index: number) => (
+                                    {history.map((item, index) => (
                                         <div key={index} className="relative pl-6 border-l border-slate-200 pb-2 last:pb-0 last:border-0">
                                             <div className="absolute -left-[5px] top-1 h-2.5 w-2.5 rounded-full bg-slate-300 ring-4 ring-white" />
                                             <div className="text-sm font-medium text-slate-900">{item.action}</div>

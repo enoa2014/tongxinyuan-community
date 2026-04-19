@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import PocketBase from "pocketbase"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Edit, Save, Trash, Share2, Plus } from "lucide-react"
+import { ArrowLeft, Edit, Trash, Share2, Plus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -35,7 +35,7 @@ import { AccommodationRecord } from "@/types/accommodation"
 import { MedicalTimeline } from "@/components/admin/medical/medical-timeline"
 import { MedicalLogForm } from "@/components/admin/medical/medical-log-form"
 
-import { MedicalLogsResponse, ActivityParticipationsResponse, ActivitiesResponse } from "@/types/pocketbase-types"
+import { BeneficiariesResponse, MedicalLogsResponse, ActivityParticipationsResponse, ActivitiesResponse } from "@/types/pocketbase-types"
 import { ActivityHistory } from "@/components/admin/activities/activity-history"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
@@ -46,6 +46,12 @@ type ActivityParticipationWithActivity = ActivityParticipationsResponse<{
     activity?: ActivitiesResponse
 }>
 
+type BeneficiaryDetail = Partial<BeneficiariesResponse>
+
+function hasStatusCode(error: unknown, status: number) {
+    return typeof error === "object" && error !== null && "status" in error && error.status === status
+}
+
 export default function BeneficiaryDetailPage() {
     const params = useParams()
     const router = useRouter()
@@ -53,7 +59,7 @@ export default function BeneficiaryDetailPage() {
     const id = params.id as string
     const isNew = id === "new"
 
-    const [data, setData] = useState<any>(null)
+    const [data, setData] = useState<BeneficiaryDetail | null>(null)
     const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([])
     const [loading, setLoading] = useState(!isNew)
     const [activeTab, setActiveTab] = useState("profile")
@@ -92,11 +98,12 @@ export default function BeneficiaryDetailPage() {
 
         fetchMedicalLogs()
         fetchActivityHistory()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id])
 
     async function fetchData() {
         try {
-            const record = await pb.collection("beneficiaries").getOne(id, {
+            const record = await pb.collection("beneficiaries").getOne<BeneficiaryDetail>(id, {
                 expand: "accommodation_records(beneficiary)"
             })
             setData(record)
@@ -155,9 +162,9 @@ export default function BeneficiaryDetailPage() {
                 sort: '-start_date'
             })
             setAccommodationItems(records.items)
-        } catch (e: any) {
-            console.error("Failed to fetch accommodation", e)
-            if (e.status === 400) {
+        } catch (error: unknown) {
+            console.error("Failed to fetch accommodation", error)
+            if (hasStatusCode(error, 400)) {
                 // Fallback attempt for field name mismatch
                 try {
                     const records = await pb.collection("accommodation_records").getList<AccommodationRecord>(1, 50, {
@@ -204,7 +211,7 @@ export default function BeneficiaryDetailPage() {
             })
             setData({ ...data, photo_usage_consent: checked })
             toast({ title: "Updated", description: "Privacy consent updated." })
-        } catch (e) {
+        } catch {
             toast({ title: "Error", description: "Failed to update consent.", variant: "destructive" })
         }
     }
@@ -336,7 +343,7 @@ export default function BeneficiaryDetailPage() {
                         </Dialog>
                     </div>
 
-                    <GenogramView beneficiaryName={data?.name} familyMembers={familyMembers} />
+                    <GenogramView beneficiaryName={data?.name || ""} familyMembers={familyMembers} />
 
                     <Card>
                         <CardHeader>
@@ -363,7 +370,7 @@ export default function BeneficiaryDetailPage() {
                                                     await pb.collection("family_members").delete(member.id)
                                                     toast({ title: "已删除", description: "家庭成员已移除" })
                                                     fetchFamilyMembers()
-                                                } catch (e) {
+                                                } catch {
                                                     toast({ title: "删除失败", description: "请稍后重试", variant: "destructive" })
                                                 }
                                             }}>

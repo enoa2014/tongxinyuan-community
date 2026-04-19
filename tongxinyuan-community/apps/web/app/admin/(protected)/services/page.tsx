@@ -2,29 +2,19 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Plus, Pencil, Trash2, Loader2, Utensils, HeartHandshake, BookOpen, Sun, HelpCircle, Home, Smile, Users, Star, Gift, ArrowUp } from "lucide-react"
+import { Plus, Loader2, Utensils, HeartHandshake, BookOpen, Sun, Home, Smile, Users, Star, Gift } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import { pb } from "@/lib/pocketbase"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
 import { SortableServiceList } from "@/components/admin/services/sortable-service-list"
-import type { ServicesResponse } from "@/types/pocketbase-types"
+import { ServiceFormDialog } from "@/components/admin/services/service-form-dialog"
+import { ServiceDeleteAlert } from "@/components/admin/services/service-delete-alert"
+import type { ServiceIconMap, ServiceItem } from "@/components/admin/services/types"
 
 // Reusing the map for display
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: ServiceIconMap = {
     utensils: Utensils,
     heart_handshake: HeartHandshake,
     book_open: BookOpen,
@@ -34,14 +24,10 @@ const ICON_MAP: Record<string, any> = {
     users: Users,
     star: Star,
     gift: Gift
-};
+}
 
-import { ServiceFormDialog } from "@/components/admin/services/service-form-dialog"
-import { ServiceDeleteAlert } from "@/components/admin/services/service-delete-alert"
-
-type ServiceItem = ServicesResponse & {
-    created?: string
-    updated?: string
+function hasErrorData(error: unknown): error is { data: unknown } {
+    return typeof error === "object" && error !== null && "data" in error
 }
 
 export default function ServicesAdminPage() {
@@ -52,7 +38,7 @@ export default function ServicesAdminPage() {
     const [isCreateOpen, setIsCreateOpen] = useState(false)
     const [isEditOpen, setIsEditOpen] = useState(false)
     const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-    const [selectedService, setSelectedService] = useState<any>(null)
+    const [selectedService, setSelectedService] = useState<ServiceItem | null>(null)
 
     useEffect(() => {
         loadServices()
@@ -70,17 +56,14 @@ export default function ServicesAdminPage() {
                 return new Date(b.created || 0).getTime() - new Date(a.created || 0).getTime();
             })
             setServices(sortedItems)
-        } catch (e: any) {
-            console.error("Failed to load services:", e)
-            if (e.data) console.error("Error details:", e.data)
+        } catch (error: unknown) {
+            console.error("Failed to load services:", error)
+            if (hasErrorData(error)) {
+                console.error("Error details:", error.data)
+            }
         } finally {
             setLoading(false)
         }
-    }
-
-    const handleEdit = (service: ServiceItem) => {
-        setSelectedService(service)
-        setIsEditOpen(true)
     }
 
     const handleDelete = (service: ServiceItem) => {
@@ -190,7 +173,7 @@ export default function ServicesAdminPage() {
             <ServiceDeleteAlert
                 open={isDeleteOpen}
                 onOpenChange={setIsDeleteOpen}
-                serviceId={selectedService?.id}
+                serviceId={selectedService?.id ?? null}
                 onSuccess={loadServices}
             />
         </div >

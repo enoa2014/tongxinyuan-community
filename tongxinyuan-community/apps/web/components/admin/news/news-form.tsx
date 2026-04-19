@@ -1,10 +1,13 @@
 "use client"
 
 import { useState } from "react"
+import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
 import * as z from "zod"
+import { Loader2 } from "lucide-react"
+
 import { pb } from "@/lib/pocketbase"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,7 +20,6 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import {
     Select,
     SelectContent,
@@ -26,30 +28,47 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
+import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
-import { Loader2 } from "lucide-react"
-import dynamic from "next/dynamic"
+import type { NewsResponse } from "@/types/pocketbase-types"
 
 const RichTextEditor = dynamic(
     () => import("./rich-text-editor").then((mod) => mod.RichTextEditor),
-    { ssr: false, loading: () => <p>Loading Editor...</p> }
+    { ssr: false, loading: () => <p>Loading editor...</p> }
 )
 
 const newsFormSchema = z.object({
-    title: z.string().min(2, "标题至少需要2个字符"),
-    slug: z.string().min(2, "URL别名至少需要2个字符").regex(/^[a-z0-9-]+$/, "只能包含小写字母、数字和连字符"),
-    description: z.string().max(200, "简介不能超过200字"),
-    author: z.string().min(1, "请填写作者"),
+    title: z.string().min(2, "Title must be at least 2 characters"),
+    slug: z
+        .string()
+        .min(2, "Slug must be at least 2 characters")
+        .regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
+    description: z.string().max(200, "Summary must be at most 200 characters"),
+    author: z.string().min(1, "Author is required"),
     category: z.enum(["news", "story", "notice", "activity"]),
-    content: z.string().min(10, "正文太短了"),
-    published: z.boolean().default(false),
+    content: z.string().min(10, "Content is too short"),
+    published: z.boolean(),
 })
 
 type NewsFormValues = z.infer<typeof newsFormSchema>
 
 interface NewsFormProps {
-    initialData?: any
+    initialData?: NewsResponse | null
     isEdit?: boolean
+}
+
+type PocketBaseErrorLike = {
+    data?: {
+        message?: string
+    }
+}
+
+function getPocketBaseErrorMessage(error: unknown) {
+    if (typeof error === "object" && error !== null && "data" in error) {
+        return (error as PocketBaseErrorLike).data?.message
+    }
+
+    return undefined
 }
 
 export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
@@ -59,13 +78,13 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
     const [coverFile, setCoverFile] = useState<File | null>(null)
 
     const form = useForm<NewsFormValues>({
-        resolver: zodResolver(newsFormSchema) as any,
+        resolver: zodResolver(newsFormSchema),
         defaultValues: {
             title: initialData?.title || "",
             slug: initialData?.slug || "",
             description: initialData?.description || "",
-            author: initialData?.author || "同心源",
-            category: (initialData?.category as "news" | "story" | "notice" | "activity") || "news",
+            author: initialData?.author || "同心苑",
+            category: initialData?.category || "news",
             content: initialData?.content || "",
             published: initialData?.published || false,
         },
@@ -76,32 +95,30 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
         try {
             const formData = new FormData()
 
-            // Append all text fields
             Object.entries(data).forEach(([key, value]) => {
                 formData.append(key, value.toString())
             })
 
-            // Append file if selected
             if (coverFile) {
-                formData.append('cover', coverFile)
+                formData.append("cover", coverFile)
             }
 
             if (isEdit && initialData?.id) {
-                await pb.collection('news').update(initialData.id, formData)
-                toast({ title: "更新成功", description: "文章已更新" })
+                await pb.collection("news").update(initialData.id, formData)
+                toast({ title: "更新成功", description: "文章已更新。" })
             } else {
-                await pb.collection('news').create(formData)
-                toast({ title: "发布成功", description: "新文章已创建" })
+                await pb.collection("news").create(formData)
+                toast({ title: "发布成功", description: "文章已创建。" })
             }
 
-            router.push('/admin/news')
+            router.push("/admin/news")
             router.refresh()
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(error)
             toast({
                 variant: "destructive",
                 title: "操作失败",
-                description: error?.data?.message || "请检查网络或字段格式",
+                description: getPocketBaseErrorMessage(error) || "请检查网络连接或表单字段。",
             })
         } finally {
             setIsLoading(false)
@@ -110,17 +127,16 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-2xl">
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-2xl space-y-8">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <FormField
                         control={form.control}
                         name="title"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>文章标题</FormLabel>
+                                <FormLabel>标题</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="输入标题..." {...field} />
+                                    <Input placeholder="输入文章标题..." {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -132,18 +148,18 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
                         name="slug"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>URL 别名 (Slug)</FormLabel>
+                                <FormLabel>Slug</FormLabel>
                                 <FormControl>
                                     <Input placeholder="english-slug-only" {...field} />
                                 </FormControl>
-                                <FormDescription>用于生成友好的文章链接，只能包含字母数字和横杠</FormDescription>
+                                <FormDescription>用于生成文章链接，仅支持小写字母、数字和连字符。</FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <FormField
                         control={form.control}
                         name="author"
@@ -188,10 +204,10 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
                     name="description"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>简介 (摘要)</FormLabel>
+                            <FormLabel>摘要</FormLabel>
                             <FormControl>
                                 <Textarea
-                                    placeholder="一句话介绍这篇文章..."
+                                    placeholder="一句话概括这篇文章..."
                                     className="resize-none"
                                     {...field}
                                 />
@@ -207,11 +223,11 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
                         <Input
                             type="file"
                             accept="image/*"
-                            onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
+                            onChange={(event) => setCoverFile(event.target.files?.[0] || null)}
                         />
                     </FormControl>
                     <FormDescription>
-                        {initialData?.cover ? `当前已有封面: ${initialData.cover}` : "选择一张图片作为封面 (最大 5MB)"}
+                        {initialData?.cover ? `当前封面: ${initialData.cover}` : "可选，建议上传不超过 5MB 的图片。"}
                     </FormDescription>
                 </FormItem>
 
@@ -220,17 +236,15 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
                     name="content"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>文章正文</FormLabel>
+                            <FormLabel>正文</FormLabel>
                             <FormControl>
                                 <RichTextEditor
                                     value={field.value}
                                     onChange={field.onChange}
-                                    placeholder="请在此撰写文章内容... 可使用模板快速开始"
+                                    placeholder="在这里编写文章内容..."
                                 />
                             </FormControl>
-                            <FormDescription>
-                                支持富文本编辑与即时预览。点击工具栏“使用模板”可快速插入布局。
-                            </FormDescription>
+                            <FormDescription>支持富文本编辑和实时预览。</FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}
@@ -243,15 +257,10 @@ export function NewsForm({ initialData, isEdit = false }: NewsFormProps) {
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
                                 <FormLabel className="text-base">立即发布</FormLabel>
-                                <FormDescription>
-                                    开启后，文章将立即在前台可见。
-                                </FormDescription>
+                                <FormDescription>开启后，文章会直接在前台显示。</FormDescription>
                             </div>
                             <FormControl>
-                                <Switch
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                />
+                                <Switch checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                         </FormItem>
                     )}

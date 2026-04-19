@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react"
 import { ActivityForm } from "@/components/admin/activity-form"
 import { pb } from "@/lib/pocketbase"
+import type { StaffResponse } from "@/types/pocketbase-types"
 
 export default function CreateActivityPage() {
-    const [staffList, setStaffList] = useState<any[]>([])
+    const [staffList, setStaffList] = useState<StaffResponse[]>([])
 
     useEffect(() => {
         const fetchStaff = async () => {

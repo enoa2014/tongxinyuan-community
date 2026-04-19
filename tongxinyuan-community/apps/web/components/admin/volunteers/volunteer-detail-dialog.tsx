@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
 import { VolunteerApplication } from "@/app/admin/(protected)/volunteers/columns"
 
 interface VolunteerDetailDialogProps {
@@ -23,6 +22,16 @@ export function VolunteerDetailDialog({
     onOpenChange,
 }: VolunteerDetailDialogProps) {
     if (!volunteer) return null
+    const skills =
+        typeof volunteer.skills === "string"
+            ? (() => {
+                try {
+                    return JSON.parse(volunteer.skills) as { age?: number; level?: string; skills?: string[] | string }
+                } catch {
+                    return {}
+                }
+            })()
+            : volunteer.skills
 
     const levelMap: Record<string, string> = {
         level1: "Level 1: 普适型 (关注陪伴)",
@@ -61,7 +70,7 @@ export function VolunteerDetailDialog({
                                 </div>
                                 <div>
                                     <dt className="text-slate-500">年龄</dt>
-                                    <dd className="font-medium">{volunteer.skills?.age || volunteer.age || "-"}</dd>
+                                    <dd className="font-medium">{skills.age || volunteer.age || "-"}</dd>
                                 </div>
                                 <div className="col-span-2">
                                     <dt className="text-slate-500">电子邮箱</dt>
@@ -107,7 +116,7 @@ export function VolunteerDetailDialog({
                             <section className="space-y-3">
                                 <h3 className="font-semibold text-lg border-b pb-2">操作日志</h3>
                                 <div className="space-y-4 pl-2">
-                                    {volunteer.history.map((item: any, index: number) => (
+                                    {volunteer.history.map((item, index: number) => (
                                         <div key={index} className="relative pl-6 border-l border-slate-200 pb-2 last:pb-0 last:border-0">
                                             <div className="absolute -left-[5px] top-1 h-2.5 w-2.5 rounded-full bg-slate-300 ring-4 ring-white" />
                                             <div className="text-sm font-medium text-slate-900">{item.action}</div>

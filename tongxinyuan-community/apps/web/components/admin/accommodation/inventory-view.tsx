@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react"
 import PocketBase from "pocketbase"
-import { AccommodationUnitsRecord, AccommodationUnitsTypeOptions, AccommodationUnitsStatusOptions } from "@/types/pocketbase-types"
+import { AccommodationUnitsRecord, AccommodationUnitsTypeOptions } from "@/types/pocketbase-types"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -16,10 +16,6 @@ const pb = new PocketBase(process.env.NEXT_PUBLIC_PB_URL)
 interface InventoryViewProps {
     // Optional props for selecting a unit
     onSelectUnit?: (unit: AccommodationUnitsRecord) => void
-}
-
-type HierarchyNode = AccommodationUnitsRecord & {
-    children?: HierarchyNode[]
 }
 
 export function InventoryView({ onSelectUnit }: InventoryViewProps) {
@@ -43,8 +39,8 @@ export function InventoryView({ onSelectUnit }: InventoryViewProps) {
             if (buildings.length > 0) {
                 setSelectedBuilding(buildings[0].id)
             }
-        } catch (e) {
-            console.error("Failed to fetch units", e)
+        } catch (error) {
+            console.error("Failed to fetch units", error)
         } finally {
             setLoading(false)
         }

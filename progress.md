@@ -293,3 +293,100 @@
 - Continue reducing warnings in the larger admin surfaces (`beneficiaries`, `services`, `volunteers`, `news`) where the remaining warning density is highest.
 - Run browser-level regression for admin auth, check-status, accommodation flows, and public content pages with PocketBase online.
 - Resume business feature work on accommodation finance / waiver support after the warning baseline is in a more maintainable state.
+
+## Session Update: Type-Safe Admin Cleanup
+**Date:** 2026-04-19
+**Status:** In Progress
+
+### 1. Achievements
+- **Service admin type cleanup**:
+    - Added shared service admin types in `apps/web/components/admin/services/types.ts`.
+    - Replaced most service-module `any` usage across page, sortable list/items, detail dialog, delete dialog, and form dialog.
+    - Kept `selectedService` / reorder / icon map flows strongly typed while preserving current behavior.
+- **Additional warning reduction**:
+    - Cleaned more unused imports/locals in admin sidebar, activity form, beneficiary profile form, document upload, volunteers list, and related admin components.
+    - Tightened `check-status` result handling and fixed follow-up type regressions introduced during warning cleanup.
+- **Volunteer/admin compatibility fixes**:
+    - Normalized volunteer skill typing for admin table/detail usage without reopening `type-check` failures.
+
+### 2. Validation Status
+- `npm run type-check` passes.
+- `npm run lint` now completes with `29` warnings and `0` errors.
+- `npm run build` passes after the latest admin typing cleanup.
+- Since the previous recorded pass, warning count has been reduced further from `104` to `29`.
+
+### 3. Remaining Risks / Gaps
+- Remaining warnings are now concentrated in historically loose areas: `beneficiaries`, `accommodation`, `news`, `volunteer-actions`, and a few unescaped-quote / hook-dependency cases.
+- Browser-level regression against a live PocketBase instance is still pending.
+- Build-time logs still report `ECONNREFUSED 127.0.0.1:8091` for public news/services fetches when local PocketBase is offline, but the build still completes successfully.
+- Accommodation finance / waiver workflow and deployment / backup / handover work remain unfinished.
+
+### 4. Next Steps
+- Decide whether to keep pushing warning cleanup into `beneficiaries` and `accommodation`, or switch back to unfinished business features.
+- Run targeted browser regression for admin CRUD, check-status, and accommodation flows with PocketBase online.
+- After regression, either commit this cleanup batch or continue to a lower warning baseline before committing.
+
+## Session Update: Validation Baseline Tightened
+**Date:** 2026-04-19
+**Status:** In Progress
+
+### 1. Achievements
+- **Low-warning baseline**:
+    - Reduced `apps/web` ESLint warnings further from `29` to `2`.
+    - Reworked `activities/columns.tsx`, `settings/page.tsx`, `news/news-form.tsx`, `accommodation` form/check-out flows, and selected `beneficiaries` / `volunteers` admin surfaces to remove lingering `any`, quote, and hook-dependency issues.
+- **Type-safe form cleanup**:
+    - Tightened typing around beneficiary detail state and profile form handoff without reintroducing blocking `type-check` errors.
+    - Restored clean `react-hook-form` typing for the admin news editor flow after removing legacy resolver workarounds.
+
+### 2. Validation Status
+- `npm run type-check` passes.
+- `npm run build` passes.
+- `npm run lint` now completes with only `2` warnings and `0` errors.
+- Build output still logs `ECONNREFUSED 127.0.0.1:8091` for public `news/services` fetching when local PocketBase is offline, but artifact generation still succeeds.
+
+### 3. Remaining Risks / Gaps
+- Remaining warnings are now limited to:
+    - `components/admin/data-table.tsx` React Compiler / TanStack Table incompatibility warning.
+    - `components/admin/news/rich-text-editor.tsx` one historical `any` in upload error handling.
+- Browser-level regression against a live PocketBase backend is still pending.
+- Accommodation finance / waiver work and Phase 9 deployment / backup / handover deliverables remain unfinished.
+
+### 4. Next Steps
+- Decide whether to eliminate the final two ESLint warnings or accept them as known engineering debt for now.
+- Run live-backend regression for admin CRUD, public news/services, accommodation check-in/check-out, and check-status.
+- Return to unfinished business scope: accommodation finance / waiver support and deployment/handover materials.
+
+## Session Update: Accommodation Finance Slice
+**Date:** 2026-04-19
+**Status:** In Progress
+
+### 1. Achievements
+- **Validation baseline completed**:
+    - `apps/web` now has a clean `lint` run with `0` warnings and `0` errors.
+    - `npm run type-check` and `npm run build` both pass after the final editor/table warning cleanup.
+- **Accommodation finance / waiver support**:
+    - Added finance-oriented accommodation fields in local schema/types: `fee_amount`, `payment_status`, and `waiver_reason`.
+    - Extended accommodation check-in, check-out, and record-edit flows so staff can capture fee status and waiver notes during the workflow instead of tracking them outside the system.
+    - Replaced the accommodation manager’s placeholder `records` tab with a working records table that surfaces beneficiary, unit, fee, payment status, waiver reason, and notes.
+    - Updated beneficiary-level accommodation history so fee and payment status are visible in the archive view.
+- **Schema support**:
+    - Updated `scripts/check-schema.ts` so future schema syncs can create or patch the new accommodation finance fields on `accommodation_records`.
+
+### 2. Validation Status
+- `npm run lint` passes with `0` warnings.
+- `npm run type-check` passes.
+- `npm run build` passes.
+- Build output still logs `ECONNREFUSED 127.0.0.1:8091` for public `news/services` fetches when local PocketBase is offline, but production artifact generation still completes.
+
+### 3. Remaining Risks / Gaps
+- The new accommodation finance fields are implemented in code, but the live PocketBase schema still needs to be patched by running the schema sync script in a real environment.
+- Browser-level regression with PocketBase online is still pending for:
+    - accommodation check-in / check-out
+    - accommodation records tab
+    - beneficiary accommodation history edits
+- Full deployment / backup / handover work remains unfinished.
+
+### 4. Next Steps
+- Run the schema patch against the live or staging PocketBase instance and verify the new accommodation fields exist.
+- Perform end-to-end regression for accommodation finance flows with real data.
+- Continue remaining delivery work: deployment confirmation, backup strategy, and admin handover material.

@@ -1,11 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { Loader2 } from "lucide-react"
 
+import { pb } from "@/lib/pocketbase"
 import { Button } from "@/components/ui/button"
 import {
     Form,
@@ -19,16 +20,15 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
-import { pb } from "@/lib/pocketbase"
 import type { SiteSettingsResponse } from "@/types/pocketbase-types"
 
 const settingsFormSchema = z.object({
     site_name: z.string().min(2, {
-        message: "网站名称至少需要2个字符。",
+        message: "站点名称至少需要 2 个字符。",
     }),
     description: z.string().optional(),
     contact_phone: z.string().optional(),
-    contact_email: z.string().email("请输入有效的邮箱地址").optional().or(z.literal("")),
+    contact_email: z.string().email("请输入有效的邮箱地址。").optional().or(z.literal("")),
     announcement: z.string().optional(),
 })
 
@@ -40,6 +40,10 @@ type SiteSettingsModel = SiteSettingsResponse & {
     contact_phone?: string
     contact_email?: string
     announcement?: string
+}
+
+function getErrorMessage(error: unknown) {
+    return error instanceof Error ? error.message : "请稍后重试。"
 }
 
 export default function SettingsPage() {
@@ -60,28 +64,26 @@ export default function SettingsPage() {
     useEffect(() => {
         async function loadSettings() {
             try {
-                // Fetch the first (and only) settings record
-                const result = await pb.collection('site_settings').getList<SiteSettingsModel>(1, 1)
+                const result = await pb.collection("site_settings").getList<SiteSettingsModel>(1, 1)
 
-                if (result.items.length > 0) {
-                    const settings = result.items[0]
-                    setSettingsId(settings.id)
-                    form.reset({
-                        site_name: settings.site_name || "",
-                        description: settings.description || "",
-                        contact_phone: settings.contact_phone || "",
-                        contact_email: settings.contact_email || "",
-                        announcement: settings.announcement || "",
-                    })
-                } else {
-                    // No settings found, create one if appropriate, or just leave blank for user to save new
-                    console.log("No settings found, waiting for user to create.")
+                if (result.items.length === 0) {
+                    return
                 }
+
+                const settings = result.items[0]
+                setSettingsId(settings.id)
+                form.reset({
+                    site_name: settings.site_name || "",
+                    description: settings.description || "",
+                    contact_phone: settings.contact_phone || "",
+                    contact_email: settings.contact_email || "",
+                    announcement: settings.announcement || "",
+                })
             } catch (error) {
                 console.error("Failed to load settings:", error)
                 toast({
-                    title: "加载配置失败",
-                    description: "请检查网络连接或权限。",
+                    title: "加载失败",
+                    description: "无法加载全局设置，请检查网络或权限。",
                     variant: "destructive",
                 })
             } finally {
@@ -89,30 +91,28 @@ export default function SettingsPage() {
             }
         }
 
-        loadSettings()
+        void loadSettings()
     }, [form])
 
     async function onSubmit(data: SettingsFormValues) {
         setIsLoading(true)
         try {
             if (settingsId) {
-                // Update existing
-                await pb.collection('site_settings').update(settingsId, data)
+                await pb.collection("site_settings").update(settingsId, data)
             } else {
-                // Create new
-                const record = await pb.collection('site_settings').create(data)
+                const record = await pb.collection("site_settings").create(data)
                 setSettingsId(record.id)
             }
 
             toast({
-                title: "设置已保存",
-                description: "全局配置已更新。",
+                title: "保存成功",
+                description: "全局设置已更新。",
             })
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Failed to save settings:", error)
             toast({
                 title: "保存失败",
-                description: error.message || "请稍后重试。",
+                description: getErrorMessage(error),
                 variant: "destructive",
             })
         } finally {
@@ -120,35 +120,28 @@ export default function SettingsPage() {
         }
     }
 
-    if (isLoading && !settingsId && false) {
-        // Optional: Full page loader if desired, but form loading state works too
-        // Keeping it simple for now, using button loading state primarily
-    }
-
     return (
         <div className="space-y-6">
             <div>
                 <h3 className="text-lg font-medium">系统设置</h3>
                 <p className="text-sm text-muted-foreground">
-                    管理网站的全局配置，如标题、联系方式和公告。
+                    管理站点的全局配置，例如名称、联系方式和公告内容。
                 </p>
             </div>
-            <div className="border-t border-slate-200 pt-6"></div>
+            <div className="border-t border-slate-200 pt-6" />
 
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-2xl">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-2xl space-y-8">
                     <FormField
                         control={form.control}
                         name="site_name"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>网站名称 (Site Name)</FormLabel>
+                                <FormLabel>站点名称</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="同心源·关爱中心" {...field} />
+                                    <Input placeholder="同心苑关爱中心" {...field} />
                                 </FormControl>
-                                <FormDescription>
-                                    这将显示在浏览器标题栏和页脚中。
-                                </FormDescription>
+                                <FormDescription>会显示在浏览器标题和页脚等位置。</FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -159,13 +152,11 @@ export default function SettingsPage() {
                         name="description"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>网站描述 (Description)</FormLabel>
+                                <FormLabel>站点描述</FormLabel>
                                 <FormControl>
                                     <Textarea placeholder="一句话介绍机构..." {...field} />
                                 </FormControl>
-                                <FormDescription>
-                                    用于 SEO 和元数据描述。
-                                </FormDescription>
+                                <FormDescription>用于 SEO 和页面元信息展示。</FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -205,13 +196,15 @@ export default function SettingsPage() {
                         name="announcement"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>全局公告 (Global Announcement)</FormLabel>
+                                <FormLabel>全局公告</FormLabel>
                                 <FormControl>
-                                    <Textarea placeholder="例如：春节期间服务暂停通知..." className="min-h-[100px]" {...field} />
+                                    <Textarea
+                                        placeholder="例如：节假日期间服务时间调整通知..."
+                                        className="min-h-[100px]"
+                                        {...field}
+                                    />
                                 </FormControl>
-                                <FormDescription>
-                                    如果填写，将在网站顶部显示公告横幅（需前台支持）。
-                                </FormDescription>
+                                <FormDescription>填写后，可在前台顶部展示统一公告。</FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
